@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rüya Kapısı — Doğum Haritanıza Göre Rüya Yorumu</title>
+    <meta name="description" content="Rüyanızı anlatın, doğum haritanıza göre kişisel ve derinlikli rüya yorumu alın. Astrolojik rüya analizi ile rüyalarınızın gerçek anlamını keşfedin.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #0a0a12;
+            --bg-card: #12121f;
+            --bg-card-hover: #1a1a2e;
+            --gold: #c9a84c;
+            --gold-light: #e8d48b;
+            --gold-dim: #8a7233;
+            --purple: #6b5ce7;
+            --purple-dim: #3d3480;
+            --text-primary: #e8e6f0;
+            --text-secondary: #9896a8;
+            --text-dim: #5c5a6e;
+            --border: #2a2840;
+            --danger: #e74c6f;
+            --success: #4ce7a2;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Stars background */
+        .stars {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px; height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration) ease-in-out infinite;
+            opacity: 0;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; }
+            50% { opacity: var(--max-opacity); }
+        }
+
+        /* Gradient orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .orb-1 {
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(107,92,231,0.15), transparent);
+            top: -100px; right: -100px;
+            animation: float1 20s ease-in-out infinite;
+        }
+
+        .orb-2 {
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(201,168,76,0.1), transparent);
+            bottom: -50px; left: -50px;
+            animation: float2 25s ease-in-out infinite;
+        }
+
+        @keyframes float1 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-50px, 50px); }
+        }
+
+        @keyframes float2 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(30px, -40px); }
+        }
+
+        /* Layout */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 60px 0 40px;
+        }
+
+        .moon-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+            animation: moonGlow 4s ease-in-out infinite;
+        }
+
+        @keyframes moonGlow {
+            0%, 100% { filter: drop-shadow(0 0 10px rgba(201,168,76,0.3)); }
+            50% { filter: drop-shadow(0 0 25px rgba(201,168,76,0.6)); }
+        }
+
+        .site-title {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(32px, 6vw, 48px);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dim));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 3px;
+            margin-bottom: 12px;
+        }
+
+        .site-subtitle {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(16px, 3vw, 20px);
+            font-weight: 400;
+            font-style: italic;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+        }
+
+        .trust-badges {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            font-size: 12px;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .badge span { color: var(--gold); }
+
+        /* Sections */
+        .section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            border-color: var(--gold-dim);
+        }
+
+        .section-number {
+            font-family: 'Cinzel', serif;
+            font-size: 11px;
+            color: var(--gold);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .section-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .section-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        /* Form elements */
+        textarea, input, select {
+            width: 100%;
+            background: var(--bg-deep);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            padding: 14px 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus, input:focus, select:focus {
+            border-color: var(--gold-dim);
+        }
+
+        textarea {
+            min-height: 140px;
+            resize: vertical;
+            line-height: 1.7;
+        }
+
+        textarea::placeholder, input::placeholder {
+            color: var(--text-dim);
+            font-style: italic;
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-top: 8px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-group { margin-bottom: 16px; }
+
+        select {
+            appearance: none;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239896a8' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 36px;
+        }
+
+        /* CTA Button */
+        .cta-btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Cinzel', serif;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+            color: var(--bg-deep);
+        }
+
+        .cta-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(201,168,76,0.3);
+        }
+
+        .cta-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .cta-premium {
+            background: linear-gradient(135deg, var(--purple), var(--purple-dim));
+            color: white;
+            margin-top: 12px;
+        }
+
+        .cta-premium:hover {
+            box-shadow: 0 8px 30px rgba(107,92,231,0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Loading */
+        .loading-container {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .loading-moon {
+            font-size: 56px;
+            animation: moonGlow 2s ease-in-out infinite;
+            margin-bottom: 24px;
+            display: block;
+        }
+
+        .loading-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 20px;
+            font-style: italic;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .loading-subtext {
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+
+        .loading-dots span {
+            animation: dot-pulse 1.5s ease-in-out infinite;
+        }
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes dot-pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* Result */
+        .result-section {
+            display: none;
+        }
+
+        .result-section.visible {
+            display: block;
+            animation: fadeUp 0.8s ease;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .result-date {
+            font-size: 12px;
+            color: var(--gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .result-title {
+            font-family: 'Cinzel', serif;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .interpretation-body {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 18px;
+            line-height: 1.9;
+            color: var(--text-primary);
+        }
+
+        .interpretation-body h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 14px;
+            color: var(--gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin: 32px 0 16px;
+        }
+
+        .interpretation-body h3:first-child {
+            margin-top: 0;
+        }
+
+        .interpretation-body p {
+            margin-bottom: 16px;
+        }
+
+        .divider {
+            width: 60px;
+            height: 1px;
+            background: var(--gold-dim);
+            margin: 32px auto;
+        }
+
+        /* Premium Wall */
+        .premium-wall {
+            background: linear-gradient(135deg, #1a1530, #12121f);
+            border: 1px solid var(--purple-dim);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            margin-top: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .premium-wall::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--purple), var(--gold), var(--purple), transparent);
+        }
+
+        .premium-icon { font-size: 36px; margin-bottom: 16px; display: block; }
+
+        .premium-title {
+            font-family: 'Cinzel', serif;
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .premium-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.7;
+        }
+
+        .premium-features {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .premium-feature {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .premium-feature span { color: var(--gold); font-size: 16px; }
+
+        .premium-price {
+            font-family: 'Cinzel', serif;
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--gold-light);
+            margin-bottom: 4px;
+        }
+
+        .premium-price-note {
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+        }
+
+        /* Question Section */
+        .questions-section {
+            display: none;
+            margin-top: 24px;
+        }
+
+        .questions-section.visible {
+            display: block;
+            animation: fadeUp 0.6s ease;
+        }
+
+        .question-input-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .question-input-row input {
+            flex: 1;
+        }
+
+        .question-input-row button {
+            padding: 14px 20px;
+            white-space: nowrap;
+        }
+
+        .questions-remaining {
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-top: 8px;
+            text-align: right;
+        }
+
+        .qa-item {
+            margin-top: 20px;
+            padding: 20px;
+            background: var(--bg-deep);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .qa-question {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gold-light);
+            margin-bottom: 12px;
+        }
+
+        .qa-answer {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 17px;
+            line-height: 1.8;
+            color: var(--text-primary);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        .footer a { color: var(--gold-dim); text-decoration: none; }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .form-row { grid-template-columns: 1fr; }
+            .section { padding: 24px 20px; }
+            .container { padding: 12px; }
+            .question-input-row { flex-direction: column; }
+        }
+
+        /* Typing animation for result */
+        .typing-cursor::after {
+            content: '|';
+            animation: blink 0.8s step-end infinite;
+            color: var(--gold);
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        .hidden { display: none; }
+
+        /* Smooth scroll behavior */
+        html { scroll-behavior: smooth; }
+    </style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <header class="header">
+        <span class="moon-icon">🌙</span>
+        <h1 class="site-title">RÜYA KAPISI</h1>
+        <p class="site-subtitle">Doğum haritanıza göre rüyalarınızın gerçek anlamını keşfedin</p>
+        <div class="trust-badges">
+            <div class="badge"><span>✦</span> Astrolojik Analiz</div>
+            <div class="badge"><span>✦</span> Kişiye Özel</div>
+            <div class="badge"><span>✦</span> Derinlikli Yorum</div>
+        </div>
+    </header>
+
+    <!-- STEP 1: DREAM INPUT -->
+    <div class="section" id="step1">
+        <div class="section-number">Adım 1</div>
+        <h2 class="section-title">Rüyanızı Anlatın</h2>
+        <p class="section-desc">Rüyanızı tüm detaylarıyla yazın — gördüğünüz kişiler, mekanlar, duygular, renkler... Ne kadar detay verirseniz, yorumunuz o kadar derinlikli olur.</p>
+        <textarea id="dreamInput" placeholder="Rüyamda bir banka şubesindeydim. Biri hesabıma yanlışlıkla para göndermişti..." maxlength="3000"></textarea>
+        <div class="char-count"><span id="charCount">0</span> / 3000</div>
+    </div>
+
+    <!-- STEP 2: BIRTH INFO (Optional for free, required for premium) -->
+    <div class="section" id="step2">
+        <div class="section-number">Adım 2 — İsteğe Bağlı</div>
+        <h2 class="section-title">Doğum Bilgileriniz</h2>
+        <p class="section-desc">Doğum haritanıza göre kişiselleştirilmiş yorum almak için bilgilerinizi girin. Boş bırakırsanız genel bir rüya analizi yapılır.</p>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Doğum Tarihi</label>
+                <input type="date" id="birthDate">
+            </div>
+            <div class="form-group">
+                <label>Doğum Saati</label>
+                <input type="time" id="birthTime">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Doğum Yeri</label>
+            <input type="text" id="birthPlace" placeholder="Örn: İstanbul, Ankara, Sivas...">
+        </div>
+    </div>
+
+    <!-- CTA -->
+    <button class="cta-btn cta-primary" id="interpretBtn" onclick="interpretDream()">
+        ✦ RÜYAMI YORUMLA ✦
+    </button>
+
+    <!-- LOADING -->
+    <div class="section hidden" id="loadingSection">
+        <div class="loading-container">
+            <span class="loading-moon">🔮</span>
+            <p class="loading-text">Rüyanız analiz ediliyor...</p>
+            <p class="loading-subtext loading-dots">
+                Semboller çözülüyor<span>.</span><span>.</span><span>.</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- FREE RESULT -->
+    <div class="result-section" id="freeResult">
+        <div class="section">
+            <div class="result-header">
+                <div class="result-date" id="resultDate"></div>
+                <h2 class="result-title">🌙 Rüya Analiziniz</h2>
+            </div>
+            <div class="divider"></div>
+            <div class="interpretation-body" id="freeInterpretation"></div>
+        </div>
+
+        <!-- PREMIUM WALL -->
+        <div class="premium-wall" id="premiumWall">
+            <span class="premium-icon">🔮</span>
+            <h3 class="premium-title">Daha Derine İnmek İster Misiniz?</h3>
+            <p class="premium-desc">Ücretsiz yorumunuz hazır! Doğum haritanıza göre kişisel analiz ve soru hakkı için devam edin.</p>
+
+            <div class="premium-features">
+                <div class="premium-feature"><span>✦</span> Doğum haritanıza göre kişisel sembol analizi</div>
+                <div class="premium-feature"><span>✦</span> Güncel gezegen transitlerinin rüyanıza etkisi</div>
+                <div class="premium-feature"><span>✦</span> "Önündeki Dönem" yönlendirmesi</div>
+                <div class="premium-feature"><span>✦</span> 3 soru hakkı — rüyanız hakkında her şeyi sorun</div>
+            </div>
+
+            <div class="premium-price">79 ₺</div>
+            <p class="premium-price-note">Tek seferlik ödeme · Kredi kartı veya havale</p>
+
+            <button class="cta-btn cta-premium" onclick="unlockPremium()">
+                ✦ KİŞİSEL ANALİZİ AÇ ✦
+            </button>
+        </div>
+    </div>
+
+    <!-- PREMIUM RESULT -->
+    <div class="result-section" id="premiumResult">
+        <div class="section">
+            <div class="result-header">
+                <div class="result-date">✦ KİŞİSEL ANALİZ</div>
+                <h2 class="result-title">🔮 Doğum Haritanıza Göre Yorum</h2>
+            </div>
+            <div class="divider"></div>
+            <div class="interpretation-body" id="premiumInterpretation"></div>
+        </div>
+
+        <!-- QUESTIONS -->
+        <div class="questions-section visible" id="questionsSection">
+            <div class="section">
+                <div class="section-number">Soru Hakkınız</div>
+                <h2 class="section-title">Bu Rüya Hakkında Sorun</h2>
+                <p class="section-desc">Rüyanız ve yorumunuz hakkında merak ettiklerinizi sorun.</p>
+
+                <div class="question-input-row">
+                    <input type="text" id="questionInput" placeholder="Örn: Bu rüya ilişkimle mi ilgili?" maxlength="500">
+                    <button class="cta-btn cta-primary" onclick="askQuestion()" style="width:auto; padding: 14px 24px; font-size: 13px;">
+                        SOR
+                    </button>
+                </div>
+                <div class="questions-remaining">Kalan soru hakkı: <strong id="remainingQ">3</strong></div>
+                <div id="qaContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>Rüya Kapısı © 2026 · Astrolojik rüya analizi platformu</p>
+        <p style="margin-top:8px;">Rüya yorumları kişisel gelişim ve eğlence amaçlıdır. Profesyonel danışmanlık yerine geçmez.</p>
+    </footer>
+
+</div>
+
+<script>
+    // Generate stars
+    const starsContainer = document.getElementById('stars');
+    for (let i = 0; i < 120; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.setProperty('--duration', (2 + Math.random() * 4) + 's');
+        star.style.setProperty('--max-opacity', (0.3 + Math.random() * 0.7));
+        star.style.animationDelay = Math.random() * 4 + 's';
+        if (Math.random() > 0.8) {
+            star.style.width = '3px';
+            star.style.height = '3px';
+        }
+        starsContainer.appendChild(star);
+    }
+
+    // Character count
+    const dreamInput = document.getElementById('dreamInput');
+    const charCount = document.getElementById('charCount');
+    dreamInput.addEventListener('input', () => {
+        charCount.textContent = dreamInput.value.length;
+    });
+
+    // State
+    let dreamText = '';
+    let birthInfo = {};
+    let freeInterpretationText = '';
+    let premiumInterpretationText = '';
+    let questionsRemaining = 3;
+
+    // MAIN: Interpret dream
+    async function interpretDream() {
+        dreamText = dreamInput.value.trim();
+        if (dreamText.length < 20) {
+            alert('Lütfen rüyanızı biraz daha detaylı anlatın (en az 20 karakter).');
+            return;
+        }
+
+        birthInfo = {
+            date: document.getElementById('birthDate').value,
+            time: document.getElementById('birthTime').value,
+            place: document.getElementById('birthPlace').value
+        };
+
+        // Show loading
+        document.getElementById('step1').classList.add('hidden');
+        document.getElementById('step2').classList.add('hidden');
+        document.getElementById('interpretBtn').classList.add('hidden');
+        document.getElementById('loadingSection').classList.remove('hidden');
+
+        try {
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'claude-sonnet-4-20250514',
+                    max_tokens: 1000,
+                    system: `Sen deneyimli bir rüya analisti ve astrologsun. Türkçe, samimi ve sıcak bir dille rüya yorumu yapıyorsun. 
+
+Kullanıcının rüyasını analiz et ve ÜCRETSİZ bir yorum yaz. Bu yorum:
+- Rüyanın genel atmosferini ve duygusal tonunu analiz etmeli
+- 3-4 ana sembolü detaylıca yorumlamalı
+- Jungian ve klasik sembolizm kullanmalı
+- Samimi, arkadaşça ama bilgili bir ton kullanmalı
+- Bilinçaltı mesajları çıkarmalı
+
+ÖNEMLİ: Doğum haritası bağlantısı YAPMA. O premium bölümde. Genel sembol analizi ve psikolojik yorum yap.
+ÖNEMLİ: Yanıtını doğrudan HTML formatında ver. <h3> başlıklar ve <p> paragraflar kullan. Markdown KULLANMA.
+ÖNEMLİ: 4-5 paragraf yaz, çok kısa olmasın ama premium kadar da uzun olmasın.`,
+                    messages: [
+                        { role: 'user', content: `Rüyam: ${dreamText}` }
+                    ]
+                })
+            });
+
+            const data = await response.json();
+            freeInterpretationText = data.content.map(c => c.text || '').join('');
+
+            // Show result
+            document.getElementById('loadingSection').classList.add('hidden');
+            document.getElementById('resultDate').textContent = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+            document.getElementById('freeInterpretation').innerHTML = freeInterpretationText;
+            document.getElementById('freeResult').classList.add('visible');
+
+            // Scroll to result
+            document.getElementById('freeResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        } catch (err) {
+            console.error(err);
+            document.getElementById('loadingSection').classList.add('hidden');
+            document.getElementById('step1').classList.remove('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+            document.getElementById('interpretBtn').classList.remove('hidden');
+            alert('Bir hata oluştu, lütfen tekrar deneyin.');
+        }
+    }
+
+    // PREMIUM UNLOCK (demo - would connect to payment in production)
+    async function unlockPremium() {
+        if (!birthInfo.date) {
+            alert('Kişisel analiz için doğum bilgileriniz gerekli. Lütfen sayfayı yenileyip doğum bilgilerinizi girin.');
+            return;
+        }
+
+        // In production, this would go to payment gateway (iyzico etc.)
+        // For demo, we proceed directly
+        const premiumBtn = document.querySelector('.cta-premium');
+        premiumBtn.disabled = true;
+        premiumBtn.textContent = 'Analiz hazırlanıyor...';
+
+        try {
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'claude-sonnet-4-20250514',
+                    max_tokens: 1000,
+                    system: `Sen deneyimli bir rüya analisti ve astrologsun. Türkçe, samimi ve derinlikli rüya yorumu yapıyorsun.
+
+Kullanıcının doğum bilgileri: Tarih: ${birthInfo.date}, Saat: ${birthInfo.time}, Yer: ${birthInfo.place}
+
+Bu bilgilerle tahmini bir natal chart profili çıkar (Güneş burcu kesin hesaplanabilir, diğerlerini tahmin et).
+
+PREMIUM kişisel analiz yaz:
+1. "Doğum Haritanızla Bağlantı" — natal chart yerleşimlerinin bu rüyayla nasıl konuştuğunu anlat (Güneş burcu, tahmini Ay burcu, önemli evler)
+2. "Güncel Transit Etkisi" — şu anki önemli transitlerin (Satürn, Jüpiter, vs.) bu rüyayla bağlantısı
+3. "Önündeki Dönem" — kehanet değil ama yönlendirme ver. "Şuna dikkat et, bu dönem hassas" tarzında.
+
+Samimi, sıcak, arkadaşça ama bilgili bir ton kullan. "Sen" diye hitap et.
+Yanıtını doğrudan HTML formatında ver. <h3> başlıklar ve <p> paragraflar kullan. Markdown KULLANMA.
+Detaylı ve uzun yaz — bu premium içerik, kullanıcı para ödüyor.`,
+                    messages: [
+                        { role: 'user', content: `Rüya: ${dreamText}\n\nÜcretsiz yorumda şunlar söylenmişti:\n${freeInterpretationText}` }
+                    ]
+                })
+            });
+
+            const data = await response.json();
+            premiumInterpretationText = data.content.map(c => c.text || '').join('');
+
+            // Hide premium wall, show premium result
+            document.getElementById('premiumWall').classList.add('hidden');
+            document.getElementById('premiumResult').classList.add('visible');
+            document.getElementById('premiumInterpretation').innerHTML = premiumInterpretationText;
+
+            document.getElementById('premiumResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        } catch (err) {
+            console.error(err);
+            premiumBtn.disabled = false;
+            premiumBtn.textContent = '✦ KİŞİSEL ANALİZİ AÇ ✦';
+            alert('Bir hata oluştu, lütfen tekrar deneyin.');
+        }
+    }
+
+    // ASK QUESTION
+    async function askQuestion() {
+        if (questionsRemaining <= 0) {
+            alert('Soru hakkınız doldu.');
+            return;
+        }
+
+        const questionInput = document.getElementById('questionInput');
+        const question = questionInput.value.trim();
+        if (!question) return;
+
+        questionsRemaining--;
+        document.getElementById('remainingQ').textContent = questionsRemaining;
+        questionInput.value = '';
+
+        if (questionsRemaining <= 0) {
+            questionInput.disabled = true;
+            questionInput.placeholder = 'Soru hakkınız doldu';
+        }
+
+        // Add question placeholder
+        const qaContainer = document.getElementById('qaContainer');
+        const qaItem = document.createElement('div');
+        qaItem.className = 'qa-item';
+        qaItem.innerHTML = `
+            <div class="qa-question">❓ ${question}</div>
+            <div class="qa-answer" style="color: var(--text-dim); font-style: italic;">Yanıt hazırlanıyor...</div>
+        `;
+        qaContainer.appendChild(qaItem);
+        qaItem.scrollIntoView({ behavior: 'smooth' });
+
+        try {
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'claude-sonnet-4-20250514',
+                    max_tokens: 1000,
+                    system: `Sen bir rüya analisti ve astrologsun. Kullanıcı daha önce bir rüya anlattı ve sen yorumladın. Şimdi kullanıcı bu rüya hakkında ek bir soru soruyor.
+
+Rüya: ${dreamText}
+Doğum bilgileri: ${birthInfo.date}, ${birthInfo.time}, ${birthInfo.place}
+Önceki ücretsiz yorum: ${freeInterpretationText}
+Önceki premium yorum: ${premiumInterpretationText}
+
+Soruyu samimi, derinlikli ve kişisel bir şekilde yanıtla. Natal chart bağlantısı kur. 2-3 paragraf yaz.
+HTML formatında yaz (<p> tagları ile). Markdown KULLANMA.`,
+                    messages: [
+                        { role: 'user', content: question }
+                    ]
+                })
+            });
+
+            const data = await response.json();
+            const answer = data.content.map(c => c.text || '').join('');
+            qaItem.querySelector('.qa-answer').innerHTML = answer;
+            qaItem.querySelector('.qa-answer').style.color = '';
+            qaItem.querySelector('.qa-answer').style.fontStyle = '';
+
+        } catch (err) {
+            qaItem.querySelector('.qa-answer').innerHTML = 'Bir hata oluştu, lütfen tekrar deneyin.';
+            qaItem.querySelector('.qa-answer').style.color = 'var(--danger)';
+            questionsRemaining++;
+            document.getElementById('remainingQ').textContent = questionsRemaining;
+        }
+    }
+
+    // Enter key for question
+    document.getElementById('questionInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') askQuestion();
+    });
+</script>
+
+</body>
+</html>
