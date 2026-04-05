@@ -35,7 +35,6 @@
             overflow-x: hidden;
         }
 
-        /* Stars background */
         .stars {
             position: fixed;
             top: 0; left: 0;
@@ -58,7 +57,6 @@
             50% { opacity: var(--max-opacity); }
         }
 
-        /* Gradient orbs */
         .orb {
             position: fixed;
             border-radius: 50%;
@@ -91,7 +89,6 @@
             50% { transform: translate(30px, -40px); }
         }
 
-        /* Layout */
         .container {
             position: relative;
             z-index: 1;
@@ -100,7 +97,6 @@
             padding: 20px;
         }
 
-        /* Header */
         .header {
             text-align: center;
             padding: 60px 0 40px;
@@ -159,7 +155,6 @@
 
         .badge span { color: var(--gold); }
 
-        /* Sections */
         .section {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -169,9 +164,7 @@
             transition: all 0.3s ease;
         }
 
-        .section:hover {
-            border-color: var(--gold-dim);
-        }
+        .section:hover { border-color: var(--gold-dim); }
 
         .section-number {
             font-family: 'Cinzel', serif;
@@ -196,7 +189,6 @@
             line-height: 1.6;
         }
 
-        /* Form elements */
         textarea, input, select {
             width: 100%;
             background: var(--bg-deep);
@@ -210,9 +202,7 @@
             transition: border-color 0.3s;
         }
 
-        textarea:focus, input:focus, select:focus {
-            border-color: var(--gold-dim);
-        }
+        textarea:focus, input:focus, select:focus { border-color: var(--gold-dim); }
 
         textarea {
             min-height: 140px;
@@ -249,16 +239,6 @@
 
         .form-group { margin-bottom: 16px; }
 
-        select {
-            appearance: none;
-            cursor: pointer;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239896a8' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 14px center;
-            padding-right: 36px;
-        }
-
-        /* CTA Button */
         .cta-btn {
             width: 100%;
             padding: 18px;
@@ -302,7 +282,6 @@
             transform: translateY(-2px);
         }
 
-        /* Loading */
         .loading-container {
             text-align: center;
             padding: 60px 20px;
@@ -339,10 +318,7 @@
             50% { opacity: 1; }
         }
 
-        /* Result */
-        .result-section {
-            display: none;
-        }
+        .result-section { display: none; }
 
         .result-section.visible {
             display: block;
@@ -389,13 +365,8 @@
             margin: 32px 0 16px;
         }
 
-        .interpretation-body h3:first-child {
-            margin-top: 0;
-        }
-
-        .interpretation-body p {
-            margin-bottom: 16px;
-        }
+        .interpretation-body h3:first-child { margin-top: 0; }
+        .interpretation-body p { margin-bottom: 16px; }
 
         .divider {
             width: 60px;
@@ -404,7 +375,6 @@
             margin: 32px auto;
         }
 
-        /* Premium Wall */
         .premium-wall {
             background: linear-gradient(135deg, #1a1530, #12121f);
             border: 1px solid var(--purple-dim);
@@ -470,7 +440,6 @@
             margin-bottom: 20px;
         }
 
-        /* Question Section */
         .questions-section {
             display: none;
             margin-top: 24px;
@@ -486,9 +455,7 @@
             gap: 12px;
         }
 
-        .question-input-row input {
-            flex: 1;
-        }
+        .question-input-row input { flex: 1; }
 
         .question-input-row button {
             padding: 14px 20px;
@@ -524,7 +491,6 @@
             color: var(--text-primary);
         }
 
-        /* Footer */
         .footer {
             text-align: center;
             padding: 40px 20px;
@@ -534,7 +500,6 @@
 
         .footer a { color: var(--gold-dim); text-decoration: none; }
 
-        /* Responsive */
         @media (max-width: 600px) {
             .form-row { grid-template-columns: 1fr; }
             .section { padding: 24px 20px; }
@@ -542,20 +507,7 @@
             .question-input-row { flex-direction: column; }
         }
 
-        /* Typing animation for result */
-        .typing-cursor::after {
-            content: '|';
-            animation: blink 0.8s step-end infinite;
-            color: var(--gold);
-        }
-
-        @keyframes blink {
-            50% { opacity: 0; }
-        }
-
         .hidden { display: none; }
-
-        /* Smooth scroll behavior */
         html { scroll-behavior: smooth; }
     </style>
 </head>
@@ -567,7 +519,6 @@
 
 <div class="container">
 
-    <!-- HEADER -->
     <header class="header">
         <span class="moon-icon">🌙</span>
         <h1 class="site-title">RÜYA KAPISI</h1>
@@ -579,7 +530,6 @@
         </div>
     </header>
 
-    <!-- STEP 1: DREAM INPUT -->
     <div class="section" id="step1">
         <div class="section-number">Adım 1</div>
         <h2 class="section-title">Rüyanızı Anlatın</h2>
@@ -588,12 +538,10 @@
         <div class="char-count"><span id="charCount">0</span> / 3000</div>
     </div>
 
-    <!-- STEP 2: BIRTH INFO (Optional for free, required for premium) -->
     <div class="section" id="step2">
         <div class="section-number">Adım 2 — İsteğe Bağlı</div>
         <h2 class="section-title">Doğum Bilgileriniz</h2>
         <p class="section-desc">Doğum haritanıza göre kişiselleştirilmiş yorum almak için bilgilerinizi girin. Boş bırakırsanız genel bir rüya analizi yapılır.</p>
-
         <div class="form-row">
             <div class="form-group">
                 <label>Doğum Tarihi</label>
@@ -610,12 +558,10 @@
         </div>
     </div>
 
-    <!-- CTA -->
     <button class="cta-btn cta-primary" id="interpretBtn" onclick="interpretDream()">
         ✦ RÜYAMI YORUMLA ✦
     </button>
 
-    <!-- LOADING -->
     <div class="section hidden" id="loadingSection">
         <div class="loading-container">
             <span class="loading-moon">🔮</span>
@@ -626,7 +572,6 @@
         </div>
     </div>
 
-    <!-- FREE RESULT -->
     <div class="result-section" id="freeResult">
         <div class="section">
             <div class="result-header">
@@ -637,29 +582,24 @@
             <div class="interpretation-body" id="freeInterpretation"></div>
         </div>
 
-        <!-- PREMIUM WALL -->
         <div class="premium-wall" id="premiumWall">
             <span class="premium-icon">🔮</span>
             <h3 class="premium-title">Daha Derine İnmek İster Misiniz?</h3>
             <p class="premium-desc">Ücretsiz yorumunuz hazır! Doğum haritanıza göre kişisel analiz ve soru hakkı için devam edin.</p>
-
             <div class="premium-features">
                 <div class="premium-feature"><span>✦</span> Doğum haritanıza göre kişisel sembol analizi</div>
                 <div class="premium-feature"><span>✦</span> Güncel gezegen transitlerinin rüyanıza etkisi</div>
                 <div class="premium-feature"><span>✦</span> "Önündeki Dönem" yönlendirmesi</div>
                 <div class="premium-feature"><span>✦</span> 3 soru hakkı — rüyanız hakkında her şeyi sorun</div>
             </div>
-
             <div class="premium-price">79 ₺</div>
             <p class="premium-price-note">Tek seferlik ödeme · Kredi kartı veya havale</p>
-
             <button class="cta-btn cta-premium" onclick="unlockPremium()">
                 ✦ KİŞİSEL ANALİZİ AÇ ✦
             </button>
         </div>
     </div>
 
-    <!-- PREMIUM RESULT -->
     <div class="result-section" id="premiumResult">
         <div class="section">
             <div class="result-header">
@@ -670,18 +610,14 @@
             <div class="interpretation-body" id="premiumInterpretation"></div>
         </div>
 
-        <!-- QUESTIONS -->
         <div class="questions-section visible" id="questionsSection">
             <div class="section">
                 <div class="section-number">Soru Hakkınız</div>
                 <h2 class="section-title">Bu Rüya Hakkında Sorun</h2>
                 <p class="section-desc">Rüyanız ve yorumunuz hakkında merak ettiklerinizi sorun.</p>
-
                 <div class="question-input-row">
                     <input type="text" id="questionInput" placeholder="Örn: Bu rüya ilişkimle mi ilgili?" maxlength="500">
-                    <button class="cta-btn cta-primary" onclick="askQuestion()" style="width:auto; padding: 14px 24px; font-size: 13px;">
-                        SOR
-                    </button>
+                    <button class="cta-btn cta-primary" onclick="askQuestion()" style="width:auto; padding: 14px 24px; font-size: 13px;">SOR</button>
                 </div>
                 <div class="questions-remaining">Kalan soru hakkı: <strong id="remainingQ">3</strong></div>
                 <div id="qaContainer"></div>
@@ -697,7 +633,7 @@
 </div>
 
 <script>
-    // Generate stars
+    // Stars
     const starsContainer = document.getElementById('stars');
     for (let i = 0; i < 120; i++) {
         const star = document.createElement('div');
@@ -707,19 +643,14 @@
         star.style.setProperty('--duration', (2 + Math.random() * 4) + 's');
         star.style.setProperty('--max-opacity', (0.3 + Math.random() * 0.7));
         star.style.animationDelay = Math.random() * 4 + 's';
-        if (Math.random() > 0.8) {
-            star.style.width = '3px';
-            star.style.height = '3px';
-        }
+        if (Math.random() > 0.8) { star.style.width = '3px'; star.style.height = '3px'; }
         starsContainer.appendChild(star);
     }
 
-    // Character count
+    // Char count
     const dreamInput = document.getElementById('dreamInput');
     const charCount = document.getElementById('charCount');
-    dreamInput.addEventListener('input', () => {
-        charCount.textContent = dreamInput.value.length;
-    });
+    dreamInput.addEventListener('input', () => { charCount.textContent = dreamInput.value.length; });
 
     // State
     let dreamText = '';
@@ -728,7 +659,24 @@
     let premiumInterpretationText = '';
     let questionsRemaining = 3;
 
-    // MAIN: Interpret dream
+    // API helper — calls our serverless function
+    async function callAPI(system, messages) {
+        const response = await fetch('/api/interpret', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ system, messages })
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || 'API hatası');
+        }
+
+        const data = await response.json();
+        return data.content.map(c => c.text || '').join('');
+    }
+
+    // INTERPRET
     async function interpretDream() {
         dreamText = dreamInput.value.trim();
         if (dreamText.length < 20) {
@@ -742,20 +690,13 @@
             place: document.getElementById('birthPlace').value
         };
 
-        // Show loading
         document.getElementById('step1').classList.add('hidden');
         document.getElementById('step2').classList.add('hidden');
         document.getElementById('interpretBtn').classList.add('hidden');
         document.getElementById('loadingSection').classList.remove('hidden');
 
         try {
-            const response = await fetch('https://api.anthropic.com/v1/messages', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: 'claude-sonnet-4-20250514',
-                    max_tokens: 1000,
-                    system: `Sen deneyimli bir rüya analisti ve astrologsun. Türkçe, samimi ve sıcak bir dille rüya yorumu yapıyorsun. 
+            const system = `Sen deneyimli bir rüya analisti ve astrologsun. Türkçe, samimi ve sıcak bir dille rüya yorumu yapıyorsun.
 
 Kullanıcının rüyasını analiz et ve ÜCRETSİZ bir yorum yaz. Bu yorum:
 - Rüyanın genel atmosferini ve duygusal tonunu analiz etmeli
@@ -766,23 +707,14 @@ Kullanıcının rüyasını analiz et ve ÜCRETSİZ bir yorum yaz. Bu yorum:
 
 ÖNEMLİ: Doğum haritası bağlantısı YAPMA. O premium bölümde. Genel sembol analizi ve psikolojik yorum yap.
 ÖNEMLİ: Yanıtını doğrudan HTML formatında ver. <h3> başlıklar ve <p> paragraflar kullan. Markdown KULLANMA.
-ÖNEMLİ: 4-5 paragraf yaz, çok kısa olmasın ama premium kadar da uzun olmasın.`,
-                    messages: [
-                        { role: 'user', content: `Rüyam: ${dreamText}` }
-                    ]
-                })
-            });
+ÖNEMLİ: 4-5 paragraf yaz, çok kısa olmasın ama premium kadar da uzun olmasın.`;
 
-            const data = await response.json();
-            freeInterpretationText = data.content.map(c => c.text || '').join('');
+            freeInterpretationText = await callAPI(system, [{ role: 'user', content: `Rüyam: ${dreamText}` }]);
 
-            // Show result
             document.getElementById('loadingSection').classList.add('hidden');
             document.getElementById('resultDate').textContent = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
             document.getElementById('freeInterpretation').innerHTML = freeInterpretationText;
             document.getElementById('freeResult').classList.add('visible');
-
-            // Scroll to result
             document.getElementById('freeResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
         } catch (err) {
@@ -791,74 +723,57 @@ Kullanıcının rüyasını analiz et ve ÜCRETSİZ bir yorum yaz. Bu yorum:
             document.getElementById('step1').classList.remove('hidden');
             document.getElementById('step2').classList.remove('hidden');
             document.getElementById('interpretBtn').classList.remove('hidden');
-            alert('Bir hata oluştu, lütfen tekrar deneyin.');
+            alert('Bir hata oluştu: ' + err.message);
         }
     }
 
-    // PREMIUM UNLOCK (demo - would connect to payment in production)
+    // PREMIUM
     async function unlockPremium() {
         if (!birthInfo.date) {
             alert('Kişisel analiz için doğum bilgileriniz gerekli. Lütfen sayfayı yenileyip doğum bilgilerinizi girin.');
             return;
         }
 
-        // In production, this would go to payment gateway (iyzico etc.)
-        // For demo, we proceed directly
         const premiumBtn = document.querySelector('.cta-premium');
         premiumBtn.disabled = true;
         premiumBtn.textContent = 'Analiz hazırlanıyor...';
 
         try {
-            const response = await fetch('https://api.anthropic.com/v1/messages', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: 'claude-sonnet-4-20250514',
-                    max_tokens: 1000,
-                    system: `Sen deneyimli bir rüya analisti ve astrologsun. Türkçe, samimi ve derinlikli rüya yorumu yapıyorsun.
+            const system = `Sen deneyimli bir rüya analisti ve astrologsun. Türkçe, samimi ve derinlikli rüya yorumu yapıyorsun.
 
 Kullanıcının doğum bilgileri: Tarih: ${birthInfo.date}, Saat: ${birthInfo.time}, Yer: ${birthInfo.place}
 
 Bu bilgilerle tahmini bir natal chart profili çıkar (Güneş burcu kesin hesaplanabilir, diğerlerini tahmin et).
 
 PREMIUM kişisel analiz yaz:
-1. "Doğum Haritanızla Bağlantı" — natal chart yerleşimlerinin bu rüyayla nasıl konuştuğunu anlat (Güneş burcu, tahmini Ay burcu, önemli evler)
-2. "Güncel Transit Etkisi" — şu anki önemli transitlerin (Satürn, Jüpiter, vs.) bu rüyayla bağlantısı
-3. "Önündeki Dönem" — kehanet değil ama yönlendirme ver. "Şuna dikkat et, bu dönem hassas" tarzında.
+1. "Doğum Haritanızla Bağlantı" — natal chart yerleşimlerinin bu rüyayla nasıl konuştuğunu anlat
+2. "Güncel Transit Etkisi" — şu anki önemli transitlerin bu rüyayla bağlantısı
+3. "Önündeki Dönem" — kehanet değil ama yönlendirme ver
 
 Samimi, sıcak, arkadaşça ama bilgili bir ton kullan. "Sen" diye hitap et.
 Yanıtını doğrudan HTML formatında ver. <h3> başlıklar ve <p> paragraflar kullan. Markdown KULLANMA.
-Detaylı ve uzun yaz — bu premium içerik, kullanıcı para ödüyor.`,
-                    messages: [
-                        { role: 'user', content: `Rüya: ${dreamText}\n\nÜcretsiz yorumda şunlar söylenmişti:\n${freeInterpretationText}` }
-                    ]
-                })
-            });
+Detaylı ve uzun yaz — bu premium içerik.`;
 
-            const data = await response.json();
-            premiumInterpretationText = data.content.map(c => c.text || '').join('');
+            premiumInterpretationText = await callAPI(system, [
+                { role: 'user', content: `Rüya: ${dreamText}\n\nÜcretsiz yorumda şunlar söylenmişti:\n${freeInterpretationText}` }
+            ]);
 
-            // Hide premium wall, show premium result
             document.getElementById('premiumWall').classList.add('hidden');
             document.getElementById('premiumResult').classList.add('visible');
             document.getElementById('premiumInterpretation').innerHTML = premiumInterpretationText;
-
             document.getElementById('premiumResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
         } catch (err) {
             console.error(err);
             premiumBtn.disabled = false;
             premiumBtn.textContent = '✦ KİŞİSEL ANALİZİ AÇ ✦';
-            alert('Bir hata oluştu, lütfen tekrar deneyin.');
+            alert('Bir hata oluştu: ' + err.message);
         }
     }
 
-    // ASK QUESTION
+    // QUESTIONS
     async function askQuestion() {
-        if (questionsRemaining <= 0) {
-            alert('Soru hakkınız doldu.');
-            return;
-        }
+        if (questionsRemaining <= 0) { alert('Soru hakkınız doldu.'); return; }
 
         const questionInput = document.getElementById('questionInput');
         const question = questionInput.value.trim();
@@ -873,7 +788,6 @@ Detaylı ve uzun yaz — bu premium içerik, kullanıcı para ödüyor.`,
             questionInput.placeholder = 'Soru hakkınız doldu';
         }
 
-        // Add question placeholder
         const qaContainer = document.getElementById('qaContainer');
         const qaItem = document.createElement('div');
         qaItem.className = 'qa-item';
@@ -885,29 +799,17 @@ Detaylı ve uzun yaz — bu premium içerik, kullanıcı para ödüyor.`,
         qaItem.scrollIntoView({ behavior: 'smooth' });
 
         try {
-            const response = await fetch('https://api.anthropic.com/v1/messages', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: 'claude-sonnet-4-20250514',
-                    max_tokens: 1000,
-                    system: `Sen bir rüya analisti ve astrologsun. Kullanıcı daha önce bir rüya anlattı ve sen yorumladın. Şimdi kullanıcı bu rüya hakkında ek bir soru soruyor.
+            const system = `Sen bir rüya analisti ve astrologsun. Kullanıcı daha önce bir rüya anlattı ve sen yorumladın. Şimdi ek soru soruyor.
 
 Rüya: ${dreamText}
 Doğum bilgileri: ${birthInfo.date}, ${birthInfo.time}, ${birthInfo.place}
 Önceki ücretsiz yorum: ${freeInterpretationText}
 Önceki premium yorum: ${premiumInterpretationText}
 
-Soruyu samimi, derinlikli ve kişisel bir şekilde yanıtla. Natal chart bağlantısı kur. 2-3 paragraf yaz.
-HTML formatında yaz (<p> tagları ile). Markdown KULLANMA.`,
-                    messages: [
-                        { role: 'user', content: question }
-                    ]
-                })
-            });
+Soruyu samimi, derinlikli ve kişisel yanıtla. 2-3 paragraf yaz.
+HTML formatında yaz (<p> tagları ile). Markdown KULLANMA.`;
 
-            const data = await response.json();
-            const answer = data.content.map(c => c.text || '').join('');
+            const answer = await callAPI(system, [{ role: 'user', content: question }]);
             qaItem.querySelector('.qa-answer').innerHTML = answer;
             qaItem.querySelector('.qa-answer').style.color = '';
             qaItem.querySelector('.qa-answer').style.fontStyle = '';
@@ -920,7 +822,6 @@ HTML formatında yaz (<p> tagları ile). Markdown KULLANMA.`,
         }
     }
 
-    // Enter key for question
     document.getElementById('questionInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') askQuestion();
     });
