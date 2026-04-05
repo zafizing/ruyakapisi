@@ -11,7 +11,6 @@
         :root {
             --bg-deep: #0a0a12;
             --bg-card: #12121f;
-            --bg-card-hover: #1a1a2e;
             --gold: #c9a84c;
             --gold-light: #e8d48b;
             --gold-dim: #8a7233;
@@ -22,11 +21,8 @@
             --text-dim: #5c5a6e;
             --border: #2a2840;
             --danger: #e74c6f;
-            --success: #4ce7a2;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             background: var(--bg-deep);
             color: var(--text-primary);
@@ -34,479 +30,130 @@
             min-height: 100vh;
             overflow-x: hidden;
         }
-
-        .stars {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 0;
-        }
-
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
         .star {
-            position: absolute;
-            width: 2px; height: 2px;
-            background: white;
-            border-radius: 50%;
-            animation: twinkle var(--duration) ease-in-out infinite;
-            opacity: 0;
+            position: absolute; width: 2px; height: 2px; background: white;
+            border-radius: 50%; animation: twinkle var(--duration) ease-in-out infinite; opacity: 0;
         }
-
-        @keyframes twinkle {
-            0%, 100% { opacity: 0; }
-            50% { opacity: var(--max-opacity); }
-        }
-
-        .orb {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(80px);
-            pointer-events: none;
-            z-index: 0;
-        }
-
+        @keyframes twinkle { 0%, 100% { opacity: 0; } 50% { opacity: var(--max-opacity); } }
+        .orb { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
         .orb-1 {
             width: 400px; height: 400px;
             background: radial-gradient(circle, rgba(107,92,231,0.15), transparent);
-            top: -100px; right: -100px;
-            animation: float1 20s ease-in-out infinite;
+            top: -100px; right: -100px; animation: float1 20s ease-in-out infinite;
         }
-
         .orb-2 {
             width: 300px; height: 300px;
             background: radial-gradient(circle, rgba(201,168,76,0.1), transparent);
-            bottom: -50px; left: -50px;
-            animation: float2 25s ease-in-out infinite;
+            bottom: -50px; left: -50px; animation: float2 25s ease-in-out infinite;
         }
-
-        @keyframes float1 {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(-50px, 50px); }
-        }
-
-        @keyframes float2 {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(30px, -40px); }
-        }
-
-        .container {
-            position: relative;
-            z-index: 1;
-            max-width: 720px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            text-align: center;
-            padding: 60px 0 40px;
-        }
-
-        .moon-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-            display: block;
-            animation: moonGlow 4s ease-in-out infinite;
-        }
-
+        @keyframes float1 { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-50px,50px); } }
+        @keyframes float2 { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(30px,-40px); } }
+        .container { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; padding: 60px 0 40px; }
+        .moon-icon { font-size: 48px; margin-bottom: 16px; display: block; animation: moonGlow 4s ease-in-out infinite; }
         @keyframes moonGlow {
             0%, 100% { filter: drop-shadow(0 0 10px rgba(201,168,76,0.3)); }
             50% { filter: drop-shadow(0 0 25px rgba(201,168,76,0.6)); }
         }
-
         .site-title {
-            font-family: 'Cinzel', serif;
-            font-size: clamp(32px, 6vw, 48px);
-            font-weight: 700;
+            font-family: 'Cinzel', serif; font-size: clamp(32px, 6vw, 48px); font-weight: 700;
             background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dim));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: 3px;
-            margin-bottom: 12px;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; letter-spacing: 3px; margin-bottom: 12px;
         }
-
         .site-subtitle {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: clamp(16px, 3vw, 20px);
-            font-weight: 400;
-            font-style: italic;
-            color: var(--text-secondary);
-            letter-spacing: 1px;
+            font-family: 'Cormorant Garamond', serif; font-size: clamp(16px, 3vw, 20px);
+            font-weight: 400; font-style: italic; color: var(--text-secondary); letter-spacing: 1px;
         }
-
-        .trust-badges {
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-            margin-top: 24px;
-            flex-wrap: wrap;
-        }
-
-        .badge {
-            font-size: 12px;
-            color: var(--text-dim);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
+        .trust-badges { display: flex; justify-content: center; gap: 24px; margin-top: 24px; flex-wrap: wrap; }
+        .badge { font-size: 12px; color: var(--text-dim); display: flex; align-items: center; gap: 6px; letter-spacing: 0.5px; text-transform: uppercase; }
         .badge span { color: var(--gold); }
-
         .section {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 32px;
-            margin-bottom: 24px;
-            transition: all 0.3s ease;
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+            padding: 32px; margin-bottom: 24px; transition: all 0.3s ease;
         }
-
         .section:hover { border-color: var(--gold-dim); }
-
-        .section-number {
-            font-family: 'Cinzel', serif;
-            font-size: 11px;
-            color: var(--gold);
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-bottom: 8px;
+        .section-number { font-family: 'Cinzel', serif; font-size: 11px; color: var(--gold); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+        .section-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 600; margin-bottom: 4px; }
+        .section-desc { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6; }
+        textarea, input {
+            width: 100%; background: var(--bg-deep); border: 1px solid var(--border); border-radius: 10px;
+            color: var(--text-primary); font-family: 'DM Sans', sans-serif; font-size: 15px;
+            padding: 14px 16px; outline: none; transition: border-color 0.3s;
         }
-
-        .section-title {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .section-desc {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 24px;
-            line-height: 1.6;
-        }
-
-        textarea, input, select {
-            width: 100%;
-            background: var(--bg-deep);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            color: var(--text-primary);
-            font-family: 'DM Sans', sans-serif;
-            font-size: 15px;
-            padding: 14px 16px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        textarea:focus, input:focus, select:focus { border-color: var(--gold-dim); }
-
-        textarea {
-            min-height: 140px;
-            resize: vertical;
-            line-height: 1.7;
-        }
-
-        textarea::placeholder, input::placeholder {
-            color: var(--text-dim);
-            font-style: italic;
-        }
-
-        .char-count {
-            text-align: right;
-            font-size: 12px;
-            color: var(--text-dim);
-            margin-top: 8px;
-        }
-
-        label {
-            display: block;
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-bottom: 6px;
-            letter-spacing: 0.3px;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-
+        textarea:focus, input:focus { border-color: var(--gold-dim); }
+        textarea { min-height: 140px; resize: vertical; line-height: 1.7; }
+        textarea::placeholder, input::placeholder { color: var(--text-dim); font-style: italic; }
+        .char-count { text-align: right; font-size: 12px; color: var(--text-dim); margin-top: 8px; }
+        label { display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
         .form-group { margin-bottom: 16px; }
-
         .cta-btn {
-            width: 100%;
-            padding: 18px;
-            border: none;
-            border-radius: 12px;
-            font-family: 'Cinzel', serif;
-            font-size: 16px;
-            font-weight: 600;
-            letter-spacing: 2px;
-            cursor: pointer;
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
+            width: 100%; padding: 18px; border: none; border-radius: 12px;
+            font-family: 'Cinzel', serif; font-size: 16px; font-weight: 600;
+            letter-spacing: 2px; cursor: pointer; transition: all 0.4s ease;
         }
-
-        .cta-primary {
-            background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-            color: var(--bg-deep);
-        }
-
-        .cta-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(201,168,76,0.3);
-        }
-
-        .cta-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .cta-premium {
-            background: linear-gradient(135deg, var(--purple), var(--purple-dim));
-            color: white;
-            margin-top: 12px;
-        }
-
-        .cta-premium:hover {
-            box-shadow: 0 8px 30px rgba(107,92,231,0.3);
-            transform: translateY(-2px);
-        }
-
-        .loading-container {
-            text-align: center;
-            padding: 60px 20px;
-        }
-
-        .loading-moon {
-            font-size: 56px;
-            animation: moonGlow 2s ease-in-out infinite;
-            margin-bottom: 24px;
-            display: block;
-        }
-
-        .loading-text {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 20px;
-            font-style: italic;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-        }
-
-        .loading-subtext {
-            font-size: 13px;
-            color: var(--text-dim);
-        }
-
-        .loading-dots span {
-            animation: dot-pulse 1.5s ease-in-out infinite;
-        }
+        .cta-primary { background: linear-gradient(135deg, var(--gold), var(--gold-dim)); color: var(--bg-deep); }
+        .cta-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(201,168,76,0.3); }
+        .cta-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .cta-premium { background: linear-gradient(135deg, var(--purple), var(--purple-dim)); color: white; margin-top: 12px; }
+        .cta-premium:hover { box-shadow: 0 8px 30px rgba(107,92,231,0.3); transform: translateY(-2px); }
+        .loading-container { text-align: center; padding: 60px 20px; }
+        .loading-moon { font-size: 56px; animation: moonGlow 2s ease-in-out infinite; margin-bottom: 24px; display: block; }
+        .loading-text { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-style: italic; color: var(--text-secondary); margin-bottom: 8px; }
+        .loading-subtext { font-size: 13px; color: var(--text-dim); }
+        .loading-dots span { animation: dot-pulse 1.5s ease-in-out infinite; }
         .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
         .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes dot-pulse {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 1; }
-        }
-
+        @keyframes dot-pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
         .result-section { display: none; }
-
-        .result-section.visible {
-            display: block;
-            animation: fadeUp 0.8s ease;
-        }
-
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .result-header {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-
-        .result-date {
-            font-size: 12px;
-            color: var(--gold);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-
-        .result-title {
-            font-family: 'Cinzel', serif;
-            font-size: 22px;
-            font-weight: 600;
-        }
-
+        .result-section.visible { display: block; animation: fadeUp 0.8s ease; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .result-header { text-align: center; margin-bottom: 32px; }
+        .result-date { font-size: 12px; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+        .result-title { font-family: 'Cinzel', serif; font-size: 22px; font-weight: 600; }
         .interpretation-body {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 18px;
-            line-height: 1.9;
-            color: var(--text-primary);
+            font-family: 'Cormorant Garamond', serif; font-size: 18px; line-height: 1.9; color: var(--text-primary);
         }
-
         .interpretation-body h3 {
-            font-family: 'Cinzel', serif;
-            font-size: 14px;
-            color: var(--gold);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin: 32px 0 16px;
+            font-family: 'Cinzel', serif; font-size: 14px; color: var(--gold);
+            letter-spacing: 2px; text-transform: uppercase; margin: 32px 0 16px;
         }
-
         .interpretation-body h3:first-child { margin-top: 0; }
         .interpretation-body p { margin-bottom: 16px; }
-
-        .divider {
-            width: 60px;
-            height: 1px;
-            background: var(--gold-dim);
-            margin: 32px auto;
-        }
-
+        .divider { width: 60px; height: 1px; background: var(--gold-dim); margin: 32px auto; }
         .premium-wall {
-            background: linear-gradient(135deg, #1a1530, #12121f);
-            border: 1px solid var(--purple-dim);
-            border-radius: 16px;
-            padding: 32px;
-            text-align: center;
-            margin-top: 32px;
-            position: relative;
-            overflow: hidden;
+            background: linear-gradient(135deg, #1a1530, #12121f); border: 1px solid var(--purple-dim);
+            border-radius: 16px; padding: 32px; text-align: center; margin-top: 32px; position: relative; overflow: hidden;
         }
-
         .premium-wall::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
             background: linear-gradient(90deg, transparent, var(--purple), var(--gold), var(--purple), transparent);
         }
-
         .premium-icon { font-size: 36px; margin-bottom: 16px; display: block; }
-
-        .premium-title {
-            font-family: 'Cinzel', serif;
-            font-size: 20px;
-            margin-bottom: 8px;
-        }
-
-        .premium-desc {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 24px;
-            line-height: 1.7;
-        }
-
-        .premium-features {
-            display: grid;
-            gap: 12px;
-            margin-bottom: 24px;
-            text-align: left;
-        }
-
-        .premium-feature {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
+        .premium-title { font-family: 'Cinzel', serif; font-size: 20px; margin-bottom: 8px; }
+        .premium-desc { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.7; }
+        .premium-features { display: grid; gap: 12px; margin-bottom: 24px; text-align: left; }
+        .premium-feature { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--text-secondary); }
         .premium-feature span { color: var(--gold); font-size: 16px; }
-
-        .premium-price {
-            font-family: 'Cinzel', serif;
-            font-size: 36px;
-            font-weight: 700;
-            color: var(--gold-light);
-            margin-bottom: 4px;
-        }
-
-        .premium-price-note {
-            font-size: 13px;
-            color: var(--text-dim);
-            margin-bottom: 20px;
-        }
-
-        .questions-section {
-            display: none;
-            margin-top: 24px;
-        }
-
-        .questions-section.visible {
-            display: block;
-            animation: fadeUp 0.6s ease;
-        }
-
-        .question-input-row {
-            display: flex;
-            gap: 12px;
-        }
-
+        .premium-price { font-family: 'Cinzel', serif; font-size: 36px; font-weight: 700; color: var(--gold-light); margin-bottom: 4px; }
+        .premium-price-note { font-size: 13px; color: var(--text-dim); margin-bottom: 20px; }
+        .questions-section { display: none; margin-top: 24px; }
+        .questions-section.visible { display: block; animation: fadeUp 0.6s ease; }
+        .question-input-row { display: flex; gap: 12px; }
         .question-input-row input { flex: 1; }
-
-        .question-input-row button {
-            padding: 14px 20px;
-            white-space: nowrap;
-        }
-
-        .questions-remaining {
-            font-size: 12px;
-            color: var(--text-dim);
-            margin-top: 8px;
-            text-align: right;
-        }
-
-        .qa-item {
-            margin-top: 20px;
-            padding: 20px;
-            background: var(--bg-deep);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-        }
-
-        .qa-question {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--gold-light);
-            margin-bottom: 12px;
-        }
-
-        .qa-answer {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 17px;
-            line-height: 1.8;
-            color: var(--text-primary);
-        }
-
-        .footer {
-            text-align: center;
-            padding: 40px 20px;
-            font-size: 12px;
-            color: var(--text-dim);
-        }
-
-        .footer a { color: var(--gold-dim); text-decoration: none; }
-
+        .questions-remaining { font-size: 12px; color: var(--text-dim); margin-top: 8px; text-align: right; }
+        .qa-item { margin-top: 20px; padding: 20px; background: var(--bg-deep); border-radius: 12px; border: 1px solid var(--border); }
+        .qa-question { font-size: 14px; font-weight: 500; color: var(--gold-light); margin-bottom: 12px; }
+        .qa-answer { font-family: 'Cormorant Garamond', serif; font-size: 17px; line-height: 1.8; color: var(--text-primary); }
+        .footer { text-align: center; padding: 40px 20px; font-size: 12px; color: var(--text-dim); }
         @media (max-width: 600px) {
             .form-row { grid-template-columns: 1fr; }
             .section { padding: 24px 20px; }
             .container { padding: 12px; }
             .question-input-row { flex-direction: column; }
         }
-
         .hidden { display: none; }
         html { scroll-behavior: smooth; }
     </style>
@@ -518,7 +165,6 @@
 <div class="orb orb-2"></div>
 
 <div class="container">
-
     <header class="header">
         <span class="moon-icon">🌙</span>
         <h1 class="site-title">RÜYA KAPISI</h1>
@@ -543,32 +189,19 @@
         <h2 class="section-title">Doğum Bilgileriniz</h2>
         <p class="section-desc">Doğum haritanıza göre kişiselleştirilmiş yorum almak için bilgilerinizi girin. Boş bırakırsanız genel bir rüya analizi yapılır.</p>
         <div class="form-row">
-            <div class="form-group">
-                <label>Doğum Tarihi</label>
-                <input type="date" id="birthDate">
-            </div>
-            <div class="form-group">
-                <label>Doğum Saati</label>
-                <input type="time" id="birthTime">
-            </div>
+            <div class="form-group"><label>Doğum Tarihi</label><input type="date" id="birthDate"></div>
+            <div class="form-group"><label>Doğum Saati</label><input type="time" id="birthTime"></div>
         </div>
-        <div class="form-group">
-            <label>Doğum Yeri</label>
-            <input type="text" id="birthPlace" placeholder="Örn: İstanbul, Ankara, Sivas...">
-        </div>
+        <div class="form-group"><label>Doğum Yeri</label><input type="text" id="birthPlace" placeholder="Örn: İstanbul, Ankara, Sivas..."></div>
     </div>
 
-    <button class="cta-btn cta-primary" id="interpretBtn" onclick="interpretDream()">
-        ✦ RÜYAMI YORUMLA ✦
-    </button>
+    <button class="cta-btn cta-primary" id="interpretBtn" onclick="interpretDream()">✦ RÜYAMI YORUMLA ✦</button>
 
     <div class="section hidden" id="loadingSection">
         <div class="loading-container">
             <span class="loading-moon">🔮</span>
             <p class="loading-text">Rüyanız analiz ediliyor...</p>
-            <p class="loading-subtext loading-dots">
-                Semboller çözülüyor<span>.</span><span>.</span><span>.</span>
-            </p>
+            <p class="loading-subtext loading-dots">Semboller çözülüyor<span>.</span><span>.</span><span>.</span></p>
         </div>
     </div>
 
@@ -581,7 +214,6 @@
             <div class="divider"></div>
             <div class="interpretation-body" id="freeInterpretation"></div>
         </div>
-
         <div class="premium-wall" id="premiumWall">
             <span class="premium-icon">🔮</span>
             <h3 class="premium-title">Daha Derine İnmek İster Misiniz?</h3>
@@ -594,9 +226,7 @@
             </div>
             <div class="premium-price">79 ₺</div>
             <p class="premium-price-note">Tek seferlik ödeme · Kredi kartı veya havale</p>
-            <button class="cta-btn cta-premium" onclick="unlockPremium()">
-                ✦ KİŞİSEL ANALİZİ AÇ ✦
-            </button>
+            <button class="cta-btn cta-premium" onclick="unlockPremium()">✦ KİŞİSEL ANALİZİ AÇ ✦</button>
         </div>
     </div>
 
@@ -609,7 +239,6 @@
             <div class="divider"></div>
             <div class="interpretation-body" id="premiumInterpretation"></div>
         </div>
-
         <div class="questions-section visible" id="questionsSection">
             <div class="section">
                 <div class="section-number">Soru Hakkınız</div>
@@ -617,7 +246,7 @@
                 <p class="section-desc">Rüyanız ve yorumunuz hakkında merak ettiklerinizi sorun.</p>
                 <div class="question-input-row">
                     <input type="text" id="questionInput" placeholder="Örn: Bu rüya ilişkimle mi ilgili?" maxlength="500">
-                    <button class="cta-btn cta-primary" onclick="askQuestion()" style="width:auto; padding: 14px 24px; font-size: 13px;">SOR</button>
+                    <button class="cta-btn cta-primary" onclick="askQuestion()" style="width:auto; padding:14px 24px; font-size:13px;">SOR</button>
                 </div>
                 <div class="questions-remaining">Kalan soru hakkı: <strong id="remainingQ">3</strong></div>
                 <div id="qaContainer"></div>
@@ -629,60 +258,108 @@
         <p>Rüya Kapısı © 2026 · Astrolojik rüya analizi platformu</p>
         <p style="margin-top:8px;">Rüya yorumları kişisel gelişim ve eğlence amaçlıdır. Profesyonel danışmanlık yerine geçmez.</p>
     </footer>
-
 </div>
 
 <script>
     // Stars
-    const starsContainer = document.getElementById('stars');
+    const sc = document.getElementById('stars');
     for (let i = 0; i < 120; i++) {
-        const star = document.createElement('div');
-        star.className = 'star';
-        star.style.left = Math.random() * 100 + '%';
-        star.style.top = Math.random() * 100 + '%';
-        star.style.setProperty('--duration', (2 + Math.random() * 4) + 's');
-        star.style.setProperty('--max-opacity', (0.3 + Math.random() * 0.7));
-        star.style.animationDelay = Math.random() * 4 + 's';
-        if (Math.random() > 0.8) { star.style.width = '3px'; star.style.height = '3px'; }
-        starsContainer.appendChild(star);
+        const s = document.createElement('div'); s.className = 'star';
+        s.style.left = Math.random()*100+'%'; s.style.top = Math.random()*100+'%';
+        s.style.setProperty('--duration', (2+Math.random()*4)+'s');
+        s.style.setProperty('--max-opacity', (0.3+Math.random()*0.7));
+        s.style.animationDelay = Math.random()*4+'s';
+        if (Math.random()>0.8){s.style.width='3px';s.style.height='3px';}
+        sc.appendChild(s);
     }
 
-    // Char count
     const dreamInput = document.getElementById('dreamInput');
     const charCount = document.getElementById('charCount');
     dreamInput.addEventListener('input', () => { charCount.textContent = dreamInput.value.length; });
 
-    // State
-    let dreamText = '';
-    let birthInfo = {};
-    let freeInterpretationText = '';
-    let premiumInterpretationText = '';
-    let questionsRemaining = 3;
+    let dreamText='', birthInfo={}, freeText='', premiumText='', questionsRemaining=3;
 
-    // API helper — calls our serverless function
-    async function callAPI(system, messages) {
-        const response = await fetch('/api/interpret', {
+    // Prompts — bu promptlar yorumun insan gibi olmasını sağlıyor
+    const FREE_SYSTEM = `Sen 20 yıllık deneyime sahip bir rüya analisti ve psikologsun. Adın yok — sadece yorumunu yazıyorsun. Asla "yapay zeka", "AI", "model", "dil modeli" gibi ifadeler kullanma. Sen gerçek bir insansın.
+
+YAZIM TARZI:
+- Türkçe yaz, samimi ve sıcak bir ton kullan. "Siz" değil "sen" de.
+- Bazen "Bak, burada ilginç bir şey var..." veya "Dikkat et, bu sembol önemli..." gibi doğal geçişler kullan.
+- Robotik veya kalıplaşmış cümleler KULLANMA. Her yorum benzersiz olsun.
+- Arada kısa cümleler kullan, arada uzun. Monoton olma.
+- Gerçek bir insan gibi bazen "Hmm, bu ilginç" gibi düşünce ifadeleri kullanabilirsin.
+
+İÇERİK:
+- Rüyanın genel atmosferini ve duygusal tonunu analiz et
+- 3-4 ana sembolü derinlemesine yorumla
+- Jungian psikoloji, arketip teorisi ve klasik rüya sembolizminden yararlan ama bunları akademik değil anlaşılır şekilde anlat
+- Rüyadaki duyguları, renkleri, mekanları ve kişileri dikkate al
+- Bilinçaltı mesajları çıkar
+- Kişinin hayatıyla bağlantı kurabilecek sorular veya tespitler yap
+
+ÖNEMLİ KURALLAR:
+- Doğum haritası bağlantısı YAPMA (o premium bölümde)
+- Yanıtını HTML formatında ver: <h3> başlıklar ve <p> paragraflar kullan
+- Markdown (**, ##, - gibi) KULLANMA
+- 5-7 paragraf yaz, zengin ve doyurucu olsun
+- Asla "yapay zeka" olduğundan bahsetme`;
+
+    const PREMIUM_SYSTEM_BASE = `Sen 20 yıllık deneyime sahip bir rüya analisti ve astrologsun. Hem Jungian rüya analizi hem de astroloji konusunda uzmansın. Asla "yapay zeka", "AI", "model" gibi ifadeler kullanma.
+
+YAZIM TARZI:
+- Türkçe, samimi, sıcak ve derin bir ton kullan. "Sen" diye hitap et.
+- Astroloji terimlerini kullan ama her birini anlaşılır şekilde açıkla.
+- Gerçek bir astrolog gibi yaz — "Haritana baktığımda...", "Burada dikkatimi çeken şey..." gibi doğal ifadeler kullan.
+- Robotik veya template cümleler KULLANMA.
+
+İÇERİK — 3 BÖLÜM YAZ:
+
+1. "Doğum Haritanla Bağlantı" başlığı altında:
+- Verilen doğum tarihinden Güneş burcunu kesin hesapla
+- Doğum saatine göre tahmini yükselen burç ve Ay burcu belirle
+- Bu yerleşimlerin rüyadaki sembollerle nasıl konuştuğunu anlat
+- Gezegen-ev ilişkilerini rüyaya bağla
+- Spesifik ol: "Senin Güneşin Koç'ta, bu yüzden rüyandaki X sembolü..." gibi
+
+2. "Güncel Transit Etkisi" başlığı altında:
+- Şu anki major transitleri (Satürn, Jüpiter, Plüton pozisyonları) kullan
+- Bu transitlerin kişinin haritasıyla etkileşimini ve rüyaya yansımasını anlat
+
+3. "Önündeki Dönem" başlığı altında:
+- Kehanet verme ama yönlendirme yap
+- "Şu konuda dikkatli ol", "Bu dönem X açısından hassas" tarzında
+- Umut verici ama gerçekçi ol
+
+ÖNEMLİ KURALLAR:
+- Yanıtını HTML formatında ver: <h3> başlıklar ve <p> paragraflar
+- Markdown KULLANMA
+- Detaylı ve uzun yaz — bu premium içerik, en az 6-8 paragraf
+- Asla yapay zeka olduğundan bahsetme`;
+
+    const QUESTION_SYSTEM_BASE = `Sen 20 yıllık deneyime sahip bir rüya analisti ve astrologsun. Daha önce bir rüya yorumladın, şimdi kullanıcı ek soru soruyor. Asla "yapay zeka", "AI" olduğundan bahsetme.
+
+Samimi, derinlikli ve kişisel yanıtla. Astroloji bağlantısı kur. 2-3 paragraf yaz.
+HTML formatında yaz (<p> tagları ile). Markdown KULLANMA. Gerçek bir insan gibi doğal yaz.`;
+
+    // API call
+    async function callAPI(systemPrompt, userMessage) {
+        const resp = await fetch('/api/interpret', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ system, messages })
+            body: JSON.stringify({ systemPrompt, userMessage })
         });
-
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.error || 'API hatası');
+        if (!resp.ok) {
+            const err = await resp.json();
+            throw new Error(err.error || 'Bir hata oluştu');
         }
-
-        const data = await response.json();
-        return data.content.map(c => c.text || '').join('');
+        const data = await resp.json();
+        return data.text;
     }
 
-    // INTERPRET
+    // FREE INTERPRETATION
     async function interpretDream() {
         dreamText = dreamInput.value.trim();
-        if (dreamText.length < 20) {
-            alert('Lütfen rüyanızı biraz daha detaylı anlatın (en az 20 karakter).');
-            return;
-        }
+        if (dreamText.length < 20) { alert('Lütfen rüyanızı biraz daha detaylı anlatın.'); return; }
 
         birthInfo = {
             date: document.getElementById('birthDate').value,
@@ -696,27 +373,13 @@
         document.getElementById('loadingSection').classList.remove('hidden');
 
         try {
-            const system = `Sen deneyimli bir rüya analisti ve astrologsun. Türkçe, samimi ve sıcak bir dille rüya yorumu yapıyorsun.
-
-Kullanıcının rüyasını analiz et ve ÜCRETSİZ bir yorum yaz. Bu yorum:
-- Rüyanın genel atmosferini ve duygusal tonunu analiz etmeli
-- 3-4 ana sembolü detaylıca yorumlamalı
-- Jungian ve klasik sembolizm kullanmalı
-- Samimi, arkadaşça ama bilgili bir ton kullanmalı
-- Bilinçaltı mesajları çıkarmalı
-
-ÖNEMLİ: Doğum haritası bağlantısı YAPMA. O premium bölümde. Genel sembol analizi ve psikolojik yorum yap.
-ÖNEMLİ: Yanıtını doğrudan HTML formatında ver. <h3> başlıklar ve <p> paragraflar kullan. Markdown KULLANMA.
-ÖNEMLİ: 4-5 paragraf yaz, çok kısa olmasın ama premium kadar da uzun olmasın.`;
-
-            freeInterpretationText = await callAPI(system, [{ role: 'user', content: `Rüyam: ${dreamText}` }]);
+            freeText = await callAPI(FREE_SYSTEM, `İşte rüyam:\n\n${dreamText}`);
 
             document.getElementById('loadingSection').classList.add('hidden');
-            document.getElementById('resultDate').textContent = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
-            document.getElementById('freeInterpretation').innerHTML = freeInterpretationText;
+            document.getElementById('resultDate').textContent = new Date().toLocaleDateString('tr-TR', { day:'numeric', month:'long', year:'numeric' });
+            document.getElementById('freeInterpretation').innerHTML = freeText;
             document.getElementById('freeResult').classList.add('visible');
-            document.getElementById('freeResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
-
+            document.getElementById('freeResult').scrollIntoView({ behavior:'smooth', block:'start' });
         } catch (err) {
             console.error(err);
             document.getElementById('loadingSection').classList.add('hidden');
@@ -733,40 +396,21 @@ Kullanıcının rüyasını analiz et ve ÜCRETSİZ bir yorum yaz. Bu yorum:
             alert('Kişisel analiz için doğum bilgileriniz gerekli. Lütfen sayfayı yenileyip doğum bilgilerinizi girin.');
             return;
         }
+        const btn = document.querySelector('.cta-premium');
+        btn.disabled = true; btn.textContent = 'Analiz hazırlanıyor...';
 
-        const premiumBtn = document.querySelector('.cta-premium');
-        premiumBtn.disabled = true;
-        premiumBtn.textContent = 'Analiz hazırlanıyor...';
+        const premiumSystem = PREMIUM_SYSTEM_BASE + `\n\nKullanıcının doğum bilgileri: Tarih: ${birthInfo.date}, Saat: ${birthInfo.time || 'belirtilmedi'}, Yer: ${birthInfo.place || 'belirtilmedi'}`;
 
         try {
-            const system = `Sen deneyimli bir rüya analisti ve astrologsun. Türkçe, samimi ve derinlikli rüya yorumu yapıyorsun.
-
-Kullanıcının doğum bilgileri: Tarih: ${birthInfo.date}, Saat: ${birthInfo.time}, Yer: ${birthInfo.place}
-
-Bu bilgilerle tahmini bir natal chart profili çıkar (Güneş burcu kesin hesaplanabilir, diğerlerini tahmin et).
-
-PREMIUM kişisel analiz yaz:
-1. "Doğum Haritanızla Bağlantı" — natal chart yerleşimlerinin bu rüyayla nasıl konuştuğunu anlat
-2. "Güncel Transit Etkisi" — şu anki önemli transitlerin bu rüyayla bağlantısı
-3. "Önündeki Dönem" — kehanet değil ama yönlendirme ver
-
-Samimi, sıcak, arkadaşça ama bilgili bir ton kullan. "Sen" diye hitap et.
-Yanıtını doğrudan HTML formatında ver. <h3> başlıklar ve <p> paragraflar kullan. Markdown KULLANMA.
-Detaylı ve uzun yaz — bu premium içerik.`;
-
-            premiumInterpretationText = await callAPI(system, [
-                { role: 'user', content: `Rüya: ${dreamText}\n\nÜcretsiz yorumda şunlar söylenmişti:\n${freeInterpretationText}` }
-            ]);
+            premiumText = await callAPI(premiumSystem, `Rüya: ${dreamText}\n\nDaha önce yapılan genel yorum:\n${freeText}`);
 
             document.getElementById('premiumWall').classList.add('hidden');
             document.getElementById('premiumResult').classList.add('visible');
-            document.getElementById('premiumInterpretation').innerHTML = premiumInterpretationText;
-            document.getElementById('premiumResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
-
+            document.getElementById('premiumInterpretation').innerHTML = premiumText;
+            document.getElementById('premiumResult').scrollIntoView({ behavior:'smooth', block:'start' });
         } catch (err) {
             console.error(err);
-            premiumBtn.disabled = false;
-            premiumBtn.textContent = '✦ KİŞİSEL ANALİZİ AÇ ✦';
+            btn.disabled = false; btn.textContent = '✦ KİŞİSEL ANALİZİ AÇ ✦';
             alert('Bir hata oluştu: ' + err.message);
         }
     }
@@ -774,58 +418,37 @@ Detaylı ve uzun yaz — bu premium içerik.`;
     // QUESTIONS
     async function askQuestion() {
         if (questionsRemaining <= 0) { alert('Soru hakkınız doldu.'); return; }
-
-        const questionInput = document.getElementById('questionInput');
-        const question = questionInput.value.trim();
-        if (!question) return;
+        const qi = document.getElementById('questionInput');
+        const q = qi.value.trim();
+        if (!q) return;
 
         questionsRemaining--;
         document.getElementById('remainingQ').textContent = questionsRemaining;
-        questionInput.value = '';
+        qi.value = '';
+        if (questionsRemaining <= 0) { qi.disabled = true; qi.placeholder = 'Soru hakkınız doldu'; }
 
-        if (questionsRemaining <= 0) {
-            questionInput.disabled = true;
-            questionInput.placeholder = 'Soru hakkınız doldu';
-        }
+        const qc = document.getElementById('qaContainer');
+        const item = document.createElement('div'); item.className = 'qa-item';
+        item.innerHTML = `<div class="qa-question">❓ ${q}</div><div class="qa-answer" style="color:var(--text-dim);font-style:italic;">Yanıt hazırlanıyor...</div>`;
+        qc.appendChild(item);
+        item.scrollIntoView({ behavior:'smooth' });
 
-        const qaContainer = document.getElementById('qaContainer');
-        const qaItem = document.createElement('div');
-        qaItem.className = 'qa-item';
-        qaItem.innerHTML = `
-            <div class="qa-question">❓ ${question}</div>
-            <div class="qa-answer" style="color: var(--text-dim); font-style: italic;">Yanıt hazırlanıyor...</div>
-        `;
-        qaContainer.appendChild(qaItem);
-        qaItem.scrollIntoView({ behavior: 'smooth' });
+        const qSystem = QUESTION_SYSTEM_BASE + `\n\nRüya: ${dreamText}\nDoğum: ${birthInfo.date}, ${birthInfo.time}, ${birthInfo.place}\nÖnceki yorumlar: ${freeText}\n${premiumText}`;
 
         try {
-            const system = `Sen bir rüya analisti ve astrologsun. Kullanıcı daha önce bir rüya anlattı ve sen yorumladın. Şimdi ek soru soruyor.
-
-Rüya: ${dreamText}
-Doğum bilgileri: ${birthInfo.date}, ${birthInfo.time}, ${birthInfo.place}
-Önceki ücretsiz yorum: ${freeInterpretationText}
-Önceki premium yorum: ${premiumInterpretationText}
-
-Soruyu samimi, derinlikli ve kişisel yanıtla. 2-3 paragraf yaz.
-HTML formatında yaz (<p> tagları ile). Markdown KULLANMA.`;
-
-            const answer = await callAPI(system, [{ role: 'user', content: question }]);
-            qaItem.querySelector('.qa-answer').innerHTML = answer;
-            qaItem.querySelector('.qa-answer').style.color = '';
-            qaItem.querySelector('.qa-answer').style.fontStyle = '';
-
+            const answer = await callAPI(qSystem, q);
+            item.querySelector('.qa-answer').innerHTML = answer;
+            item.querySelector('.qa-answer').style.color = '';
+            item.querySelector('.qa-answer').style.fontStyle = '';
         } catch (err) {
-            qaItem.querySelector('.qa-answer').innerHTML = 'Bir hata oluştu, lütfen tekrar deneyin.';
-            qaItem.querySelector('.qa-answer').style.color = 'var(--danger)';
+            item.querySelector('.qa-answer').innerHTML = 'Bir hata oluştu, lütfen tekrar deneyin.';
+            item.querySelector('.qa-answer').style.color = 'var(--danger)';
             questionsRemaining++;
             document.getElementById('remainingQ').textContent = questionsRemaining;
         }
     }
 
-    document.getElementById('questionInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') askQuestion();
-    });
+    document.getElementById('questionInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') askQuestion(); });
 </script>
-
 </body>
 </html>
