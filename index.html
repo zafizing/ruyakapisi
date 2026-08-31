@@ -33,8 +33,54 @@
   .pip{width:7px; height:7px; border-radius:50%; background:var(--led); animation:beat 2.4s ease-in-out infinite;}
   @keyframes beat{0%,100%{opacity:1; transform:scale(1);} 50%{opacity:.35; transform:scale(.82);}}
 
-  /* ---------- HERO: voices first ---------- */
-  .hero{padding:52px 0 0;}
+  /* ---------- ASK: the first thing you see ---------- */
+  .ask{padding:96px 0 88px; max-width:760px;}
+  .ask h1{
+    font-weight:600; font-size:clamp(34px,7vw,64px); line-height:1.1;
+    letter-spacing:-.03em; margin:0;
+  }
+  .ask__field{
+    display:flex; gap:0; margin:36px 0 0; max-width:620px;
+    border-bottom:2px solid var(--ink);
+  }
+  .ask__field input{
+    flex:1; min-width:0;
+    font-family:Archivo,sans-serif; font-size:clamp(18px,2.6vw,23px);
+    padding:14px 4px; background:transparent; color:var(--ink);
+    border:none; outline:none;
+  }
+  .ask__field input::placeholder{color:var(--rule);}
+  .ask__field button{
+    flex:0 0 auto; padding:0 22px; cursor:pointer;
+    font-family:"DM Mono",monospace; font-size:11px;
+    letter-spacing:.14em; text-transform:uppercase;
+    background:transparent; color:var(--ink); border:none; border-left:1px solid var(--rule);
+  }
+  .ask__field button:hover{color:var(--led);}
+  .ask__hint{margin:14px 0 0; font-family:"DM Mono",monospace; font-size:11.5px; color:var(--ink-soft);}
+  .ask__skip{
+    display:inline-block; margin:26px 0 0;
+    font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.1em;
+    color:var(--ink-soft); text-decoration:underline; cursor:pointer;
+  }
+
+  .echo{margin:34px 0 0; display:none;}
+  .echo.is-open{display:block; animation:fadein .6s ease-out;}
+  .echo__said{
+    font-size:clamp(21px,3.4vw,30px); line-height:1.35;
+    padding:12px 0 12px 20px; border-left:3px solid var(--led); margin:0;
+  }
+  .echo__kin{margin:20px 0 0; font-size:17px; color:var(--ink-soft); max-width:520px;}
+  .echo__kin b{color:var(--ink); font-weight:600;}
+  .echo__go{
+    margin:22px 0 0; padding:14px 26px; cursor:pointer;
+    font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    background:var(--ink); color:var(--hall); border:1px solid var(--ink);
+  }
+  .echo__go:hover{background:var(--led); border-color:var(--led);}
+
+  /* ---------- HERO: voices ---------- */
+  .hero{padding:12px 0 0;}
   .hero h1{
     font-weight:600; font-size:clamp(29px,5.2vw,48px); line-height:1.16;
     letter-spacing:-.024em; margin:0; max-width:680px;
@@ -213,9 +259,32 @@
     <div class="live"><span class="pip"></span><span id="live-txt">Open &middot; Always</span></div>
   </header>
 
+  <!-- ASK -->
+  <section class="ask">
+    <h1>What are you waiting for?</h1>
+
+    <div class="ask__field">
+      <input id="ask-input" type="text" maxlength="70"
+             placeholder="a phone call &middot; nothing &middot; my results"
+             aria-label="What are you waiting for?">
+      <button id="ask-go">Answer</button>
+    </div>
+    <p class="ask__hint">Nobody is asking on behalf of anything. There is no form behind this.</p>
+
+    <div class="echo" id="echo">
+      <p class="echo__said" id="echo-said"></p>
+      <p class="echo__kin" id="echo-kin"></p>
+      <button class="echo__go" id="echo-go">Show me the queue</button>
+    </div>
+
+    <span class="ask__skip" id="ask-skip">or just look at what everyone else said</span>
+  </section>
+
   <!-- HERO -->
-  <section class="hero">
-    <h1>This is a queue. There is nothing at the end of it.</h1>
+  <section class="hero" id="hero">
+    <h2 style="font-weight:600;font-size:clamp(26px,4.6vw,42px);line-height:1.18;letter-spacing:-.024em;margin:0;max-width:680px;">
+      This is a queue. There is nothing at the end of it.
+    </h2>
 
     <div class="voices">
       <p class="voice">my father to wake up<span>&#8470;&nbsp;9,204</span></p>
@@ -756,6 +825,46 @@
   function withFonts(fn){
     if(document.fonts && document.fonts.ready) document.fonts.ready.then(fn); else fn();
   }
+
+  /* ---------- THE OPENING QUESTION ----------
+     Answering costs nothing and commits nothing. It carries the line down
+     to the join form so it is never typed twice, and shows the reader that
+     other people are waiting for the same thing. That recognition is the
+     hook; the price is a formality after it. */
+  function kinCount(said){
+    var t = said.toLowerCase(), best = null, n;
+    for(n = 0; n < AGG.length; n++){
+      if(t && AGG[n].label.split(/[ ,]+/).some(function(w){
+        return w.length > 3 && t.indexOf(w) > -1;
+      })){ best = AGG[n]; break; }
+    }
+    return best || AGG[2];   /* "nothing in particular" catches the rest */
+  }
+
+  function answer(){
+    var said = $("ask-input").value.trim();
+    if(!said) return;
+    var kin = kinCount(said);
+
+    $("echo-said").textContent = "\u201C" + said + "\u201D";
+    $("echo-kin").innerHTML =
+      "You are number <b>" + fmt(state.count + 1) + "</b> to be asked, and you are " +
+      km(state.count + 1).toFixed(1) + " km from a door that never opens. " +
+      "<b>" + fmt(kin.n) + "</b> people in this line are waiting for something like it.";
+    $("echo").classList.add("is-open");
+
+    $("wait").value = said;               /* carry it to the join form */
+    $("tk-said").textContent = "\u201C" + said + "\u201D";
+  }
+
+  $("ask-go").addEventListener("click", answer);
+  $("ask-input").addEventListener("keydown", function(e){ if(e.key === "Enter") answer(); });
+  $("echo-go").addEventListener("click", function(){
+    $("hero").scrollIntoView({ behavior:"smooth", block:"start" });
+  });
+  $("ask-skip").addEventListener("click", function(){
+    $("hero").scrollIntoView({ behavior:"smooth", block:"start" });
+  });
 
   /* ---------- wiring ---------- */
   $("q-go").addEventListener("click", search);
