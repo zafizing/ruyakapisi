@@ -2,513 +2,192 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Queue — There is nothing at the end</title>
-<meta name="description" content="A queue with nothing at the end of it. Thousands of people are waiting anyway. This is what they are waiting for.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Queue — walk it yourself</title>
+<meta name="description" content="You are at the back of a queue with nothing at the end. Scroll to walk toward the door. You will not reach it.">
 <meta property="og:title" content="The Queue">
-<meta property="og:description" content="There is nothing at the end. Thousands of people are waiting anyway.">
+<meta property="og:description" content="You are at the back. 12,847 people are ahead of you. Scroll.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --hall:#E9E7DF; --hall-deep:#DCD9CE; --ink:#17171A; --ink-soft:#57575F;
-    --rule:#B2AFA4; --led:#B26A00; --paper:#FBFAF6;
+    --night:#131316; --night-2:#1B1B1F;
+    --bone:#F2F0EA; --bone-dim:#8C8C95;
+    --amber:#E39B2E;
   }
   *{box-sizing:border-box;}
-  html{-webkit-text-size-adjust:100%;}
+  html,body{height:100%; margin:0;}
   body{
-    margin:0; background:var(--hall); color:var(--ink);
-    font-family:Archivo,system-ui,sans-serif; font-size:16px; line-height:1.55;
-    -webkit-font-smoothing:antialiased;
+    background:var(--night); color:var(--bone);
+    font-family:Archivo,system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased; overflow:hidden;
   }
-  .wrap{max-width:1000px; margin:0 auto; padding:0 26px;}
 
-  .bureau{
-    display:flex; justify-content:space-between; align-items:center;
-    gap:14px; flex-wrap:wrap; padding:18px 0; border-bottom:3px solid var(--ink);
+  /* ---------- HUD ---------- */
+  .hud{
+    position:fixed; inset:0 0 auto 0; z-index:20;
+    display:flex; justify-content:space-between; align-items:flex-start;
+    gap:14px; padding:18px 22px;
+    font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--bone-dim);
+    background:linear-gradient(to bottom, rgba(19,19,22,.94), rgba(19,19,22,0));
+    pointer-events:none;
   }
-  .bureau__name{font-weight:700; font-size:13px; letter-spacing:.24em; text-transform:uppercase;}
-  .live{display:flex; align-items:center; gap:8px; font-family:"DM Mono",monospace; font-size:11px; color:var(--ink-soft);}
-  .pip{width:7px; height:7px; border-radius:50%; background:var(--led); animation:beat 2.4s ease-in-out infinite;}
-  @keyframes beat{0%,100%{opacity:1; transform:scale(1);} 50%{opacity:.35; transform:scale(.82);}}
+  .hud b{display:block; margin-top:3px; font-size:15px; font-weight:500; color:var(--bone); letter-spacing:.02em; font-variant-numeric:tabular-nums;}
+  .hud__right{text-align:right;}
+  .hud__right b{color:var(--amber);}
 
-  /* ---------- ASK: the first thing you see ---------- */
-  .ask{padding:96px 0 88px; max-width:760px;}
-  .ask h1{
-    font-weight:600; font-size:clamp(34px,7vw,64px); line-height:1.1;
+  /* ---------- DECK ---------- */
+  .deck{
+    height:100dvh; overflow-y:scroll;
+    scroll-snap-type:y mandatory;
+    -webkit-overflow-scrolling:touch;
+  }
+  .deck::-webkit-scrollbar{width:0;}
+
+  .screen{
+    height:100dvh; scroll-snap-align:start; scroll-snap-stop:always;
+    display:flex; flex-direction:column; justify-content:center;
+    padding:96px 26px 110px; max-width:900px; margin:0 auto;
+    position:relative;
+  }
+
+  /* person */
+  .p__n{
+    font-family:"DM Mono",monospace; font-size:12px; letter-spacing:.18em;
+    color:var(--bone-dim); margin:0 0 20px;
+  }
+  .p__line{
+    font-weight:600; font-size:clamp(31px,7.4vw,74px); line-height:1.1;
     letter-spacing:-.03em; margin:0;
   }
-  .ask__field{
-    display:flex; gap:0; margin:36px 0 0; max-width:620px;
-    border-bottom:2px solid var(--ink);
-  }
-  .ask__field input{
-    flex:1; min-width:0;
-    font-family:Archivo,sans-serif; font-size:clamp(18px,2.6vw,23px);
-    padding:14px 4px; background:transparent; color:var(--ink);
-    border:none; outline:none;
-  }
-  .ask__field input::placeholder{color:var(--rule);}
-  .ask__field button{
-    flex:0 0 auto; padding:0 22px; cursor:pointer;
-    font-family:"DM Mono",monospace; font-size:11px;
-    letter-spacing:.14em; text-transform:uppercase;
-    background:transparent; color:var(--ink); border:none; border-left:1px solid var(--rule);
-  }
-  .ask__field button:hover{color:var(--led);}
-  .ask__hint{margin:14px 0 0; font-family:"DM Mono",monospace; font-size:11.5px; color:var(--ink-soft);}
-  .ask__skip{
-    display:inline-block; margin:26px 0 0;
-    font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.1em;
-    color:var(--ink-soft); text-decoration:underline; cursor:pointer;
+  .p__line.is-silent{color:var(--bone-dim); font-weight:400; font-style:italic; font-size:clamp(24px,5vw,48px);}
+  .p__meta{
+    margin:26px 0 0; font-family:"DM Mono",monospace;
+    font-size:11.5px; letter-spacing:.06em; color:var(--bone-dim);
   }
 
-  .echo{margin:34px 0 0; display:none;}
-  .echo.is-open{display:block; animation:fadein .6s ease-out;}
-  .echo__said{
-    font-size:clamp(21px,3.4vw,30px); line-height:1.35;
-    padding:12px 0 12px 20px; border-left:3px solid var(--led); margin:0;
+  /* interrupt */
+  .screen--stop{background:var(--night-2);}
+  .stop__big{
+    font-family:"DM Mono",monospace; font-weight:500;
+    font-size:clamp(52px,14vw,132px); line-height:.94;
+    letter-spacing:-.03em; color:var(--amber); margin:0;
+    font-variant-numeric:tabular-nums;
   }
-  .echo__kin{margin:20px 0 0; font-size:17px; color:var(--ink-soft); max-width:520px;}
-  .echo__kin b{color:var(--ink); font-weight:600;}
-  .echo__go{
-    margin:22px 0 0; padding:14px 26px; cursor:pointer;
+  .stop__txt{
+    margin:22px 0 0; font-size:clamp(19px,3.2vw,29px); line-height:1.36;
+    max-width:640px; font-weight:400;
+  }
+  .stop__sub{margin:18px 0 0; font-family:"DM Mono",monospace; font-size:12px; color:var(--bone-dim); letter-spacing:.06em;}
+
+  /* intro */
+  .intro__k{font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:var(--amber); margin:0 0 22px;}
+  .intro__h{font-weight:600; font-size:clamp(33px,7.2vw,70px); line-height:1.08; letter-spacing:-.03em; margin:0;}
+  .intro__p{margin:26px 0 0; font-size:clamp(16px,2.4vw,20px); color:var(--bone-dim); max-width:520px; line-height:1.5;}
+  .cue{
+    position:absolute; left:26px; bottom:46px;
+    font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--bone-dim);
+    animation:drift 2.6s ease-in-out infinite;
+  }
+  @keyframes drift{0%,100%{transform:translateY(0); opacity:.55;} 50%{transform:translateY(7px); opacity:1;}}
+
+  /* join */
+  .screen--join{background:var(--night-2);}
+  .join__h{font-weight:600; font-size:clamp(30px,6vw,54px); line-height:1.12; letter-spacing:-.028em; margin:0;}
+  .field{display:flex; margin:32px 0 0; max-width:620px; border-bottom:2px solid var(--bone);}
+  .field input{
+    flex:1; min-width:0; font-family:Archivo,sans-serif; font-size:clamp(18px,2.8vw,24px);
+    padding:13px 2px; background:transparent; color:var(--bone); border:none; outline:none;
+  }
+  .field input::placeholder{color:#55555E;}
+  .field button{
+    flex:0 0 auto; padding:0 20px; cursor:pointer; background:transparent; color:var(--amber);
+    border:none; border-left:1px solid #3A3A42;
     font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
-    background:var(--ink); color:var(--hall); border:1px solid var(--ink);
   }
-  .echo__go:hover{background:var(--led); border-color:var(--led);}
-
-  /* ---------- HERO: voices ---------- */
-  .hero{padding:12px 0 0;}
-  .hero h1{
-    font-weight:600; font-size:clamp(29px,5.2vw,48px); line-height:1.16;
-    letter-spacing:-.024em; margin:0; max-width:680px;
+  .prices{display:flex; gap:10px; flex-wrap:wrap; margin:30px 0 0;}
+  .price{
+    padding:15px 20px; cursor:pointer; background:transparent; color:var(--bone);
+    border:1px solid #3A3A42; text-align:left;
+    font-family:"DM Mono",monospace; font-size:12px; letter-spacing:.06em;
+    transition:border-color .15s ease, color .15s ease;
   }
-  .voices{margin:34px 0 0; max-width:700px;}
-  .voice{
-    font-size:clamp(19px,2.7vw,26px); line-height:1.42;
-    padding:9px 0 9px 20px; border-left:3px solid var(--rule);
-    color:var(--ink); opacity:0; animation:fadein .7s ease-out forwards;
+  .price:hover,.price:focus-visible{border-color:var(--amber); color:var(--amber); outline:none;}
+  .price s{display:block; font-size:10px; color:var(--bone-dim); text-decoration:none; letter-spacing:.14em; text-transform:uppercase; margin-bottom:5px;}
+  .fine{margin:24px 0 0; font-family:"DM Mono",monospace; font-size:11px; color:var(--bone-dim); line-height:1.7; letter-spacing:.04em;}
+
+  /* ticket */
+  .screen--ticket{background:var(--night-2); display:none;}
+  .screen--ticket.is-open{display:flex;}
+  .tk{
+    align-self:flex-start; width:min(340px,100%);
+    background:var(--bone); color:var(--night);
+    padding:26px 24px 0;
   }
-  .voice span{
-    display:block; margin-top:3px;
-    font-family:"DM Mono",monospace; font-size:11px; color:var(--ink-soft);
+  .tk__k,.tk__l{font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:#57575F; text-align:center;}
+  .tk__rule{border-top:1px dashed #B2AFA4; margin:15px 0;}
+  .tk__n{font-family:"DM Mono",monospace; font-weight:500; font-size:54px; line-height:1.04; text-align:center; margin:5px 0 0;}
+  .tk__said{text-align:center; font-size:15px; margin:11px 0 0; color:#57575F;}
+  .tk__rows{margin:17px 0 0; font-family:"DM Mono",monospace; font-size:11.5px;}
+  .tk__r{display:flex; justify-content:space-between; gap:12px; padding:6px 0; border-bottom:1px dotted #B2AFA4; color:#57575F;}
+  .tk__r b{color:var(--night); font-weight:500;}
+  .tk__f{margin:15px 0 0; padding-top:11px; font-family:"DM Mono",monospace; font-size:10px; color:#57575F; text-align:center;}
+  .tk__tear{height:14px; margin:8px -24px 0; background:radial-gradient(circle at 7px 14px, transparent 6px, var(--night-2) 6px 6.9px, transparent 7px) repeat-x; background-size:14px 14px;}
+  .share{display:flex; gap:10px; flex-wrap:wrap; margin:22px 0 0;}
+  .share button{
+    padding:13px 20px; cursor:pointer; background:var(--amber); color:var(--night); border:1px solid var(--amber);
+    font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.13em; text-transform:uppercase;
   }
-  .voice:nth-child(1){animation-delay:.05s} .voice:nth-child(2){animation-delay:.35s}
-  .voice:nth-child(3){animation-delay:.65s} .voice:nth-child(4){animation-delay:.95s}
-  .voice:nth-child(5){animation-delay:1.25s} .voice:nth-child(6){animation-delay:1.55s}
-  @keyframes fadein{to{opacity:1;}}
+  .share button.alt{background:transparent; color:var(--bone); border-color:#3A3A42;}
 
-  .hero__after{margin:34px 0 0; max-width:540px; color:var(--ink-soft); font-size:16.5px;}
-  .hero__after strong{color:var(--ink); font-weight:600;}
-
-  .board{
-    margin:34px 0 0; padding:22px 26px; background:var(--ink); color:var(--hall);
-    display:flex; justify-content:space-between; align-items:center; gap:18px; flex-wrap:wrap;
+  /* persistent CTA */
+  .cta{
+    position:fixed; left:0; right:0; bottom:0; z-index:20;
+    display:flex; justify-content:center; padding:0 0 22px;
+    background:linear-gradient(to top, rgba(19,19,22,.96), rgba(19,19,22,0));
   }
-  .board__label{font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.26em; text-transform:uppercase; opacity:.6;}
-  .board__value{font-family:"DM Mono",monospace; font-weight:500; font-size:clamp(32px,6.4vw,50px); line-height:1; color:var(--led);}
-  .board__note{font-family:"DM Mono",monospace; font-size:11px; opacity:.55; max-width:240px;}
-
-  .tally{display:flex; gap:36px; flex-wrap:wrap; margin:28px 0 0; padding-top:18px; border-top:1px solid var(--rule); font-family:"DM Mono",monospace;}
-  .tally dt{font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 5px;}
-  .tally dd{margin:0; font-size:22px; font-weight:500; font-variant-numeric:tabular-nums; transition:color .3s ease;}
-  .tally dd.is-bump{color:var(--led);}
-
-  .sec{padding:46px 0 0;}
-  .sec__head{display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap; padding-bottom:12px; border-bottom:3px solid var(--ink);}
-  .sec__head h2{margin:0; font-size:12px; font-weight:700; letter-spacing:.22em; text-transform:uppercase;}
-  .sec__head span{font-family:"DM Mono",monospace; font-size:11px; color:var(--ink-soft);}
-
-  /* ---------- DOOR ---------- */
-  .door{margin:20px 0 0; border:1px solid var(--rule); background:var(--paper);}
-  .door__img{
-    aspect-ratio:16/9; background:var(--hall-deep);
-    display:grid; place-items:center; border-bottom:1px solid var(--rule);
-    overflow:hidden;
+  .cta button{
+    pointer-events:auto; padding:14px 30px; cursor:pointer;
+    background:var(--bone); color:var(--night); border:1px solid var(--bone);
+    font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
   }
-  .door__img img{width:100%; height:100%; object-fit:cover; display:block;}
-  .door__img svg{width:min(240px,42%); height:auto;}
-  .door__body{padding:20px 22px;}
-  .door__cap{font-family:"DM Mono",monospace; font-size:11px; color:var(--ink-soft); margin:0;}
-  .door__cap b{color:var(--ink); font-weight:500;}
-  .door__route{padding:6px 22px 22px;}
-  .door__route svg{width:100%; height:auto; display:block;}
-  .door__legend{display:flex; gap:24px; flex-wrap:wrap; margin:10px 0 0; font-family:"DM Mono",monospace; font-size:11px; color:var(--ink-soft);}
+  .cta button:hover{background:var(--amber); border-color:var(--amber);}
 
-  /* ---------- WALL ---------- */
-  .wall-tools{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:18px 0 0; font-family:"DM Mono",monospace; font-size:11px; color:var(--ink-soft);}
-  .wall-tools input{font-family:"DM Mono",monospace; font-size:12px; padding:9px 12px; width:160px; background:var(--paper); color:var(--ink); border:1px solid var(--rule);}
-  .wall-tools input:focus-visible{outline:2px solid var(--led); outline-offset:1px;}
-  .wall-tools button{font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; padding:9px 14px; cursor:pointer; background:var(--ink); color:var(--hall); border:1px solid var(--ink);}
-  .wall-tools button:hover{background:var(--led); border-color:var(--led);}
-
-  .wall{margin:14px 0 0; border:1px solid var(--rule); background:var(--paper); height:430px; overflow-y:auto;}
-  .row{display:flex; align-items:baseline; gap:16px; padding:11px 18px; border-bottom:1px solid #E6E3DA;}
-  .row:hover{background:var(--hall-deep);}
-  .row__n{font-family:"DM Mono",monospace; font-size:11.5px; color:var(--ink-soft); font-variant-numeric:tabular-nums; flex:0 0 62px;}
-  .row__wait{font-size:15.5px; line-height:1.45;}
-  .row__km{font-family:"DM Mono",monospace; font-size:10.5px; color:var(--ink-soft); margin-left:auto; flex:0 0 auto; white-space:nowrap;}
-  .row.is-hit{background:#F3EADB;}
-  .row.is-silent .row__wait{color:var(--ink-soft); font-style:italic;}
-  .row.is-you{background:var(--ink);}
-  .row.is-you .row__wait{color:var(--hall);}
-  .row.is-you .row__n{color:var(--led); font-weight:500;}
-  .row.is-you .row__km{color:var(--hall); opacity:.7;}
-  .row.is-fresh{animation:arrive .45s ease-out;}
-  @keyframes arrive{from{opacity:0; transform:translateY(-11px); background:#F3EADB;} to{opacity:1; transform:none;}}
-
-  .wall-foot{display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin:9px 0 0; font-family:"DM Mono",monospace; font-size:11px; color:var(--ink-soft);}
-  .more{display:none; width:100%; margin:10px 0 0; padding:13px; cursor:pointer; font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; background:transparent; color:var(--ink); border:1px solid var(--ink);}
-  .more:hover{background:var(--ink); color:var(--hall);}
-
-  /* ---------- AGGREGATE ---------- */
-  .agg{margin:20px 0 0; border:1px solid var(--rule); background:var(--paper);}
-  .agg__row{display:flex; align-items:center; gap:12px; padding:12px 18px; border-bottom:1px solid #E6E3DA; position:relative;}
-  .agg__row:last-child{border-bottom:none;}
-  .agg__bar{position:absolute; left:0; top:0; bottom:0; background:var(--hall-deep); z-index:0; transition:width .5s ease;}
-  .agg__label,.agg__n,.agg__share{position:relative; z-index:1;}
-  .agg__label{font-size:15px;}
-  .agg__n{margin-left:auto; font-family:"DM Mono",monospace; font-size:12.5px; color:var(--ink-soft); font-variant-numeric:tabular-nums;}
-  .agg__share{
-    font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase;
-    padding:6px 10px; cursor:pointer; background:transparent; color:var(--ink-soft);
-    border:1px solid var(--rule);
-  }
-  .agg__share:hover{background:var(--ink); color:var(--hall); border-color:var(--ink);}
-
-  /* ---------- JOIN ---------- */
-  .say{margin:20px 0 0; padding:20px 18px; border:1px solid var(--ink); background:var(--paper);}
-  .say label{display:block; font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:9px;}
-  .say input{width:100%; font-family:Archivo,sans-serif; font-size:17px; padding:11px 13px; background:var(--hall); color:var(--ink); border:1px solid var(--rule);}
-  .say input:focus-visible{outline:2px solid var(--led); outline-offset:1px;}
-  .say small{display:block; margin-top:9px; font-family:"DM Mono",monospace; font-size:10.5px; color:var(--ink-soft);}
-
-  .buying{
-    display:flex; gap:26px; flex-wrap:wrap; margin:18px 0 0;
-    font-family:"DM Mono",monospace; font-size:11px; color:var(--ink-soft);
-  }
-  .buying b{color:var(--ink); font-weight:500;}
-
-  .tiers{display:grid; margin:12px 0 0; grid-template-columns:repeat(auto-fit,minmax(202px,1fr)); border:1px solid var(--rule); border-right:none;}
-  .tier{border-right:1px solid var(--rule); padding:20px 18px; display:flex; flex-direction:column; gap:7px; background:var(--paper);}
-  .tier--pick{background:var(--hall-deep);}
-  .tier__n{font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft);}
-  .tier__price{font-family:"DM Mono",monospace; font-size:28px; font-weight:500; line-height:1;}
-  .tier__desc{font-size:13.5px; color:var(--ink-soft); flex:1;}
-  .tier button{margin-top:8px; padding:12px 16px; cursor:pointer; font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; background:var(--ink); color:var(--hall); border:1px solid var(--ink);}
-  .tier button:hover{background:var(--led); border-color:var(--led);}
-
-  /* ---------- TICKET ---------- */
-  .preview-note{margin:20px 0 10px; font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft);}
-  .ticket{max-width:336px; background:var(--paper); border:1px solid var(--ink); padding:24px 22px 0; box-shadow:3px 3px 0 rgba(23,23,26,.16);}
-  .ticket.is-sample{opacity:.5;}
-  .ticket__bureau,.ticket__label{font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-soft); text-align:center;}
-  .ticket__rule{border-top:1px dashed var(--rule); margin:15px 0;}
-  .ticket__num{font-family:"DM Mono",monospace; font-weight:500; font-size:52px; line-height:1.05; text-align:center; margin:5px 0 0;}
-  .ticket__said{text-align:center; font-size:15px; margin:10px 0 0; color:var(--ink-soft); min-height:22px;}
-  .ticket__rows{margin:16px 0 0; font-family:"DM Mono",monospace; font-size:11.5px;}
-  .ticket__row{display:flex; justify-content:space-between; gap:12px; padding:6px 0; border-bottom:1px dotted var(--rule); color:var(--ink-soft);}
-  .ticket__row b{color:var(--ink); font-weight:500; text-align:right;}
-  .ticket__foot{margin:15px 0 0; padding-top:11px; font-family:"DM Mono",monospace; font-size:10px; color:var(--ink-soft); text-align:center;}
-  .ticket__tear{height:14px; margin:8px -22px 0; background:radial-gradient(circle at 7px 14px, transparent 6px, var(--ink) 6px 6.8px, transparent 6.9px) repeat-x; background-size:14px 14px; opacity:.9;}
-
-  .slot{display:none;} .slot.is-open{display:block;}
-  .share{display:flex; gap:10px; flex-wrap:wrap; margin:16px 0 0;}
-  .share button{font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; padding:12px 18px; cursor:pointer; background:var(--ink); color:var(--hall); border:1px solid var(--ink);}
-  .share button.alt{background:transparent; color:var(--ink);}
-  .share button:hover{background:var(--led); color:var(--hall); border-color:var(--led);}
-
-  .terms{display:grid; gap:28px; margin:20px 0 0; grid-template-columns:repeat(auto-fit,minmax(222px,1fr));}
-  .terms h3{margin:0 0 7px; font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--led);}
-  .terms p{margin:0; font-size:14.5px; color:var(--ink-soft);}
-
-  /* ---------- COLOPHON ---------- */
-  .colophon{
-    margin:46px 0 0; padding:24px 22px; border:1px solid var(--rule); background:var(--paper);
-    max-width:620px;
-  }
-  .colophon h3{margin:0 0 9px; font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft);}
-  .colophon p{margin:0 0 10px; font-size:15px; color:var(--ink-soft);}
-  .colophon p:last-child{margin-bottom:0;}
-  .colophon a{color:var(--ink);}
-
-  footer{margin-top:40px; padding:22px 0 54px; border-top:1px solid var(--rule); display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap; font-family:"DM Mono",monospace; font-size:11px; color:var(--ink-soft);}
-
-  /* ---------- MOBILE: wall joins the page flow ---------- */
-  @media (max-width:660px){
-    .wrap{padding:0 17px;}
-    .row__km{display:none;}
-    .row__n{flex-basis:52px;}
-    .wall{height:auto; overflow:visible;}
-    .more{display:block;}
-    .voice{font-size:19px; padding-left:15px;}
+  @media (max-width:640px){
+    .screen{padding:88px 20px 104px;}
+    .cue{left:20px;}
   }
   @media (prefers-reduced-motion:reduce){
-    *{transition:none !important; animation:none !important; scroll-behavior:auto !important;}
-    .voice{opacity:1;}
+    *{animation:none !important; scroll-behavior:auto !important;}
+    .deck{scroll-snap-type:none;}
   }
 </style>
 </head>
 <body>
-<div class="wrap">
 
-  <header class="bureau">
-    <div class="bureau__name">The Queue</div>
-    <div class="live"><span class="pip"></span><span id="live-txt">Open &middot; Always</span></div>
-  </header>
-
-  <!-- ASK -->
-  <section class="ask">
-    <h1>What are you waiting for?</h1>
-
-    <div class="ask__field">
-      <input id="ask-input" type="text" maxlength="70"
-             placeholder="a phone call &middot; nothing &middot; my results"
-             aria-label="What are you waiting for?">
-      <button id="ask-go">Answer</button>
-    </div>
-    <p class="ask__hint">Nobody is asking on behalf of anything. There is no form behind this.</p>
-
-    <div class="echo" id="echo">
-      <p class="echo__said" id="echo-said"></p>
-      <p class="echo__kin" id="echo-kin"></p>
-      <button class="echo__go" id="echo-go">Show me the queue</button>
-    </div>
-
-    <span class="ask__skip" id="ask-skip">or just look at what everyone else said</span>
-  </section>
-
-  <!-- HERO -->
-  <section class="hero" id="hero">
-    <h2 style="font-weight:600;font-size:clamp(26px,4.6vw,42px);line-height:1.18;letter-spacing:-.024em;margin:0;max-width:680px;">
-      This is a queue. There is nothing at the end of it.
-    </h2>
-
-    <div class="voices">
-      <p class="voice">my father to wake up<span>&#8470;&nbsp;9,204</span></p>
-      <p class="voice">nothing. I just liked the queue<span>&#8470;&nbsp;11,878</span></p>
-      <p class="voice">the swelling to go down<span>&#8470;&nbsp;4,417</span></p>
-      <p class="voice">him to text back<span>&#8470;&nbsp;12,033</span></p>
-      <p class="voice">a job, any job<span>&#8470;&nbsp;806</span></p>
-      <p class="voice">my turn, generally<span>&#8470;&nbsp;12,801</span></p>
-    </div>
-
-    <p class="hero__after">
-      Everyone here paid to stand in a line that leads nowhere, and each of them
-      answered one question first. <strong>That answer is the only thing this
-      website contains.</strong>
-    </p>
-
-    <div class="board">
-      <div>
-        <div class="board__label">Now serving</div>
-        <div class="board__value">&mdash;</div>
-      </div>
-      <div class="board__note">No number has been called. No number will be called.</div>
-    </div>
-
-    <dl class="tally">
-      <div><dt>In the queue</dt><dd id="t-count">0</dd></div>
-      <div><dt>Length</dt><dd id="t-length">0.0 km</dd></div>
-      <div><dt>Served</dt><dd>0</dd></div>
-      <div><dt>To join</dt><dd id="t-price">$5</dd></div>
-    </dl>
-  </section>
-
-  <!-- DOOR -->
-  <section class="sec">
-    <div class="sec__head">
-      <h2>The Door</h2>
-      <span>Where the queue begins</span>
-    </div>
-
-    <div class="door">
-      <div class="door__img">
-        <!-- REPLACE with your own photograph of the real door:
-             <img src="door.jpg" alt="The door where the queue begins">
-             Do not use a stock image. The claim that this door is real is the
-             only concrete claim this site makes. -->
-        <svg viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg" aria-label="The door">
-          <rect x="8" y="6" width="104" height="144" fill="#CFD1C9" stroke="#17171A" stroke-width="1.6"/>
-          <rect x="20" y="18" width="80" height="120" fill="#DCD9CE" stroke="#17171A" stroke-width="1.2"/>
-          <rect x="30" y="30" width="60" height="44" fill="none" stroke="#17171A" stroke-width="1"/>
-          <rect x="30" y="84" width="60" height="44" fill="none" stroke="#17171A" stroke-width="1"/>
-          <circle cx="87" cy="82" r="2.6" fill="#17171A"/>
-          <rect x="52" y="0" width="16" height="7" fill="#17171A"/>
-        </svg>
-      </div>
-      <div class="door__body">
-        <p class="door__cap">
-          <b id="door-coord">39.75540&deg;, 32.80430&deg;</b> &middot; It is an ordinary door.
-          It is locked. Nobody works behind it. The queue starts on the pavement
-          in front of it and runs backwards from there.
-        </p>
-      </div>
-      <div class="door__route">
-        <svg viewBox="0 0 900 150" xmlns="http://www.w3.org/2000/svg" aria-label="Schematic of the queue route">
-          <path d="M40,120 L200,120 L200,48 L430,48 L430,120 L700,120 L700,62 L860,62"
-                fill="none" stroke="#B2AFA4" stroke-width="13" stroke-linecap="square"/>
-          <path d="M40,120 L200,120 L200,48 L430,48 L430,120 L700,120 L700,62 L860,62"
-                fill="none" stroke="#17171A" stroke-width="2.2" stroke-dasharray="7 6"/>
-          <rect x="27" y="104" width="14" height="30" fill="#17171A"/>
-          <text x="27" y="96" font-family="DM Mono, monospace" font-size="11" fill="#57575F">THE DOOR</text>
-          <circle cx="860" cy="62" r="6.5" fill="#B26A00"/>
-          <text x="784" y="42" font-family="DM Mono, monospace" font-size="11" fill="#57575F">THE BACK</text>
-        </svg>
-        <div class="door__legend">
-          <span>Start: 0.00 km</span>
-          <span id="legend-back">Back of the line: 0.00 km</span>
-          <span>1 metre per person</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- WALL -->
-  <section class="sec">
-    <div class="sec__head">
-      <h2>What They Are Waiting For</h2>
-      <span>Every person in the line, in order</span>
-    </div>
-    <div class="wall-tools">
-      <input id="q" type="text" placeholder="search the queue" aria-label="Search what people are waiting for">
-      <button id="q-go">Search</button>
-      <input id="jump" type="number" placeholder="go to number" aria-label="Jump to a position">
-      <button id="jump-go">Go</button>
-      <span id="q-info"></span>
-    </div>
-    <div class="wall" id="wall"></div>
-    <button class="more" id="more">Walk further up the line</button>
-    <div class="wall-foot">
-      <span id="wall-from">Showing the back of the line</span>
-      <span>1 metre apart</span>
-    </div>
-  </section>
-
-  <!-- AGGREGATE -->
-  <section class="sec">
-    <div class="sec__head">
-      <h2>What The Queue Is Waiting For</h2>
-      <span>Recounted continuously</span>
-    </div>
-    <div class="agg" id="agg"></div>
-  </section>
-
-  <!-- JOIN -->
-  <section class="sec">
-    <div class="sec__head">
-      <h2>Take A Number</h2>
-      <span>You may only join at the back</span>
-    </div>
-
-    <div class="say">
-      <label for="wait">What are you waiting for?</label>
-      <input id="wait" type="text" maxlength="70" placeholder="a phone call &middot; nothing &middot; my results &middot; him to notice">
-      <small>Permanent, public, and the only thing anyone will ever read about you here. You may leave it blank.</small>
-    </div>
-
-    <div class="buying">
-      <span><b>Permanent.</b> Never deleted or edited.</span>
-      <span><b>Issued once.</b> Numbers are never reused.</span>
-      <span><b>Final.</b> No refunds, no transfers, no leaving.</span>
-    </div>
-
-    <div class="tiers">
-      <div class="tier">
-        <div class="tier__n">One place</div>
-        <div class="tier__price">$5</div>
-        <p class="tier__desc">A number, a coordinate on a real street, and your line.</p>
-        <button data-places="1">Take a number</button>
-      </div>
-      <div class="tier tier--pick">
-        <div class="tier__n">Five places</div>
-        <div class="tier__price">$20</div>
-        <p class="tier__desc">Five in a row. Nobody can ever get between you.</p>
-        <button data-places="5">Take five</button>
-      </div>
-      <div class="tier">
-        <div class="tier__n">Ten places</div>
-        <div class="tier__price">$35</div>
-        <p class="tier__desc">Ten metres of pavement, held indefinitely.</p>
-        <button data-places="10">Take ten</button>
-      </div>
-    </div>
-
-    <p class="preview-note" id="prev-label">This is what you get</p>
-    <div class="ticket is-sample" id="ticket">
-      <div class="ticket__bureau">The Queue &middot; Issued once &middot; Non-transferable</div>
-      <div class="ticket__rule"></div>
-      <div class="ticket__label">Your number</div>
-      <div class="ticket__num" id="tk-num">&mdash;&mdash;&mdash;</div>
-      <div class="ticket__said" id="tk-said">your line, exactly as you wrote it</div>
-      <div class="ticket__rows">
-        <div class="ticket__row"><span>Joined</span><b id="tk-date">&mdash;</b></div>
-        <div class="ticket__row"><span>Distance from door</span><b id="tk-dist">&mdash;</b></div>
-        <div class="ticket__row"><span>Standing at</span><b id="tk-coord">&mdash;</b></div>
-        <div class="ticket__row"><span>People behind you</span><b id="tk-behind">&mdash;</b></div>
-        <div class="ticket__row"><span>Estimated wait</span><b>Never</b></div>
-      </div>
-      <div class="ticket__foot">Keep this. It will not be reissued.</div>
-      <div class="ticket__tear"></div>
-    </div>
-    <div class="slot" id="slot">
-      <div class="share">
-        <button id="dl-story">Download for stories</button>
-        <button id="dl-square" class="alt">Square image</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- CONDITIONS -->
-  <section class="sec">
-    <div class="sec__head">
-      <h2>Conditions</h2>
-      <span>Read before taking a number</span>
-    </div>
-    <div class="terms">
-      <div><h3>Your number is final</h3><p>It never goes down. There is no way to move forward, buy forward, or be moved forward.</p></div>
-      <div><h3>You cannot leave</h3><p>Places cannot be sold, transferred, refunded or deleted. Once you are in the line, you are in the line.</p></div>
-      <div><h3>Nothing is delivered</h3><p>No object is shipped, now or ever. You receive a registry entry, a coordinate and a ticket.</p></div>
-      <div><h3>The door never opens</h3><p>No prize, draw, reveal or final event. Stated plainly so nobody can be surprised by it.</p></div>
-    </div>
-
-    <!-- COLOPHON — replace with your own words. An unsigned absurd project
-         reads as a scam; a signed one reads as a piece of work. -->
-    <div class="colophon">
-      <h3>Who made this</h3>
-      <p>
-        My name is <b>[your name]</b>. I photographed the door, measured the pavement
-        behind it, and built the rest at a kitchen table. There is no company.
-      </p>
-      <p>
-        I built it because I have spent most of the last two years waiting for
-        things, and I wanted to see what everyone else was waiting for.
-      </p>
-      <p>Press and questions: <a href="mailto:hello@example.com">hello@example.com</a></p>
-    </div>
-  </section>
-
-  <footer>
-    <span>The Queue</span>
-    <span>Now serving: nobody.</span>
-  </footer>
-
+<div class="hud">
+  <div>Walked<b id="hud-walked">0 m</b></div>
+  <div class="hud__right">People still ahead<b id="hud-left">12,847</b></div>
 </div>
+
+<div class="deck" id="deck"></div>
+
+<div class="cta"><button id="cta">Take your place</button></div>
 
 <script>
 (function(){
   "use strict";
 
   /* ---------------------------------------------------------------
-     DEMO. Simulates a live queue so you can feel the pacing.
-     Replace with a real feed before launch — an invented queue is the
-     one lie this page cannot survive, because the lines ARE the product.
+     DEMO DATA. Replace with a real feed. The lines ARE the product —
+     inventing them is the one lie this page cannot survive.
   ----------------------------------------------------------------*/
   var COUNT = 12847, PRICE = 5;
-  var DOOR = { lat:39.7554, lng:32.8043 };   // replace with the real door
-  var SITE = "thequeue.example";              // replace with the real domain
+  var DOOR  = { lat:39.7554, lng:32.8043 };
+  var SITE  = "thequeue.example";
 
   var lines = [
     "a phone call","my visa","nothing, I was curious","the results","him to notice",
@@ -526,23 +205,10 @@
     "a normal week","the scan","to stop waiting","",""
   ];
 
-  var AGG = [
-    { label:"a phone call or a reply",      n:1204 },
-    { label:"a document, visa or decision", n:986  },
-    { label:"nothing in particular",        n:874  },
-    { label:"a medical result",             n:641  },
-    { label:"another person",               n:558  },
-    { label:"money to arrive",              n:392  }
-  ];
+  var deck = document.getElementById("deck");
+  var state = { cursor:COUNT, walked:0, joined:false, myNumber:null, said:"" };
 
-  var state = {
-    count:COUNT, joined:false, myNumber:null, said:"",
-    view:"back", span:60, lastJoin:Date.now()
-  };
-
-  var $ = function(id){ return document.getElementById(id); };
   function fmt(n){ return n.toLocaleString("en-US"); }
-  function km(p){ return p / 1000; }
   function esc(s){
     return String(s).replace(/[&<>"]/g, function(c){
       return { "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c];
@@ -552,342 +218,232 @@
     var s = seed * 2654435761 % 2147483647;
     return function(){ s = s * 16807 % 2147483647; return (s - 1) / 2147483646; };
   }
-  function lineFor(n){
-    if(state.joined && n === state.myNumber) return state.said;
-    return lines[Math.floor(seeded(n)() * lines.length)];
-  }
+  function lineFor(n){ return lines[Math.floor(seeded(n)() * lines.length)]; }
   function coordFor(p){
     return (DOOR.lat + p * 0.0000075).toFixed(5) + "\u00B0, " +
            (DOOR.lng + p * 0.0000061).toFixed(5) + "\u00B0";
   }
 
-  function rowHTML(e, o){
-    o = o || {};
-    var silent = !e.wait, you = state.joined && e.n === state.myNumber;
-    return '<div class="row' + (you ? " is-you" : o.hit ? " is-hit" : "") +
-      (silent ? " is-silent" : "") + (o.fresh ? " is-fresh" : "") + '">' +
-      '<span class="row__n">\u2116' + fmt(e.n) + '</span>' +
-      '<span class="row__wait">' + (silent ? "said nothing" : esc(e.wait)) + '</span>' +
-      '<span class="row__km">' + km(e.n).toFixed(2) + ' km</span>' +
-    '</div>';
+  /* Walking pace: a real queue shuffles about 20 metres an hour. */
+  function hoursToDoor(left){ return left / 20; }
+  function paceText(left){
+    var h = hoursToDoor(left);
+    if(h < 48) return Math.round(h) + " hours";
+    var d = h / 24;
+    if(d < 60) return Math.round(d) + " days";
+    return Math.round(d / 30) + " months";
   }
 
-  function windowAt(center, span){
-    var out = [], start = Math.max(1, center - span), end = Math.min(state.count, center + span), n;
-    for(n = end; n >= start; n--) out.push({ n:n, wait:lineFor(n) });
-    return out;
+  /* ---------- screen builders ---------- */
+  function intro(){
+    return '<section class="screen">' +
+      '<p class="intro__k">You have joined nothing yet</p>' +
+      '<h1 class="intro__h">You are standing at the back of a queue.</h1>' +
+      '<p class="intro__p">There are ' + fmt(COUNT) + ' people ahead of you, one metre apart, ' +
+      'and there is nothing at the end of it. Everyone here paid to stand in it, ' +
+      'and everyone was asked one question first.</p>' +
+      '<p class="intro__p">Scroll to walk forward. You will not reach the door.</p>' +
+      '<div class="cue">Scroll &darr;</div>' +
+    '</section>';
   }
 
-  function paint(list, term){
-    $("wall").innerHTML = list.map(function(e){
-      return rowHTML(e, { hit: !!(term && e.wait && e.wait.toLowerCase().indexOf(term) > -1) });
-    }).join("");
+  function person(n){
+    var w = lineFor(n), silent = !w;
+    return '<section class="screen" data-n="' + n + '">' +
+      '<p class="p__n">\u2116 ' + fmt(n) + ' \u00B7 ' + (n / 1000).toFixed(2) + ' km from the door</p>' +
+      '<p class="p__line' + (silent ? " is-silent" : "") + '">' +
+        (silent ? "said nothing" : esc(w)) + '</p>' +
+      '<p class="p__meta">standing at ' + coordFor(n) + '</p>' +
+    '</section>';
   }
 
-  function showBack(){
-    state.view = "back";
-    paint(windowAt(state.count, state.span));
-    $("wall-from").textContent = "Showing the back of the line";
-    $("q-info").textContent = "";
+  function stop(walked, left){
+    return '<section class="screen screen--stop">' +
+      '<p class="stop__big">' + fmt(walked) + ' m</p>' +
+      '<p class="stop__txt">That is how far you have walked. ' +
+        '<b>' + fmt(left) + '</b> people are still ahead of you.</p>' +
+      '<p class="stop__sub">At the pace a real queue moves, you would reach the door in ' +
+        paceText(left) + '. The door does not open.</p>' +
+    '</section>';
   }
 
-  function bump(el){
-    el.classList.add("is-bump");
-    setTimeout(function(){ el.classList.remove("is-bump"); }, 420);
+  function join(){
+    return '<section class="screen screen--join" id="join">' +
+      '<h2 class="join__h">What are you waiting for?</h2>' +
+      '<div class="field">' +
+        '<input id="said" type="text" maxlength="70" placeholder="a phone call \u00B7 nothing \u00B7 my results" aria-label="What are you waiting for?">' +
+      '</div>' +
+      '<div class="prices">' +
+        '<button class="price" data-places="1"><s>One place</s>$5</button>' +
+        '<button class="price" data-places="5"><s>Five in a row</s>$20</button>' +
+        '<button class="price" data-places="10"><s>Ten in a row</s>$35</button>' +
+      '</div>' +
+      '<p class="fine">Your number is permanent and can only go up.<br>' +
+      'Nothing is posted to you. No refunds, no transfers, no leaving.<br>' +
+      'The door never opens. This is stated plainly so nobody is surprised.</p>' +
+    '</section>';
   }
 
-  function paintTally(animate){
-    var c = $("t-count");
-    c.textContent = fmt(state.count);
-    $("t-length").textContent = km(state.count).toFixed(1) + " km";
-    $("t-price").textContent  = "$" + PRICE;
-    $("legend-back").textContent = "Back of the line: " + km(state.count).toFixed(2) + " km";
-    $("door-coord").textContent  = DOOR.lat.toFixed(5) + "\u00B0, " + DOOR.lng.toFixed(5) + "\u00B0";
-    if(animate) bump(c);
+  function ticket(){
+    return '<section class="screen screen--ticket" id="tkscreen">' +
+      '<div class="tk">' +
+        '<div class="tk__k">The Queue \u00B7 Issued once</div>' +
+        '<div class="tk__rule"></div>' +
+        '<div class="tk__l">Your number</div>' +
+        '<div class="tk__n" id="tk-n">\u2014</div>' +
+        '<div class="tk__said" id="tk-s"></div>' +
+        '<div class="tk__rows">' +
+          '<div class="tk__r"><span>Distance from door</span><b id="tk-d">\u2014</b></div>' +
+          '<div class="tk__r"><span>People behind you</span><b id="tk-b">0</b></div>' +
+          '<div class="tk__r"><span>Estimated wait</span><b>Never</b></div>' +
+        '</div>' +
+        '<div class="tk__f">Keep this. It will not be reissued.</div>' +
+        '<div class="tk__tear"></div>' +
+      '</div>' +
+      '<div class="share">' +
+        '<button id="dl">Download for stories</button>' +
+        '<button id="dl2" class="alt">Square</button>' +
+      '</div>' +
+    '</section>';
   }
 
-  function paintAgg(){
-    var max = AGG[0].n;
-    $("agg").innerHTML = AGG.map(function(a, i){
-      return '<div class="agg__row">' +
-        '<div class="agg__bar" style="width:' + ((a.n / max) * 100).toFixed(1) + '%"></div>' +
-        '<span class="agg__label">' + esc(a.label) + '</span>' +
-        '<span class="agg__n">' + fmt(a.n) + '</span>' +
-        '<button class="agg__share" data-i="' + i + '">Share</button>' +
-      '</div>';
-    }).join("");
-  }
+  /* ---------- build & extend ---------- */
+  var BATCH = 14, sinceStop = 0;
 
-  /* ---------- LIVE ---------- */
-  function ago(ms){
-    var s = Math.floor(ms / 1000);
-    if(s < 60) return s + "s ago";
-    var m = Math.floor(s / 60);
-    return m < 60 ? m + "m ago" : Math.floor(m / 60) + "h ago";
-  }
-  function tickLiveLabel(){
-    $("live-txt").textContent = "Live \u00B7 last person joined " + ago(Date.now() - state.lastJoin);
-  }
-
-  function arrive(){
-    state.count += 1;
-    state.lastJoin = Date.now();
-    paintTally(true);
-
-    if(state.view === "back"){
-      var wall = $("wall");
-      var atTop = wall.scrollTop < 40;
-      wall.insertAdjacentHTML("afterbegin",
-        rowHTML({ n:state.count, wait:lineFor(state.count) }, { fresh:true }));
-      while(wall.children.length > 200) wall.removeChild(wall.lastChild);
-      if(atTop) wall.scrollTop = 0;
+  function extend(){
+    var html = "", i;
+    for(i = 0; i < BATCH && state.cursor > 1; i++){
+      state.cursor -= 1; sinceStop += 1;
+      html += person(state.cursor);
+      if(sinceStop >= 11){
+        html += stop(COUNT - state.cursor, state.cursor);
+        sinceStop = 0;
+      }
     }
-
-    AGG[Math.floor(Math.random() * AGG.length)].n += 1;
-    AGG.sort(function(a, b){ return b.n - a.n; });
-    paintAgg();
-    schedule();
-  }
-  function schedule(){ setTimeout(arrive, 4000 + Math.random() * 9000); }
-
-  /* ---------- SEARCH / JUMP / MORE ---------- */
-  function search(){
-    var term = $("q").value.trim().toLowerCase();
-    if(!term) return showBack();
-    state.view = "search";
-    var found = [], n, w;
-    for(n = state.count; n >= 1 && found.length < 80; n--){
-      w = lineFor(n);
-      if(w && w.toLowerCase().indexOf(term) > -1) found.push({ n:n, wait:w });
-    }
-    paint(found, term);
-    $("wall-from").textContent = found.length
-      ? "People waiting for something like that" : "Nobody here is waiting for that";
-    $("q-info").textContent = found.length + " found";
+    var j = document.getElementById("join");
+    if(j){ j.insertAdjacentHTML("beforebegin", html); }
+    else  { deck.insertAdjacentHTML("beforeend", html); }
   }
 
-  function jump(){
-    var v = parseInt($("jump").value, 10);
-    if(!v || v < 1 || v > state.count) return;
-    state.view = "jump";
-    paint(windowAt(v, 40));
-    $("wall-from").textContent =
-      "Standing at \u2116" + fmt(v) + " \u00B7 " + km(v).toFixed(2) + " km from the door";
-    $("q-info").textContent = "";
-  }
+  deck.innerHTML = intro();
+  extend();
+  deck.insertAdjacentHTML("beforeend", join() + ticket());
 
-  $("more").addEventListener("click", function(){
-    state.span += 60;
-    if(state.view === "back") showBack();
+  /* ---------- HUD ---------- */
+  var screens;
+  function refresh(){ screens = deck.querySelectorAll(".screen[data-n]"); }
+  refresh();
+
+  var ticking = false;
+  deck.addEventListener("scroll", function(){
+    if(ticking) return;
+    ticking = true;
+    requestAnimationFrame(function(){
+      var mid = deck.scrollTop + deck.clientHeight / 2, seen = null, i, el;
+      for(i = 0; i < screens.length; i++){
+        el = screens[i];
+        if(el.offsetTop <= mid) seen = el; else break;
+      }
+      if(seen){
+        var n = Number(seen.dataset.n);
+        state.walked = COUNT - n;
+        document.getElementById("hud-walked").textContent = fmt(state.walked) + " m";
+        document.getElementById("hud-left").textContent   = fmt(n);
+      }
+      /* keep the line going as they walk */
+      if(deck.scrollHeight - deck.scrollTop - deck.clientHeight < deck.clientHeight * 3){
+        extend(); refresh();
+      }
+      ticking = false;
+    });
+  }, { passive:true });
+
+  /* ---------- join ---------- */
+  document.getElementById("cta").addEventListener("click", function(){
+    document.getElementById("join").scrollIntoView({ behavior:"smooth" });
   });
 
-  /* ---------- JOIN ---------- */
-  function join(places){
-    /* → real flow: open Paddle checkout, create positions server-side in
-       the transaction.completed webhook, then reload from the server. */
-    state.said     = $("wait").value.trim();
-    state.myNumber = state.count + 1;
-    state.count   += places;
+  deck.addEventListener("click", function(e){
+    var b = e.target.closest(".price");
+    if(!b) return;
+    /* → real flow: open Paddle checkout, write the position server-side
+       in the transaction.completed webhook, then reload from server. */
+    var places = Number(b.dataset.places);
+    state.said     = (document.getElementById("said").value || "").trim();
+    state.myNumber = COUNT + 1;
     state.joined   = true;
 
-    $("ticket").classList.remove("is-sample");
-    $("prev-label").textContent = "Your ticket";
-    $("tk-num").textContent    = fmt(state.myNumber);
-    $("tk-said").textContent   = state.said ? "\u201C" + state.said + "\u201D" : "You said nothing.";
-    $("tk-date").textContent   = new Date().toISOString().slice(0, 10);
-    $("tk-dist").textContent   = km(state.myNumber).toFixed(2) + " km";
-    $("tk-coord").textContent  = coordFor(state.myNumber);
-    $("tk-behind").textContent = fmt(state.count - state.myNumber);
+    document.getElementById("tk-n").textContent = fmt(state.myNumber);
+    document.getElementById("tk-s").textContent = state.said ? "\u201C" + state.said + "\u201D" : "You said nothing.";
+    document.getElementById("tk-d").textContent = (state.myNumber / 1000).toFixed(2) + " km";
+    document.getElementById("tk-b").textContent = fmt(places - 1);
+    var ts = document.getElementById("tkscreen");
+    ts.classList.add("is-open");
+    ts.scrollIntoView({ behavior:"smooth" });
+  });
 
-    $("slot").classList.add("is-open");
-    paintTally(true);
-    state.view = "back";
-    paint(windowAt(state.myNumber, 40));
-    $("wall-from").textContent = "You are here";
-    $("ticket").scrollIntoView({ behavior:"smooth", block:"center" });
-  }
-
-  /* ---------- SHARE CARDS ---------- */
-  function wrapText(ctx, text, maxW){
-    var words = String(text).split(" "), out = [], line = "";
-    words.forEach(function(w){
-      var t = line ? line + " " + w : w;
-      if(ctx.measureText(t).width > maxW && line){ out.push(line); line = w; }
-      else line = t;
+  /* ---------- share card ---------- */
+  function wrap(ctx, t, maxW){
+    var out = [], line = "";
+    String(t).split(" ").forEach(function(w){
+      var test = line ? line + " " + w : w;
+      if(ctx.measureText(test).width > maxW && line){ out.push(line); line = w; }
+      else line = test;
     });
     if(line) out.push(line);
     return out;
   }
 
-  function frame(W, H){
+  function card(W, H){
     var c = document.createElement("canvas");
     c.width = W; c.height = H;
     var x = c.getContext("2d");
-    x.fillStyle = "#E9E7DF"; x.fillRect(0, 0, W, H);
-    return { c:c, x:x };
-  }
+    x.fillStyle = "#131316"; x.fillRect(0, 0, W, H);
 
-  function drawTicket(W, H){
-    var f = frame(W, H), x = f.x;
-    var cw = Math.min(W * 0.82, 760), cx = (W - cw) / 2;
-    var ch = Math.min(H * 0.70, 960), cy = (H - ch) / 2;
-
-    x.fillStyle = "rgba(23,23,26,.16)"; x.fillRect(cx + 10, cy + 10, cw, ch);
-    x.fillStyle = "#FBFAF6"; x.fillRect(cx, cy, cw, ch);
-    x.strokeStyle = "#17171A"; x.lineWidth = 2; x.strokeRect(cx, cy, cw, ch);
-
-    var pad = cw * 0.09, tx = cx + cw / 2, ty = cy + pad;
-    x.textAlign = "center"; x.fillStyle = "#57575F";
-    x.font = "500 " + (cw * 0.032) + "px 'DM Mono', monospace";
-    x.fillText("THE QUEUE \u00B7 ISSUED ONCE", tx, ty + cw * 0.03);
-
-    ty += cw * 0.10;
-    x.strokeStyle = "#B2AFA4"; x.lineWidth = 1.5; x.setLineDash([7, 7]);
-    x.beginPath(); x.moveTo(cx + pad, ty); x.lineTo(cx + cw - pad, ty); x.stroke();
-    x.setLineDash([]);
-
-    ty += cw * 0.075;
-    x.font = "400 " + (cw * 0.033) + "px 'DM Mono', monospace";
-    x.fillText("YOUR NUMBER", tx, ty);
-
-    ty += cw * 0.15;
-    x.font = "500 " + (cw * 0.185) + "px 'DM Mono', monospace";
-    x.fillStyle = "#17171A"; x.fillText(fmt(state.myNumber), tx, ty);
-
-    ty += cw * 0.10;
-    x.font = "400 " + (cw * 0.062) + "px Archivo, sans-serif";
-    var quote = state.said ? "\u201C" + state.said + "\u201D" : "Said nothing.";
-    wrapText(x, quote, cw - pad * 2).slice(0, 3).forEach(function(l){
-      x.fillText(l, tx, ty); ty += cw * 0.082;
-    });
-
-    ty += cw * 0.05;
-    x.textAlign = "left";
-    x.font = "400 " + (cw * 0.036) + "px 'DM Mono', monospace";
-    [["Distance from door", km(state.myNumber).toFixed(2) + " km"],
-     ["People behind",      fmt(Math.max(0, state.count - state.myNumber))],
-     ["Estimated wait",     "Never"]].forEach(function(r){
-      x.fillStyle = "#57575F"; x.fillText(r[0], cx + pad, ty);
-      x.fillStyle = "#17171A"; x.textAlign = "right";
-      x.fillText(r[1], cx + cw - pad, ty); x.textAlign = "left";
-      x.strokeStyle = "#DCD9CE"; x.lineWidth = 1;
-      x.beginPath(); x.moveTo(cx + pad, ty + cw * 0.022); x.lineTo(cx + cw - pad, ty + cw * 0.022); x.stroke();
-      ty += cw * 0.062;
-    });
-
-    var r = cw * 0.018, bx = cx;
-    x.fillStyle = "#E9E7DF";
-    while(bx < cx + cw){ x.beginPath(); x.arc(bx + r, cy + ch, r, 0, Math.PI * 2); x.fill(); bx += r * 2; }
-
-    x.textAlign = "center"; x.fillStyle = "#57575F";
-    x.font = "400 " + (cw * 0.036) + "px 'DM Mono', monospace";
-    x.fillText("There is nothing at the end.", W / 2, cy + ch + cw * 0.115);
-    x.fillStyle = "#B26A00"; x.fillText(SITE, W / 2, cy + ch + cw * 0.175);
-    return f.c;
-  }
-
-  function drawStat(i, W, H){
-    var a = AGG[i], f = frame(W, H), x = f.x;
     var pad = W * 0.11;
+    x.textAlign = "left";
 
-    x.textAlign = "left"; x.fillStyle = "#57575F";
+    x.fillStyle = "#E39B2E";
     x.font = "500 " + (W * 0.026) + "px 'DM Mono', monospace";
-    x.fillText("WHAT THE QUEUE IS WAITING FOR", pad, H * 0.28);
+    x.fillText("THE QUEUE \u00B7 \u2116 " + fmt(state.myNumber), pad, H * 0.30);
 
-    x.fillStyle = "#17171A";
-    x.font = "500 " + (W * 0.155) + "px 'DM Mono', monospace";
-    x.fillText(fmt(a.n), pad, H * 0.42);
-
-    x.font = "400 " + (W * 0.062) + "px Archivo, sans-serif";
-    x.fillStyle = "#17171A";
-    var ty = H * 0.50;
-    wrapText(x, "people are waiting for " + a.label, W - pad * 2).forEach(function(l){
-      x.fillText(l, pad, ty); ty += W * 0.078;
+    x.fillStyle = "#F2F0EA";
+    x.font = "600 " + (W * 0.088) + "px Archivo, sans-serif";
+    var ty = H * 0.40;
+    var quote = state.said ? "\u201C" + state.said + "\u201D" : "Said nothing.";
+    wrap(x, quote, W - pad * 2).slice(0, 4).forEach(function(l){
+      x.fillText(l, pad, ty); ty += W * 0.105;
     });
 
-    x.strokeStyle = "#17171A"; x.lineWidth = 3;
-    x.beginPath(); x.moveTo(pad, H * 0.66); x.lineTo(W - pad, H * 0.66); x.stroke();
+    x.strokeStyle = "#3A3A42"; x.lineWidth = 2;
+    x.beginPath(); x.moveTo(pad, ty + H * 0.02); x.lineTo(W - pad, ty + H * 0.02); x.stroke();
 
-    x.fillStyle = "#57575F";
-    x.font = "400 " + (W * 0.03) + "px 'DM Mono', monospace";
-    x.fillText("out of " + fmt(state.count) + " people in a queue with nothing at the end", pad, H * 0.71);
-    x.fillStyle = "#B26A00"; x.fillText(SITE, pad, H * 0.755);
-    return f.c;
+    x.fillStyle = "#8C8C95";
+    x.font = "400 " + (W * 0.031) + "px 'DM Mono', monospace";
+    x.fillText((state.myNumber / 1000).toFixed(2) + " km from a door that never opens",
+               pad, ty + H * 0.065);
+    x.fillText("Estimated wait: never", pad, ty + H * 0.105);
+    x.fillStyle = "#E39B2E";
+    x.fillText(SITE, pad, ty + H * 0.155);
+    return c;
   }
 
-  function save(canvas, name){
-    canvas.toBlob(function(blob){
-      var url = URL.createObjectURL(blob), a = document.createElement("a");
-      a.href = url; a.download = name; a.click();
-      setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
-    });
-  }
-  function withFonts(fn){
-    if(document.fonts && document.fonts.ready) document.fonts.ready.then(fn); else fn();
-  }
-
-  /* ---------- THE OPENING QUESTION ----------
-     Answering costs nothing and commits nothing. It carries the line down
-     to the join form so it is never typed twice, and shows the reader that
-     other people are waiting for the same thing. That recognition is the
-     hook; the price is a formality after it. */
-  function kinCount(said){
-    var t = said.toLowerCase(), best = null, n;
-    for(n = 0; n < AGG.length; n++){
-      if(t && AGG[n].label.split(/[ ,]+/).some(function(w){
-        return w.length > 3 && t.indexOf(w) > -1;
-      })){ best = AGG[n]; break; }
-    }
-    return best || AGG[2];   /* "nothing in particular" catches the rest */
+  function save(W, H){
+    if(!state.joined) return;
+    var go = function(){
+      card(W, H).toBlob(function(b){
+        var u = URL.createObjectURL(b), a = document.createElement("a");
+        a.href = u; a.download = "the-queue.png"; a.click();
+        setTimeout(function(){ URL.revokeObjectURL(u); }, 1500);
+      });
+    };
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(go); else go();
   }
 
-  function answer(){
-    var said = $("ask-input").value.trim();
-    if(!said) return;
-    var kin = kinCount(said);
-
-    $("echo-said").textContent = "\u201C" + said + "\u201D";
-    $("echo-kin").innerHTML =
-      "You are number <b>" + fmt(state.count + 1) + "</b> to be asked, and you are " +
-      km(state.count + 1).toFixed(1) + " km from a door that never opens. " +
-      "<b>" + fmt(kin.n) + "</b> people in this line are waiting for something like it.";
-    $("echo").classList.add("is-open");
-
-    $("wait").value = said;               /* carry it to the join form */
-    $("tk-said").textContent = "\u201C" + said + "\u201D";
-  }
-
-  $("ask-go").addEventListener("click", answer);
-  $("ask-input").addEventListener("keydown", function(e){ if(e.key === "Enter") answer(); });
-  $("echo-go").addEventListener("click", function(){
-    $("hero").scrollIntoView({ behavior:"smooth", block:"start" });
+  deck.addEventListener("click", function(e){
+    if(e.target.id === "dl")  save(1080, 1920);
+    if(e.target.id === "dl2") save(1080, 1080);
   });
-  $("ask-skip").addEventListener("click", function(){
-    $("hero").scrollIntoView({ behavior:"smooth", block:"start" });
-  });
-
-  /* ---------- wiring ---------- */
-  $("q-go").addEventListener("click", search);
-  $("q").addEventListener("keydown", function(e){ if(e.key === "Enter") search(); });
-  $("jump-go").addEventListener("click", jump);
-  $("jump").addEventListener("keydown", function(e){ if(e.key === "Enter") jump(); });
-  document.querySelectorAll(".tier button").forEach(function(b){
-    b.addEventListener("click", function(){ join(Number(b.dataset.places)); });
-  });
-  $("dl-story").addEventListener("click", function(){
-    if(state.joined) withFonts(function(){ save(drawTicket(1080, 1920), "the-queue-ticket.png"); });
-  });
-  $("dl-square").addEventListener("click", function(){
-    if(state.joined) withFonts(function(){ save(drawTicket(1080, 1080), "the-queue-ticket.png"); });
-  });
-  $("agg").addEventListener("click", function(e){
-    var b = e.target.closest(".agg__share");
-    if(!b) return;
-    withFonts(function(){ save(drawStat(Number(b.dataset.i), 1080, 1350), "the-queue-stat.png"); });
-  });
-
-  paintTally(); paintAgg(); showBack();
-  tickLiveLabel(); setInterval(tickLiveLabel, 1000); schedule();
 })();
 </script>
 </body>
