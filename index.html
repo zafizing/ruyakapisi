@@ -12,8 +12,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --night:#131316; --night-2:#1A1A1E; --line:#31313A;
-    --bone:#F2F0EA; --dim:#7E7E88; --faint:#4A4A54;
+    --night:#131316; --night-2:#1A1A1E; --line:#2C2C34;
+    --bone:#F2F0EA; --read:#C8C6C0; --dim:#7E7E88; --faint:#4A4A54;
     --amber:#E39B2E; --flare:#E4483A;
   }
   *{box-sizing:border-box;}
@@ -28,16 +28,13 @@
   .inner{max-width:1180px; margin:0 auto; min-height:100svh; display:flex; flex-direction:column;}
 
   /* ---------- HOOK ---------- */
-  .hook{justify-content:center; padding:80px 0;}
-  .hook h1{
-    font-weight:600; font-size:clamp(38px,9vw,110px); line-height:.96;
-    letter-spacing:-.042em; margin:0; max-width:13ch;
-  }
+  .hook{justify-content:center; padding:96px 0 80px;}
+  .hook h1{font-weight:600; font-size:clamp(38px,9vw,110px); line-height:.96; letter-spacing:-.042em; margin:0; max-width:13ch;}
   .hook h1 span{display:block; color:var(--amber);}
   .hook__sting{margin:26px 0 0; font-size:clamp(19px,3vw,28px); font-weight:500; letter-spacing:-.018em;}
   .hook__p{margin:18px 0 0; font-size:clamp(16px,2.2vw,19px); line-height:1.55; color:var(--dim); max-width:520px;}
   .hook__p em{color:var(--bone); font-style:normal; font-weight:500;}
-  .hook__row{display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:34px 0 0;}
+  .hook__row{display:flex; gap:12px; flex-wrap:wrap; margin:34px 0 0;}
   .btn{
     padding:16px 28px; cursor:pointer; border:1px solid var(--bone);
     background:var(--bone); color:var(--night);
@@ -50,83 +47,84 @@
   .cue{margin:26px 0 0; font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); animation:drift 2.6s ease-in-out infinite;}
   @keyframes drift{0%,100%{transform:translateY(0); opacity:.5;} 50%{transform:translateY(6px); opacity:1;}}
 
-  /* ---------- BAR ---------- */
+  /* ---------- CONTROL BAR ---------- */
   .bar{
-    position:fixed; inset:0 0 auto 0; z-index:40; display:none;
-    justify-content:space-between; align-items:center; gap:12px;
-    padding:10px 24px; background:rgba(19,19,22,.94); backdrop-filter:blur(8px);
+    position:fixed; inset:0 0 auto 0; z-index:50;
+    display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;
+    padding:10px 22px; background:rgba(19,19,22,.95); backdrop-filter:blur(10px);
     border-bottom:1px solid var(--line);
-    font-family:"DM Mono",monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim);
   }
-  .bar.is-on{display:flex;}
-  .sorts{display:flex; gap:6px;}
-  .sorts button{
-    padding:7px 12px; cursor:pointer; background:transparent; color:var(--dim); border:1px solid var(--line);
-    font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+  .bar__l,.bar__r{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .bar__k{font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--dim); margin-right:2px;}
+  .sortbtn{
+    padding:9px 15px; cursor:pointer; background:transparent; color:var(--read);
+    border:1px solid var(--line);
+    font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+    transition:background .15s ease, color .15s ease, border-color .15s ease;
   }
-  .sorts button.is-on{background:var(--bone); color:var(--night); border-color:var(--bone);}
-  .bar__pos b{color:var(--amber); font-weight:500;}
+  .sortbtn:hover{border-color:var(--bone); color:var(--bone);}
+  .sortbtn.is-on{background:var(--amber); color:var(--night); border-color:var(--amber); font-weight:500;}
+
+  .search{display:flex; align-items:stretch; border:1px solid var(--line);}
+  .search input{
+    width:150px; min-width:0; padding:9px 12px; background:transparent; color:var(--bone);
+    border:none; outline:none; font-family:"DM Mono",monospace; font-size:11px;
+  }
+  .search input::placeholder{color:var(--faint);}
+  .search button{padding:0 12px; cursor:pointer; background:transparent; color:var(--dim); border:none; border-left:1px solid var(--line); font-family:"DM Mono",monospace; font-size:11px;}
+  .search button:hover{color:var(--amber);}
+
+  .navbtn{
+    padding:9px 12px; cursor:pointer; background:transparent; color:var(--dim); border:1px solid var(--line);
+    font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  }
+  .navbtn:hover{color:var(--bone); border-color:var(--bone);}
 
   /* ---------- SERPENTINE WALL ---------- */
-  .wall{padding-top:54px; padding-bottom:70px; justify-content:flex-start; gap:0;}
-  .snake{flex:1; min-height:0; display:flex; flex-direction:column; justify-content:space-between; padding:6px 0;}
-
-  .lane{
-    position:relative; display:flex; align-items:stretch;
-    padding:0 14px;
-  }
+  .wall{padding-top:82px; padding-bottom:70px; justify-content:flex-start;}
+  .snake{flex:1; min-height:0; display:flex; flex-direction:column; justify-content:space-between; gap:2px;}
+  .lane{display:flex; align-items:stretch; gap:8px;}
   .lane--rtl{flex-direction:row-reverse;}
-  /* the barrier tape running through each lane */
-  .lane::before{
-    content:""; position:absolute; left:0; right:0; top:50%; height:1px;
-    background:repeating-linear-gradient(to right, var(--line) 0 5px, transparent 5px 11px);
-  }
-  /* the turn at the end of the lane */
-  .lane::after{
-    content:""; position:absolute; top:50%; bottom:-50%; width:14px;
-    border-style:dashed; border-color:var(--line); border-width:0;
-  }
-  .lane--ltr::after{right:0; border-right-width:1px; border-top-right-radius:14px; border-bottom-right-radius:14px; border-top-width:1px;}
-  .lane--rtl::after{left:0;  border-left-width:1px;  border-top-left-radius:14px;  border-bottom-left-radius:14px;  border-top-width:1px;}
-  .lane:last-child::after{display:none;}
 
   .e{
-    position:relative; z-index:1; flex:1 1 0; min-width:0;
-    padding:0 5px; cursor:pointer; text-align:center;
-    display:flex; flex-direction:column; justify-content:center; gap:1px;
+    flex:1 1 0; min-width:0; padding:6px 6px 7px; cursor:pointer; text-align:center;
+    display:flex; flex-direction:column; justify-content:center; gap:2px;
+    border-bottom:1px solid var(--line);
+    transition:transform .16s ease, color .16s ease, border-color .16s ease;
   }
-  .e__n{font-family:"DM Mono",monospace; font-size:8.5px; letter-spacing:.04em; color:#33333C; transition:color .4s ease;}
+  .e__n{font-family:"DM Mono",monospace; font-size:8.5px; letter-spacing:.04em; color:var(--faint); transition:color .16s ease;}
   .e__w{
-    font-size:clamp(9px,1.35vh,13px); line-height:1.2; color:var(--faint);
-    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; transition:color .4s ease;
+    font-size:clamp(10px,1.4vh,13.5px); line-height:1.25; color:var(--read);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; transition:color .16s ease;
   }
-  .e__amt{font-family:"DM Mono",monospace; font-size:8.5px; color:#33333C; display:none;}
+  .e__amt{font-family:"DM Mono",monospace; font-size:8.5px; color:var(--amber); display:none;}
   .is-amount .e__amt{display:block;}
-  .e:hover .e__w{color:var(--bone);}
-  .e.is-silent .e__w{font-style:italic; opacity:.55;}
-  .e.is-flare .e__w,.e.is-flare .e__n{color:var(--flare); font-weight:500;}
-  .e.is-big .e__w{color:var(--amber);}
+  .e.is-silent .e__w{font-style:italic; color:var(--dim);}
+  .e:hover{transform:scale(1.14); border-color:var(--flare);}
+  .e:hover .e__w,.e:hover .e__n{color:var(--flare);}
 
   .wallfoot{
     display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
-    padding:12px 0 0; border-top:1px solid var(--line);
+    padding:12px 0 0; margin-top:14px; border-top:1px solid var(--line);
     font-family:"DM Mono",monospace; font-size:10.5px; letter-spacing:.09em; color:var(--dim);
   }
   .wallfoot b{color:var(--bone); font-weight:500;}
 
   /* ---------- MILESTONE ---------- */
-  .mile{justify-content:center; padding:80px 0;}
+  .mile{justify-content:center; padding:100px 0 80px;}
   .mile__big{font-family:"DM Mono",monospace; font-weight:500; font-size:clamp(46px,12vw,120px); line-height:.94; letter-spacing:-.04em; color:var(--amber); margin:0; font-variant-numeric:tabular-nums;}
   .mile__t{margin:20px 0 0; font-size:clamp(19px,3.2vw,30px); line-height:1.34; max-width:620px;}
   .mile__s{margin:16px 0 0; font-family:"DM Mono",monospace; font-size:12px; color:var(--dim); letter-spacing:.05em;}
 
   /* ---------- SHEET ---------- */
-  .sheet{position:fixed; inset:0; z-index:60; display:none; background:rgba(10,10,12,.87); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:24px;}
+  .sheet{position:fixed; inset:0; z-index:70; display:none; background:rgba(10,10,12,.88); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:24px;}
   .sheet.is-on{display:flex;}
-  .card{width:min(520px,100%); background:var(--night-2); border:1px solid var(--line); padding:30px 28px;}
+  .card{width:min(520px,100%); background:var(--night-2); border:1px solid var(--line); padding:30px 28px; max-height:86svh; overflow-y:auto;}
   .card__n{font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--amber); margin:0;}
-  .card__w{font-weight:600; font-size:clamp(24px,4.4vw,38px); line-height:1.18; letter-spacing:-.024em; margin:16px 0 0;}
-  .card__m{margin:18px 0 0; font-family:"DM Mono",monospace; font-size:11.5px; line-height:1.85; color:var(--dim);}
+  .card__w{font-weight:600; font-size:clamp(24px,4.4vw,38px); line-height:1.18; letter-spacing:-.024em; margin:14px 0 0;}
+  .card__by{margin:14px 0 0; font-size:16px; color:var(--read);}
+  .card__by b{color:var(--bone); font-weight:600;}
+  .card__m{margin:16px 0 0; font-family:"DM Mono",monospace; font-size:11.5px; line-height:1.85; color:var(--dim);}
   .card__acts{display:flex; gap:9px; flex-wrap:wrap; margin:24px 0 0;}
   .act{padding:11px 16px; cursor:pointer; background:transparent; color:var(--bone); border:1px solid var(--line); font-family:"DM Mono",monospace; font-size:10.5px; letter-spacing:.11em; text-transform:uppercase;}
   .act:hover{border-color:var(--bone);}
@@ -135,41 +133,53 @@
   .busy{margin:14px 0 0; font-family:"DM Mono",monospace; font-size:10.5px; color:var(--amber); display:none;}
   .busy.is-on{display:block;}
 
+  /* ---------- SEARCH RESULTS ---------- */
+  .results{position:fixed; inset:0; z-index:65; display:none; background:rgba(19,19,22,.97); padding:78px 24px 30px; overflow-y:auto;}
+  .results.is-on{display:block;}
+  .results__in{max-width:760px; margin:0 auto;}
+  .results__k{font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); margin:0 0 20px;}
+  .r{display:flex; gap:14px; align-items:baseline; padding:13px 0; border-bottom:1px solid var(--line); cursor:pointer;}
+  .r:hover .r__w{color:var(--flare);}
+  .r__n{font-family:"DM Mono",monospace; font-size:11px; color:var(--faint); flex:0 0 62px;}
+  .r__w{flex:1; min-width:0; font-size:16px; color:var(--read); transition:color .15s ease;}
+  .r__by{font-family:"DM Mono",monospace; font-size:11px; color:var(--dim); flex:0 0 auto;}
+  .results__x{margin:26px 0 0; font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--amber); cursor:pointer;}
+
   /* ---------- JOIN ---------- */
-  .join{justify-content:center; padding:90px 0;}
+  .join{justify-content:center; padding:100px 0 80px;}
   .join h2{font-weight:600; font-size:clamp(30px,6.4vw,62px); line-height:1.04; letter-spacing:-.034em; margin:0;}
   .join h2 span{display:block; color:var(--amber);}
   .join__p{margin:22px 0 0; font-size:17px; line-height:1.55; color:var(--dim); max-width:520px;}
   .join__p b{color:var(--bone); font-weight:500;}
-  .field{display:flex; margin:28px 0 0; max-width:600px; border-bottom:2px solid var(--bone);}
-  .field input{flex:1; min-width:0; font-family:Archivo,sans-serif; font-size:clamp(18px,2.8vw,23px); padding:13px 2px; background:transparent; color:var(--bone); border:none; outline:none;}
+  .flabel{font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); margin:26px 0 8px;}
+  .field{display:flex; max-width:600px; border-bottom:2px solid var(--bone);}
+  .field input{flex:1; min-width:0; font-family:Archivo,sans-serif; font-size:clamp(17px,2.6vw,22px); padding:11px 2px; background:transparent; color:var(--bone); border:none; outline:none;}
   .field input::placeholder{color:var(--faint);}
+  .field--sm{max-width:330px;}
 
-  .pay{margin:30px 0 0; max-width:600px;}
-  .pay__k{font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); margin:0 0 12px;}
-  .pay__row{display:flex; align-items:baseline; gap:6px; border-bottom:2px solid var(--bone); max-width:260px;}
-  .pay__cur{font-family:"DM Mono",monospace; font-size:26px; color:var(--dim);}
-  .pay__row input{flex:1; min-width:0; font-family:"DM Mono",monospace; font-weight:500; font-size:34px; padding:8px 0; background:transparent; color:var(--bone); border:none; outline:none;}
-  .pay__chips{display:flex; gap:8px; flex-wrap:wrap; margin:16px 0 0;}
+  .pay__row{display:flex; align-items:baseline; gap:6px; border-bottom:2px solid var(--bone); max-width:250px;}
+  .pay__cur{font-family:"DM Mono",monospace; font-size:24px; color:var(--dim);}
+  .pay__row input{flex:1; min-width:0; font-family:"DM Mono",monospace; font-weight:500; font-size:32px; padding:7px 0; background:transparent; color:var(--bone); border:none; outline:none;}
+  .chips{display:flex; gap:8px; flex-wrap:wrap; margin:14px 0 0;}
   .chip{padding:9px 15px; cursor:pointer; background:transparent; color:var(--dim); border:1px solid var(--line); font-family:"DM Mono",monospace; font-size:12px;}
   .chip:hover,.chip.is-on{border-color:var(--amber); color:var(--amber);}
-  .pay__note{margin:14px 0 0; font-family:"DM Mono",monospace; font-size:11px; color:var(--dim); line-height:1.7;}
-  .pay__note b{color:var(--bone); font-weight:500;}
-  .pay__go{margin:22px 0 0;}
-
+  .paynote{margin:14px 0 0; font-family:"DM Mono",monospace; font-size:11px; color:var(--dim); line-height:1.7; max-width:560px;}
+  .paynote b{color:var(--bone); font-weight:500;}
   .fine{margin:24px 0 0; font-family:"DM Mono",monospace; font-size:11px; color:var(--dim); line-height:1.8;}
   .colo{margin:32px 0 0; padding:22px 0 0; border-top:1px solid var(--line); max-width:540px; font-size:14.5px; line-height:1.6; color:var(--dim);}
   .colo b{color:var(--bone); font-weight:500;} .colo a{color:var(--amber);}
 
-  .sticky{position:fixed; left:0; right:0; bottom:0; z-index:40; display:flex; justify-content:center; padding:0 20px 18px; pointer-events:none; opacity:0; transition:opacity .3s ease;}
+  .sticky{position:fixed; left:0; right:0; bottom:0; z-index:45; display:flex; justify-content:center; padding:0 20px 18px; pointer-events:none; opacity:0; transition:opacity .3s ease;}
   .sticky.is-on{opacity:1;}
   .sticky .btn{pointer-events:auto; box-shadow:0 6px 26px rgba(0,0,0,.6);}
 
-  @media (max-width:700px){
+  @media (max-width:760px){
     .page{padding:0 14px;}
-    .lane{padding:0 10px;}
-    .e{padding:0 3px;}
-    .bar{padding:9px 14px;}
+    .bar{padding:8px 14px; gap:8px;}
+    .bar__k{display:none;}
+    .search input{width:110px;}
+    .wall{padding-top:104px;}
+    .e:hover{transform:scale(1.06);}
   }
   @media (prefers-reduced-motion:reduce){ *{animation:none !important; transition:none !important;} .deck{scroll-snap-type:none;} }
 </style>
@@ -177,12 +187,20 @@
 <body>
 
 <div class="bar" id="bar">
-  <div class="sorts">
-    <button data-sort="order" class="is-on">In line</button>
-    <button data-sort="random">Random</button>
-    <button data-sort="paid">Most paid</button>
+  <div class="bar__l">
+    <span class="bar__k">Sort</span>
+    <button class="sortbtn is-on" data-sort="order">In line</button>
+    <button class="sortbtn" data-sort="random">Random</button>
+    <button class="sortbtn" data-sort="paid">Most paid</button>
   </div>
-  <div class="bar__pos">Read <b id="pos">0</b></div>
+  <div class="bar__r">
+    <div class="search">
+      <input id="q" type="text" placeholder="number or name" aria-label="Search by number or name">
+      <button id="q-go">&#8981;</button>
+    </div>
+    <button class="navbtn" id="to-top">&uarr; Top</button>
+    <button class="navbtn" id="to-end">&darr; End</button>
+  </div>
 </div>
 
 <div class="deck" id="deck">
@@ -212,30 +230,33 @@
       what you are paying for.
     </p>
 
+    <p class="flabel">What are you waiting for?</p>
     <div class="field">
       <input id="said" type="text" maxlength="70" placeholder="a phone call &middot; nothing &middot; my results" aria-label="What are you waiting for?">
     </div>
 
-    <div class="pay">
-      <p class="pay__k">Name your price &middot; minimum $5</p>
-      <div class="pay__row">
-        <span class="pay__cur">$</span>
-        <input id="amt" type="number" min="5" step="1" value="5" aria-label="Amount to pay">
-      </div>
-      <div class="pay__chips">
-        <button class="chip is-on" data-amt="5">5</button>
-        <button class="chip" data-amt="10">10</button>
-        <button class="chip" data-amt="25">25</button>
-        <button class="chip" data-amt="100">100</button>
-      </div>
-      <p class="pay__note">
-        Paying more buys nothing extra. It does not move you forward &mdash; nothing
-        moves anyone forward. It only changes where you sit in
-        <b>Most paid</b>, which is a list of people who wanted this written down
-        the most.
-      </p>
-      <button class="btn pay__go" id="pay-go">Take my place</button>
+    <p class="flabel">Name to show &middot; anything you like</p>
+    <div class="field field--sm">
+      <input id="nick" type="text" maxlength="24" placeholder="or leave blank to stay anonymous" aria-label="Display name">
     </div>
+
+    <p class="flabel">Name your price &middot; minimum $5</p>
+    <div class="pay__row">
+      <span class="pay__cur">$</span>
+      <input id="amt" type="number" min="5" step="1" value="5" aria-label="Amount to pay">
+    </div>
+    <div class="chips">
+      <button class="chip is-on" data-amt="5">5</button>
+      <button class="chip" data-amt="10">10</button>
+      <button class="chip" data-amt="25">25</button>
+      <button class="chip" data-amt="100">100</button>
+    </div>
+    <p class="paynote">
+      Paying more buys nothing extra. It does not move you forward &mdash; nothing
+      moves anyone forward. It only changes where you sit in <b>Most paid</b>,
+      which is a list of the people who wanted this written down the most.
+    </p>
+    <button class="btn" id="pay-go" style="margin-top:22px">Take my place</button>
 
     <p class="fine">
       Your number is permanent and can only go up.<br>
@@ -253,10 +274,21 @@
 
 </div>
 
+<!-- SEARCH RESULTS -->
+<div class="results" id="results">
+  <div class="results__in">
+    <p class="results__k" id="r-k"></p>
+    <div id="r-list"></div>
+    <p class="results__x" id="r-x">&larr; Back to the line</p>
+  </div>
+</div>
+
+<!-- DETAIL -->
 <div class="sheet" id="sheet">
   <div class="card">
     <p class="card__n" id="c-n">&#8470; 0</p>
     <p class="card__w" id="c-w"></p>
+    <p class="card__by" id="c-by"></p>
     <p class="card__m" id="c-m"></p>
     <div class="card__acts">
       <button class="act" id="c-img">Image</button>
@@ -275,11 +307,11 @@
   "use strict";
 
   /* ---------------------------------------------------------------
-     DEMO DATA. Replace with a real feed. The lines and the amounts ARE
-     the product — inventing them is the one lie this page cannot survive.
+     DEMO DATA. Replace with a real feed. The lines, names and amounts
+     ARE the product — inventing them is the one lie this page cannot
+     survive.
   ----------------------------------------------------------------*/
   var COUNT = 12847, MIN = 5;
-  var DOOR = { lat:39.7554, lng:32.8043 };
   var SITE = "thequeue.example";
 
   var lines = [
@@ -298,6 +330,11 @@
     "a normal week","the scan","to stop waiting","",""
   ];
 
+  var nickA = ["quiet","late","small","half","north","paper","winter","slow","open","tired",
+               "blue","empty","first","last","soft","grey","far","new","old","bright"];
+  var nickB = ["door","letter","hour","room","train","light","field","stone","name","hand",
+               "window","river","coat","street","bell","gate","match","cup","road","key"];
+
   var $ = function(id){ return document.getElementById(id); };
   function fmt(n){ return n.toLocaleString("en-US"); }
   function esc(s){
@@ -310,18 +347,15 @@
     return function(){ s = s * 16807 % 2147483647; return (s - 1) / 2147483646; };
   }
   function lineFor(n){ return lines[Math.floor(seeded(n)() * lines.length)]; }
-
-  /* Most people pay the minimum; a few pay a great deal more. */
-  function paidFor(n){
-    var r = seeded(n + 8807)();
-    return MIN + Math.floor(Math.pow(r, 9) * 700);
+  function nickFor(n){
+    var r = seeded(n + 3301);
+    if(r() < 0.28) return "";                      /* plenty stay anonymous */
+    return nickA[Math.floor(r() * nickA.length)] + nickB[Math.floor(r() * nickB.length)];
   }
-  function coordFor(p){
-    return (DOOR.lat + p * 0.0000075).toFixed(5) + "\u00B0, " +
-           (DOOR.lng + p * 0.0000061).toFixed(5) + "\u00B0";
-  }
+  /* Most pay the minimum; a few pay a great deal more. */
+  function paidFor(n){ return MIN + Math.floor(Math.pow(seeded(n + 8807)(), 9) * 700); }
   function pace(left){
-    var h = left / 20;                        /* a real queue: about 20 m an hour */
+    var h = left / 20;                             /* a real queue: ~20 m an hour */
     if(h < 48) return Math.round(h) + " hours";
     var d = h / 24;
     return d < 60 ? Math.round(d) + " days" : Math.round(d / 30) + " months";
@@ -330,7 +364,7 @@
   var pool = [];
   for(var i = COUNT; i >= 1; i--) pool.push(i);
 
-  var state = { sort:"order", perLane:10, lanes:10, current:null, amt:MIN };
+  var state = { sort:"order", perLane:10, lanes:10, current:null };
 
   function ordered(){
     if(state.sort === "order") return pool;
@@ -344,16 +378,15 @@
 
   function fit(){
     var w = window.innerWidth;
-    state.perLane = w >= 1000 ? 10 : w >= 700 ? 8 : 5;
-    state.lanes   = 10;
+    state.perLane = w >= 1000 ? 10 : w >= 760 ? 8 : 5;
   }
 
   function entryHTML(n){
-    var w = lineFor(n), silent = !w, paid = paidFor(n);
-    return '<div class="e' + (silent ? " is-silent" : "") + (paid >= 100 ? " is-big" : "") + '" data-n="' + n + '">' +
+    var w = lineFor(n), silent = !w;
+    return '<div class="e' + (silent ? " is-silent" : "") + '" data-n="' + n + '">' +
       '<span class="e__n">' + fmt(n) + '</span>' +
       '<span class="e__w">' + (silent ? "said nothing" : esc(w)) + '</span>' +
-      '<span class="e__amt">$' + paid + '</span>' +
+      '<span class="e__amt">$' + paidFor(n) + '</span>' +
     '</div>';
   }
 
@@ -367,8 +400,8 @@
     '</div></section>';
   }
 
-  /* The line does not run straight. It doubles back on itself, the way a
-     real queue does behind barriers: left to right, turn, right to left. */
+  /* The line doubles back on itself, the way a real queue does behind
+     barriers: left to right, turn, right to left. */
   function pageHTML(items, idx){
     var per = state.perLane, laneCount = Math.ceil(items.length / per), html = "", L, lane;
     for(L = 0; L < laneCount; L++){
@@ -391,11 +424,10 @@
 
   function render(){
     fit();
-    var list = ordered(), per = state.perLane * state.lanes;
-    var out = [], i, page, n = 0;
-    for(i = 0; i < list.length && n < 22; i += per){
-      page = list.slice(i, i + per);
-      out.push(pageHTML(page, i));
+    var list = ordered(), per = state.perLane * state.lanes, out = [], k, page, n = 0;
+    for(k = 0; k < list.length && n < 22; k += per){
+      page = list.slice(k, k + per);
+      out.push(pageHTML(page, k));
       n++;
       if(state.sort === "order" && n % 5 === 0){
         out.push(milestoneHTML(COUNT - page[page.length - 1], page[page.length - 1]));
@@ -411,9 +443,9 @@
     rt = setTimeout(function(){ var was = state.perLane; fit(); if(was !== state.perLane) render(); }, 250);
   });
 
-  document.querySelectorAll(".sorts button").forEach(function(b){
+  document.querySelectorAll(".sortbtn").forEach(function(b){
     b.addEventListener("click", function(){
-      document.querySelectorAll(".sorts button").forEach(function(x){ x.classList.remove("is-on"); });
+      document.querySelectorAll(".sortbtn").forEach(function(x){ x.classList.remove("is-on"); });
       b.classList.add("is-on");
       state.sort = b.dataset.sort;
       render();
@@ -421,59 +453,75 @@
     });
   });
 
-  /* ---------- scroll ---------- */
+  /* ---------- scroll state ---------- */
   var deck = $("deck"), ticking = false;
   deck.addEventListener("scroll", function(){
     if(ticking) return;
     ticking = true;
     requestAnimationFrame(function(){
-      var past = deck.scrollTop > window.innerHeight * 0.6;
-      $("bar").classList.toggle("is-on", past);
-      $("sticky").classList.toggle("is-on", past);
-      var walls = $("pages").querySelectorAll(".wall"), seen = 0, k, r;
-      for(k = 0; k < walls.length; k++){
-        r = walls[k].getBoundingClientRect();
-        if(r.top < window.innerHeight * 0.5) seen = k + 1; else break;
-      }
-      $("pos").textContent = fmt(seen * state.perLane * state.lanes);
+      $("sticky").classList.toggle("is-on", deck.scrollTop > window.innerHeight * 0.6);
       ticking = false;
     });
   }, { passive:true });
 
-  /* ---------- roving spotlight ---------- */
-  var flared = null;
-  setInterval(function(){
-    if(flared){ flared.classList.remove("is-flare"); flared = null; }
-    var all = document.querySelectorAll(".e"), vis = [], k, r;
-    for(k = 0; k < all.length; k++){
-      r = all[k].getBoundingClientRect();
-      if(r.top > 60 && r.bottom < window.innerHeight - 60 && r.width) vis.push(all[k]);
-    }
-    if(!vis.length) return;
-    flared = vis[Math.floor(Math.random() * vis.length)];
-    flared.classList.add("is-flare");
-  }, 5000);
+  $("to-top").addEventListener("click", function(){ deck.scrollTo({ top:0, behavior:"smooth" }); });
+  $("to-end").addEventListener("click", function(){ $("join").scrollIntoView({ behavior:"smooth" }); });
 
-  /* ---------- sheet ---------- */
+  /* ---------- detail ---------- */
   function openSheet(n){
     state.current = n;
-    var w = lineFor(n);
+    var w = lineFor(n), nk = nickFor(n);
     $("c-n").textContent = "\u2116 " + fmt(n);
     $("c-w").textContent = w ? "\u201C" + w + "\u201D" : "Said nothing.";
+    $("c-by").innerHTML = nk ? "&mdash; <b>" + esc(nk) + "</b>" : "&mdash; <b>anonymous</b>";
     $("c-m").innerHTML =
       "paid $" + paidFor(n) + "<br>" +
-      (n / 1000).toFixed(2) + " km from the door<br>" +
-      "standing at " + coordFor(n) + "<br>" +
+      fmt(n - 1) + " people ahead<br>" +
       "estimated wait: never";
     $("c-busy").classList.remove("is-on");
     $("sheet").classList.add("is-on");
   }
   document.addEventListener("click", function(e){
-    var el = e.target.closest(".e");
-    if(el) openSheet(Number(el.dataset.n));
+    var el = e.target.closest(".e, .r");
+    if(el && el.dataset.n) openSheet(Number(el.dataset.n));
   });
   $("c-close").addEventListener("click", function(){ $("sheet").classList.remove("is-on"); });
   $("sheet").addEventListener("click", function(e){ if(e.target === $("sheet")) $("sheet").classList.remove("is-on"); });
+
+  /* ---------- search: by number or by name ---------- */
+  function runSearch(){
+    var term = $("q").value.trim().toLowerCase();
+    if(!term) return;
+    var found = [], n, nk;
+
+    if(/^#?\d+$/.test(term)){
+      n = parseInt(term.replace("#", ""), 10);
+      if(n >= 1 && n <= COUNT) found.push(n);
+    } else {
+      for(n = COUNT; n >= 1 && found.length < 100; n--){
+        nk = nickFor(n);
+        if(nk && nk.toLowerCase().indexOf(term) > -1) found.push(n);
+      }
+    }
+
+    $("r-k").textContent = found.length
+      ? found.length + (found.length === 1 ? " person found" : " people found") + " for \u201C" + term + "\u201D"
+      : "Nobody in this line matches \u201C" + term + "\u201D";
+
+    $("r-list").innerHTML = found.map(function(m){
+      var w = lineFor(m), nk2 = nickFor(m);
+      return '<div class="r" data-n="' + m + '">' +
+        '<span class="r__n">\u2116' + fmt(m) + '</span>' +
+        '<span class="r__w">' + (w ? esc(w) : "said nothing") + '</span>' +
+        '<span class="r__by">' + (nk2 ? esc(nk2) : "anonymous") + '</span>' +
+      '</div>';
+    }).join("");
+
+    $("results").classList.add("is-on");
+  }
+  $("q-go").addEventListener("click", runSearch);
+  $("q").addEventListener("keydown", function(e){ if(e.key === "Enter") runSearch(); });
+  $("r-x").addEventListener("click", function(){ $("results").classList.remove("is-on"); });
 
   /* ---------- share ---------- */
   function wrapT(ctx, t, maxW){
@@ -488,7 +536,7 @@
   }
 
   function paint(x, W, H, n, reveal){
-    var w = lineFor(n), pad = W * 0.11;
+    var w = lineFor(n), nk = nickFor(n), pad = W * 0.11;
     x.fillStyle = "#131316"; x.fillRect(0, 0, W, H);
     x.textAlign = "left";
 
@@ -503,14 +551,18 @@
     var ty = H * 0.36;
     rows.slice(0, shown).forEach(function(l){ x.fillText(l, pad, ty); ty += W * 0.103; });
 
-    x.strokeStyle = "#31313A"; x.lineWidth = 2;
-    x.beginPath(); x.moveTo(pad, H * 0.66); x.lineTo(W - pad, H * 0.66); x.stroke();
+    x.fillStyle = "#C8C6C0";
+    x.font = "400 " + (W * 0.042) + "px Archivo, sans-serif";
+    x.fillText("\u2014 " + (nk || "anonymous"), pad, ty + W * 0.02);
+
+    x.strokeStyle = "#2C2C34"; x.lineWidth = 2;
+    x.beginPath(); x.moveTo(pad, H * 0.68); x.lineTo(W - pad, H * 0.68); x.stroke();
 
     x.fillStyle = "#7E7E88";
     x.font = "400 " + (W * 0.03) + "px 'DM Mono', monospace";
-    x.fillText("\u2116 " + fmt(n) + " \u00B7 paid $" + paidFor(n), pad, H * 0.71);
-    x.fillText((n / 1000).toFixed(2) + " km from a door that never opens", pad, H * 0.75);
-    x.fillStyle = "#E39B2E"; x.fillText("GET IN LINE \u00B7 " + SITE, pad, H * 0.80);
+    x.fillText("\u2116 " + fmt(n) + " \u00B7 paid $" + paidFor(n), pad, H * 0.73);
+    x.fillText("estimated wait: never", pad, H * 0.77);
+    x.fillStyle = "#E39B2E"; x.fillText("GET IN LINE \u00B7 " + SITE, pad, H * 0.82);
   }
 
   function saveBlob(b, name){
@@ -577,14 +629,16 @@
     $("amt").value = amt;
     /* → real flow: open Paddle checkout for this amount, write the position
        server-side in the transaction.completed webhook, reload from server. */
-    var said = ($("said").value || "").trim();
+    var said = ($("said").value || "").trim(), nk = ($("nick").value || "").trim();
     alert("Demo: \u2116" + fmt(COUNT + 1) + " for $" + amt +
+          (nk ? " as " + nk : " as anonymous") +
           (said ? ", waiting for \u201C" + said + "\u201D." : "."));
   });
 
   /* ---------- nav ---------- */
   function toJoin(){
     $("sheet").classList.remove("is-on");
+    $("results").classList.remove("is-on");
     $("join").scrollIntoView({ behavior:"smooth" });
     setTimeout(function(){ $("said").focus(); }, 600);
   }
