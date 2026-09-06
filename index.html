@@ -3,317 +3,249 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>The Queue — what everyone is waiting for</title>
-<meta name="description" content="Thousands of people paid to stand in a queue with nothing at the end, just to write down one sentence. Here is every sentence.">
-<meta property="og:title" content="The Queue">
-<meta property="og:description" content="They paid to stand in a line that goes nowhere. Here is what each of them is waiting for.">
+<title>What are you waiting for?</title>
+<meta name="description" content="Thousands of people paid to answer one question and stand in a queue with nothing at the end. Here is every answer.">
+<meta property="og:title" content="What are you waiting for?">
+<meta property="og:description" content="They paid to answer that, and to stand in a line that goes nowhere.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
     --night:#131316; --night-2:#1A1A1E; --line:#31313A;
-    --bone:#F2F0EA; --dim:#7E7E88;
+    --bone:#F2F0EA; --dim:#7E7E88; --faint:#4A4A54;
     --amber:#E39B2E; --flare:#E4483A;
   }
   *{box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
+  html,body{margin:0; height:100%;}
   body{
-    margin:0; background:var(--night); color:var(--bone);
+    background:var(--night); color:var(--bone);
     font-family:Archivo,system-ui,sans-serif; -webkit-font-smoothing:antialiased;
+    overflow:hidden;
   }
-  .wrap{max-width:860px; margin:0 auto; padding:0 24px;}
-
-  /* ---------- HUD ---------- */
-  .hud{
-    position:fixed; inset:0 0 auto 0; z-index:30;
-    display:flex; justify-content:space-between; gap:14px;
-    padding:14px 24px;
-    font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.14em;
-    text-transform:uppercase; color:var(--dim);
-    background:rgba(19,19,22,.9); backdrop-filter:blur(6px);
-    border-bottom:1px solid var(--line);
-  }
-  .hud b{display:block; margin-top:2px; font-size:14px; font-weight:500; color:var(--bone); letter-spacing:.02em; font-variant-numeric:tabular-nums;}
-  .hud div:last-child{text-align:right;}
-  .hud div:last-child b{color:var(--amber);}
+  .deck{height:100svh; overflow-y:scroll; scroll-snap-type:y mandatory; -webkit-overflow-scrolling:touch;}
+  .deck::-webkit-scrollbar{width:0;}
+  .page{min-height:100svh; scroll-snap-align:start; scroll-snap-stop:always; padding:0 24px;}
+  .inner{max-width:1080px; margin:0 auto; height:100svh; display:flex; flex-direction:column;}
 
   /* ---------- HOOK ---------- */
-  .hook{min-height:100svh; display:flex; flex-direction:column; justify-content:center; padding:110px 0 90px;}
-  .hook__n{
-    font-family:"DM Mono",monospace; font-weight:500;
-    font-size:clamp(56px,15vw,150px); line-height:.9; letter-spacing:-.04em;
-    color:var(--amber); margin:0; font-variant-numeric:tabular-nums;
+  .hook{justify-content:center; padding:80px 0;}
+  .hook h1{
+    font-weight:600; font-size:clamp(38px,9.5vw,116px); line-height:.98;
+    letter-spacing:-.042em; margin:0; max-width:14ch;
   }
-  .hook__h{
-    font-weight:600; font-size:clamp(26px,4.8vw,44px); line-height:1.16;
-    letter-spacing:-.028em; margin:22px 0 0; max-width:660px;
-  }
-  .hook__p{margin:24px 0 0; font-size:clamp(17px,2.3vw,21px); line-height:1.5; color:var(--dim); max-width:520px;}
+  .hook__p{margin:30px 0 0; font-size:clamp(17px,2.4vw,22px); line-height:1.5; color:var(--dim); max-width:540px;}
   .hook__p b{color:var(--bone); font-weight:500;}
-  .hook__cta{
-    align-self:flex-start; margin:38px 0 0; padding:17px 30px; cursor:pointer;
-    background:var(--bone); color:var(--night); border:1px solid var(--bone);
-    font-family:Archivo,sans-serif; font-size:17px; font-weight:600; letter-spacing:-.01em;
+  .hook__p em{color:var(--amber); font-style:normal; font-weight:500;}
+  .hook__row{display:flex; gap:14px; align-items:center; flex-wrap:wrap; margin:36px 0 0;}
+  .btn{
+    padding:16px 28px; cursor:pointer; border:1px solid var(--bone);
+    background:var(--bone); color:var(--night);
+    font-family:Archivo,sans-serif; font-size:16px; font-weight:600; letter-spacing:-.01em;
     transition:background .16s ease, border-color .16s ease;
   }
-  .hook__cta:hover{background:var(--amber); border-color:var(--amber);}
-  .hook__cue{margin:30px 0 0; font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); animation:drift 2.6s ease-in-out infinite;}
+  .btn:hover{background:var(--amber); border-color:var(--amber);}
+  .btn--ghost{background:transparent; color:var(--bone); border-color:var(--line);}
+  .btn--ghost:hover{background:transparent; border-color:var(--bone); color:var(--bone);}
+  .cue{margin:28px 0 0; font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); animation:drift 2.6s ease-in-out infinite;}
   @keyframes drift{0%,100%{transform:translateY(0); opacity:.5;} 50%{transform:translateY(6px); opacity:1;}}
 
-  /* ---------- DOOR ---------- */
-  .door{padding:70px 0 0;}
-  .door__k{font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--amber); margin:0 0 16px;}
-  .door__img{
-    aspect-ratio:16/10; background:var(--night-2); border:1px solid var(--line);
-    display:grid; place-items:center; overflow:hidden;
+  /* ---------- CONTROLS ---------- */
+  .bar{
+    position:fixed; inset:0 0 auto 0; z-index:40;
+    display:none; justify-content:space-between; align-items:center; gap:12px;
+    padding:11px 24px; background:rgba(19,19,22,.93); backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+    font-family:"DM Mono",monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim);
   }
-  .door__img img{width:100%; height:100%; object-fit:cover; display:block;}
-  .door__img svg{width:min(180px,34%); height:auto; opacity:.5;}
-  .door__cap{margin:14px 0 0; font-family:"DM Mono",monospace; font-size:11.5px; line-height:1.7; color:var(--dim); letter-spacing:.03em;}
-  .door__cap b{color:var(--bone); font-weight:500;}
+  .bar.is-on{display:flex;}
+  .bar__sorts{display:flex; gap:6px;}
+  .bar__sorts button{
+    padding:7px 12px; cursor:pointer; background:transparent; color:var(--dim);
+    border:1px solid var(--line);
+    font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+  }
+  .bar__sorts button.is-on{background:var(--bone); color:var(--night); border-color:var(--bone);}
+  .bar__pos b{color:var(--amber); font-weight:500;}
 
-  /* ---------- QUEUE SPINE ---------- */
-  .queue{padding:70px 0 0; position:relative;}
-  .queue__k{font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--dim); margin:0 0 24px;}
-
-  .spine{position:relative; padding-left:26px;}
-  .spine::before{
-    content:""; position:absolute; left:4px; top:0; bottom:0; width:1px;
-    background:repeating-linear-gradient(to bottom, var(--line) 0 4px, transparent 4px 9px);
+  /* ---------- WALL PAGE ---------- */
+  .wallpage{padding-top:52px; padding-bottom:74px; justify-content:flex-start;}
+  .grid{
+    flex:1; min-height:0;
+    columns:4; column-gap:26px;
+    font-size:clamp(10px,1.55vh,14px);
   }
   .e{
-    position:relative; padding:5px 0; display:flex; gap:12px; align-items:baseline;
-    font-size:15px; line-height:1.42; color:#4E4E58;
-    transition:color .45s ease;
+    break-inside:avoid; display:flex; gap:8px; align-items:baseline;
+    padding:2px 0; color:var(--faint); cursor:pointer;
+    line-height:1.3; transition:color .4s ease;
   }
-  .e::before{
-    content:""; position:absolute; left:-26px; top:12px;
-    width:5px; height:5px; border-radius:50%; background:var(--line);
-    transition:background .45s ease, transform .45s ease;
-  }
-  .e__n{
-    font-family:"DM Mono",monospace; font-size:10.5px; color:#3E3E47;
-    flex:0 0 58px; font-variant-numeric:tabular-nums; transition:color .45s ease;
-  }
-  .e__w{flex:1; min-width:0;}
-  .e.is-silent .e__w{font-style:italic;}
-
-  .e.is-flare{color:var(--flare);}
+  .e:hover{color:var(--bone);}
+  .e__n{font-family:"DM Mono",monospace; font-size:.82em; color:#33333C; flex:0 0 auto; font-variant-numeric:tabular-nums;}
+  .e__w{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .e.is-silent .e__w{font-style:italic; opacity:.6;}
+  .e.is-flare{color:var(--flare); font-weight:500;}
   .e.is-flare .e__n{color:var(--flare);}
-  .e.is-flare::before{background:var(--flare); transform:scale(2.2);}
+  .e.is-mine{color:var(--amber);}
+
+  .pagefoot{
+    display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    padding:12px 0 0; border-top:1px solid var(--line);
+    font-family:"DM Mono",monospace; font-size:10.5px; letter-spacing:.09em; color:var(--dim);
+  }
+  .pagefoot b{color:var(--bone); font-weight:500;}
 
   /* ---------- MILESTONE ---------- */
-  .mile{margin:34px 0 34px -26px; padding:30px 0 30px 26px; border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
-  .mile__big{
-    font-family:"DM Mono",monospace; font-weight:500;
-    font-size:clamp(38px,9vw,84px); line-height:.95; letter-spacing:-.035em;
-    color:var(--amber); margin:0; font-variant-numeric:tabular-nums;
-  }
-  .mile__t{margin:14px 0 0; font-size:clamp(17px,2.6vw,24px); line-height:1.38; max-width:600px;}
-  .mile__s{margin:12px 0 0; font-family:"DM Mono",monospace; font-size:11.5px; color:var(--dim); letter-spacing:.04em;}
+  .mile{justify-content:center; padding:80px 0;}
+  .mile__big{font-family:"DM Mono",monospace; font-weight:500; font-size:clamp(46px,12vw,120px); line-height:.94; letter-spacing:-.04em; color:var(--amber); margin:0; font-variant-numeric:tabular-nums;}
+  .mile__t{margin:20px 0 0; font-size:clamp(19px,3.2vw,30px); line-height:1.34; max-width:620px;}
+  .mile__s{margin:16px 0 0; font-family:"DM Mono",monospace; font-size:12px; color:var(--dim); letter-spacing:.05em;}
 
-  .loading{padding:40px 0; font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim);}
+  /* ---------- DETAIL SHEET ---------- */
+  .sheet{
+    position:fixed; inset:0; z-index:60; display:none;
+    background:rgba(10,10,12,.86); backdrop-filter:blur(4px);
+    align-items:center; justify-content:center; padding:24px;
+  }
+  .sheet.is-on{display:flex;}
+  .card{width:min(520px,100%); background:var(--night-2); border:1px solid var(--line); padding:30px 28px;}
+  .card__n{font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--amber); margin:0;}
+  .card__w{font-weight:600; font-size:clamp(24px,4.4vw,38px); line-height:1.18; letter-spacing:-.024em; margin:16px 0 0;}
+  .card__m{margin:18px 0 0; font-family:"DM Mono",monospace; font-size:11.5px; line-height:1.8; color:var(--dim); letter-spacing:.03em;}
+  .card__acts{display:flex; gap:9px; flex-wrap:wrap; margin:24px 0 0;}
+  .act{
+    padding:11px 16px; cursor:pointer; background:transparent; color:var(--bone); border:1px solid var(--line);
+    font-family:"DM Mono",monospace; font-size:10.5px; letter-spacing:.11em; text-transform:uppercase;
+  }
+  .act:hover{border-color:var(--bone);}
+  .act.is-liked{color:var(--flare); border-color:var(--flare);}
+  .act--go{background:var(--bone); color:var(--night); border-color:var(--bone);}
+  .card__x{margin:18px 0 0; font-family:"DM Mono",monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); cursor:pointer;}
+  .busy{margin:14px 0 0; font-family:"DM Mono",monospace; font-size:10.5px; color:var(--amber); letter-spacing:.06em; display:none;}
+  .busy.is-on{display:block;}
 
   /* ---------- JOIN ---------- */
-  .join{padding:96px 0 0; scroll-margin-top:70px;}
-  .join__h{font-weight:600; font-size:clamp(30px,6vw,56px); line-height:1.1; letter-spacing:-.03em; margin:0;}
-  .join__p{margin:20px 0 0; font-size:17px; line-height:1.55; color:var(--dim); max-width:520px;}
+  .join{justify-content:center; padding:90px 0;}
+  .join h2{font-weight:600; font-size:clamp(30px,6.4vw,62px); line-height:1.06; letter-spacing:-.034em; margin:0;}
+  .join__p{margin:22px 0 0; font-size:17px; line-height:1.55; color:var(--dim); max-width:520px;}
   .join__p b{color:var(--bone); font-weight:500;}
-  .field{display:flex; margin:32px 0 0; max-width:600px; border-bottom:2px solid var(--bone);}
+  .field{display:flex; margin:30px 0 0; max-width:600px; border-bottom:2px solid var(--bone);}
   .field input{flex:1; min-width:0; font-family:Archivo,sans-serif; font-size:clamp(18px,2.8vw,23px); padding:13px 2px; background:transparent; color:var(--bone); border:none; outline:none;}
-  .field input::placeholder{color:#4A4A54;}
-  .prices{display:flex; gap:10px; flex-wrap:wrap; margin:28px 0 0;}
-  .price{
-    padding:15px 22px; cursor:pointer; background:transparent; color:var(--bone);
-    border:1px solid var(--line); text-align:left;
-    font-family:"DM Mono",monospace; font-size:13px; letter-spacing:.04em;
-    transition:border-color .15s ease, color .15s ease;
-  }
+  .field input::placeholder{color:var(--faint);}
+  .prices{display:flex; gap:10px; flex-wrap:wrap; margin:26px 0 0;}
+  .price{padding:15px 22px; cursor:pointer; background:transparent; color:var(--bone); border:1px solid var(--line); text-align:left; font-family:"DM Mono",monospace; font-size:13px;}
   .price:hover,.price:focus-visible{border-color:var(--amber); color:var(--amber); outline:none;}
   .price s{display:block; font-size:9.5px; color:var(--dim); text-decoration:none; letter-spacing:.16em; text-transform:uppercase; margin-bottom:6px;}
-  .fine{margin:24px 0 0; font-family:"DM Mono",monospace; font-size:11px; color:var(--dim); line-height:1.8; letter-spacing:.03em;}
+  .fine{margin:22px 0 0; font-family:"DM Mono",monospace; font-size:11px; color:var(--dim); line-height:1.8;}
+  .colo{margin:34px 0 0; padding:22px 0 0; border-top:1px solid var(--line); max-width:540px; font-size:14.5px; line-height:1.6; color:var(--dim);}
+  .colo b{color:var(--bone); font-weight:500;} .colo a{color:var(--amber);}
 
-  /* ---------- TICKET ---------- */
-  .tkwrap{display:none; padding:36px 0 0;}
-  .tkwrap.is-open{display:block;}
-  .tk{width:min(336px,100%); background:var(--bone); color:var(--night); padding:26px 24px 0;}
-  .tk__k,.tk__l{font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:#57575F; text-align:center;}
-  .tk__rule{border-top:1px dashed #B2AFA4; margin:15px 0;}
-  .tk__n{font-family:"DM Mono",monospace; font-weight:500; font-size:54px; line-height:1.04; text-align:center; margin:5px 0 0;}
-  .tk__said{text-align:center; font-size:15px; margin:11px 0 0; color:#57575F;}
-  .tk__rows{margin:17px 0 0; font-family:"DM Mono",monospace; font-size:11.5px;}
-  .tk__r{display:flex; justify-content:space-between; gap:12px; padding:6px 0; border-bottom:1px dotted #B2AFA4; color:#57575F;}
-  .tk__r b{color:var(--night); font-weight:500;}
-  .tk__f{margin:15px 0 0; padding-top:11px; font-family:"DM Mono",monospace; font-size:10px; color:#57575F; text-align:center;}
-  .tk__tear{height:14px; margin:8px -24px 0; background:radial-gradient(circle at 7px 14px, transparent 6px, var(--night) 6px 6.9px, transparent 7px) repeat-x; background-size:14px 14px;}
-  .share{display:flex; gap:10px; flex-wrap:wrap; margin:22px 0 0;}
-  .share button{padding:13px 20px; cursor:pointer; background:var(--amber); color:var(--night); border:1px solid var(--amber); font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.13em; text-transform:uppercase;}
-  .share button.alt{background:transparent; color:var(--bone); border-color:var(--line);}
-
-  /* ---------- COLOPHON ---------- */
-  .colo{margin:90px 0 0; padding:26px 0 0; border-top:1px solid var(--line); max-width:560px;}
-  .colo h3{margin:0 0 10px; font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--dim);}
-  .colo p{margin:0 0 11px; font-size:15px; line-height:1.6; color:var(--dim);}
-  .colo b{color:var(--bone); font-weight:500;}
-  .colo a{color:var(--amber);}
-
-  footer{margin-top:44px; padding:20px 0 40px; border-top:1px solid var(--line); display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap; font-family:"DM Mono",monospace; font-size:11px; color:var(--dim);}
-
-  /* ---------- STICKY CTA ---------- */
-  .sticky{
-    position:fixed; left:0; right:0; bottom:0; z-index:30;
-    display:flex; justify-content:center; padding:0 20px 20px;
-    pointer-events:none; opacity:0; transition:opacity .3s ease;
-  }
+  /* ---------- STICKY ---------- */
+  .sticky{position:fixed; left:0; right:0; bottom:0; z-index:40; display:flex; justify-content:center; padding:0 20px 18px; pointer-events:none; opacity:0; transition:opacity .3s ease;}
   .sticky.is-on{opacity:1;}
-  .sticky button{
-    pointer-events:auto; padding:15px 28px; cursor:pointer;
-    background:var(--bone); color:var(--night); border:1px solid var(--bone);
-    font-family:Archivo,sans-serif; font-size:16px; font-weight:600; letter-spacing:-.01em;
-    box-shadow:0 6px 26px rgba(0,0,0,.55);
-  }
-  .sticky button:hover{background:var(--amber); border-color:var(--amber);}
+  .sticky .btn{pointer-events:auto; box-shadow:0 6px 26px rgba(0,0,0,.6);}
 
-  @media (max-width:640px){
-    .wrap{padding:0 18px;}
-    .e{font-size:14.5px;}
-    .e__n{flex-basis:48px;}
+  @media (max-width:1000px){ .grid{columns:3;} }
+  @media (max-width:700px){
+    .page{padding:0 16px;}
+    .grid{columns:2; column-gap:16px;}
+    .bar{padding:10px 16px;}
   }
-  @media (prefers-reduced-motion:reduce){
-    html{scroll-behavior:auto;}
-    *{animation:none !important; transition:none !important;}
-  }
+  @media (prefers-reduced-motion:reduce){ *{animation:none !important; transition:none !important;} .deck{scroll-snap-type:none;} }
 </style>
 </head>
 <body>
 
-<div class="hud">
-  <div>Walked<b id="hud-w">0 m</b></div>
-  <div>Still ahead<b id="hud-l">12,847</b></div>
+<div class="bar" id="bar">
+  <div class="bar__sorts">
+    <button data-sort="order" class="is-on">In line</button>
+    <button data-sort="random">Random</button>
+    <button data-sort="liked">Most felt</button>
+  </div>
+  <div class="bar__pos">Walked <b id="pos">0 m</b></div>
 </div>
 
-<div class="wrap">
+<div class="deck" id="deck">
 
   <!-- HOOK -->
-  <section class="hook">
-    <p class="hook__n" id="hook-n">12,847</p>
-    <h1 class="hook__h">people paid to stand in a queue that leads nowhere.</h1>
+  <section class="page"><div class="inner hook">
+    <h1>What are you waiting for?</h1>
     <p class="hook__p">
-      They didn't do it for a prize. There isn't one. They did it because before
-      you take a number, you are asked one question &mdash; and the answer is
-      written down and never removed. <b>This site is nothing but those answers.</b>
+      <em id="hook-n">12,847</em> people paid <em id="hook-p">$7</em> to answer that
+      question, and to stand in a queue with nothing at the end of it.
+      <b>Their answers are the only thing here.</b>
     </p>
-    <button class="hook__cta" id="hook-cta">What are you waiting for?</button>
-    <p class="hook__cue">or scroll and walk the line &darr;</p>
-  </section>
-
-  <!-- DOOR -->
-  <section class="door">
-    <p class="door__k">Where it starts</p>
-    <div class="door__img">
-      <!-- REPLACE with your own photograph of the real door:
-           <img src="door.jpg" alt="The door where the queue begins">
-           Never a stock image. That this door is real is the only concrete
-           claim this site makes; if it is faked, the whole thing collapses. -->
-      <svg viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg" aria-label="The door">
-        <rect x="8" y="6" width="104" height="144" fill="none" stroke="#7E7E88" stroke-width="1.6"/>
-        <rect x="20" y="18" width="80" height="120" fill="none" stroke="#7E7E88" stroke-width="1.2"/>
-        <rect x="30" y="30" width="60" height="44" fill="none" stroke="#7E7E88" stroke-width="1"/>
-        <rect x="30" y="84" width="60" height="44" fill="none" stroke="#7E7E88" stroke-width="1"/>
-        <circle cx="87" cy="82" r="2.6" fill="#7E7E88"/>
-      </svg>
+    <div class="hook__row">
+      <button class="btn" id="hook-go">Answer it</button>
+      <button class="btn btn--ghost" id="hook-read">Read theirs first</button>
     </div>
-    <p class="door__cap">
-      <b id="door-c">39.75540&deg;, 32.80430&deg;</b><br>
-      An ordinary door. It is locked, nobody works behind it, and it has never
-      been opened for anyone in this queue. The line starts on the pavement in
-      front of it and runs backwards from there, one person per metre.
-    </p>
-  </section>
+    <p class="cue">100 people per screen &middot; scroll &darr;</p>
+  </div></section>
 
-  <!-- QUEUE -->
-  <section class="queue">
-    <p class="queue__k">The line, from the back &mdash; every person, in order</p>
-    <div class="spine" id="spine"></div>
-    <p class="loading" id="loading">loading more of the line&hellip;</p>
-  </section>
+  <div id="pages"></div>
 
   <!-- JOIN -->
-  <section class="join" id="join">
-    <h2 class="join__h">What are you waiting for?</h2>
+  <section class="page" id="join"><div class="inner join">
+    <h2>What are you waiting for?</h2>
     <p class="join__p">
-      Write it down. It is kept exactly as you typed it, for as long as this
-      exists, and <b>it is never edited, moved or deleted</b> &mdash; not by you,
-      not by me. That permanence is the entire thing you are paying for.
+      Write it down. It stays exactly as you typed it, and <b>it is never edited,
+      moved or deleted</b> &mdash; not by you, not by me. That permanence is the
+      whole of what you are paying for.
     </p>
-
     <div class="field">
       <input id="said" type="text" maxlength="70" placeholder="a phone call &middot; nothing &middot; my results" aria-label="What are you waiting for?">
     </div>
-
     <div class="prices">
       <button class="price" data-places="1"><s>One place</s>$7</button>
       <button class="price" data-places="5"><s>Five in a row</s>$28</button>
       <button class="price" data-places="10"><s>Ten in a row</s>$50</button>
     </div>
-
     <p class="fine">
       The price rises as the queue grows. It does not come back down.<br>
       Nothing is posted to you. No refunds, no transfers, no leaving.<br>
-      The door never opens. Said plainly, so nobody can be surprised by it.
+      The door never opens. Said plainly, so nobody is surprised.
     </p>
+    <!-- COLOPHON — replace with your own words. -->
+    <p class="colo">
+      Made by <b>[your name]</b>. I photographed the door, measured the pavement
+      behind it, and built the rest at a kitchen table. There is no company.
+      Press: <a href="mailto:hello@example.com">hello@example.com</a>
+    </p>
+  </div></section>
 
-    <div class="tkwrap" id="tkwrap">
-      <div class="tk">
-        <div class="tk__k">The Queue &middot; Issued once</div>
-        <div class="tk__rule"></div>
-        <div class="tk__l">Your number</div>
-        <div class="tk__n" id="tk-n">&mdash;</div>
-        <div class="tk__said" id="tk-s"></div>
-        <div class="tk__rows">
-          <div class="tk__r"><span>Distance from door</span><b id="tk-d">&mdash;</b></div>
-          <div class="tk__r"><span>People behind you</span><b id="tk-b">0</b></div>
-          <div class="tk__r"><span>Estimated wait</span><b>Never</b></div>
-        </div>
-        <div class="tk__f">Keep this. It will not be reissued.</div>
-        <div class="tk__tear"></div>
-      </div>
-      <div class="share">
-        <button id="dl">Download for stories</button>
-        <button id="dl2" class="alt">Square</button>
-      </div>
-    </div>
-
-    <!-- COLOPHON — replace with your own words. An unsigned absurd project
-         reads as a scam; a signed one reads as a piece of work. -->
-    <div class="colo">
-      <h3>Who made this</h3>
-      <p>My name is <b>[your name]</b>. I photographed the door, measured the pavement behind it, and built the rest at a kitchen table. There is no company.</p>
-      <p>I made it because I have spent most of the last two years waiting for things, and I wanted to know what everyone else was waiting for.</p>
-      <p>Press and questions: <a href="mailto:hello@example.com">hello@example.com</a></p>
-    </div>
-  </section>
-
-  <footer>
-    <span>The Queue</span>
-    <span>Now serving: nobody.</span>
-  </footer>
 </div>
 
-<div class="sticky" id="sticky"><button id="sticky-btn">What are you waiting for?</button></div>
+<!-- DETAIL SHEET -->
+<div class="sheet" id="sheet">
+  <div class="card">
+    <p class="card__n" id="c-n">&#8470; 0</p>
+    <p class="card__w" id="c-w"></p>
+    <p class="card__m" id="c-m"></p>
+    <div class="card__acts">
+      <button class="act" id="c-like">&#9829; <span id="c-likes">0</span></button>
+      <button class="act" id="c-img">Image</button>
+      <button class="act" id="c-vid">Video</button>
+      <button class="act act--go" id="c-join">Add mine</button>
+    </div>
+    <p class="busy" id="c-busy">recording&hellip; about 6 seconds</p>
+    <p class="card__x" id="c-close">Close</p>
+  </div>
+</div>
+
+<div class="sticky" id="sticky"><button class="btn" id="sticky-btn">What are you waiting for?</button></div>
 
 <script>
 (function(){
   "use strict";
 
   /* ---------------------------------------------------------------
-     DEMO DATA. Replace with a real feed. The lines ARE the product —
-     inventing them is the one lie this page cannot survive.
+     DEMO DATA. Replace with a real feed. The lines and the like counts
+     ARE the product — inventing them is the one lie this page cannot
+     survive.
   ----------------------------------------------------------------*/
   var COUNT = 12847, PRICE = 7;
-  var DOOR  = { lat:39.7554, lng:32.8043 };
-  var SITE  = "thequeue.example";
+  var DOOR = { lat:39.7554, lng:32.8043 };
+  var SITE = "thequeue.example";
 
   var lines = [
     "a phone call","my visa","nothing, I was curious","the results","him to notice",
@@ -343,122 +275,179 @@
     return function(){ s = s * 16807 % 2147483647; return (s - 1) / 2147483646; };
   }
   function lineFor(n){ return lines[Math.floor(seeded(n)() * lines.length)]; }
+  function likesFor(n){
+    var r = seeded(n + 5501);
+    return Math.floor(Math.pow(r(), 4) * 900);   /* a few get many, most get few */
+  }
   function coordFor(p){
     return (DOOR.lat + p * 0.0000075).toFixed(5) + "\u00B0, " +
            (DOOR.lng + p * 0.0000061).toFixed(5) + "\u00B0";
   }
-  /* A real queue shuffles roughly 20 metres an hour. */
   function pace(left){
-    var h = left / 20;
+    var h = left / 20;                            /* a real queue: ~20 m an hour */
     if(h < 48) return Math.round(h) + " hours";
     var d = h / 24;
     return d < 60 ? Math.round(d) + " days" : Math.round(d / 30) + " months";
   }
 
-  var state = { cursor:COUNT, joined:false, myNumber:null, said:"" };
-  var spine = $("spine");
-  var CHUNK = 100, sinceMile = 0;
+  /* ---------- pool ---------- */
+  var pool = [], liked = {}, extraLikes = {};
+  (function build(){
+    for(var n = COUNT; n >= 1; n--) pool.push(n);
+  })();
 
-  function entry(n){
+  var state = { sort:"order", perPage:100, joined:false, myNumber:null, said:"", current:null };
+
+  function likes(n){ return likesFor(n) + (extraLikes[n] || 0); }
+
+  function ordered(){
+    if(state.sort === "order") return pool;
+    if(state.sort === "random"){
+      var a = pool.slice(), i, j, t;
+      for(i = a.length - 1; i > 0; i--){ j = Math.floor(Math.random() * (i + 1)); t = a[i]; a[i] = a[j]; a[j] = t; }
+      return a;
+    }
+    return pool.slice().sort(function(x, y){ return likes(y) - likes(x); });
+  }
+
+  /* ---------- render pages ---------- */
+  function entryHTML(n){
     var w = lineFor(n), silent = !w;
-    return '<div class="e' + (silent ? " is-silent" : "") + '" data-n="' + n + '">' +
-      '<span class="e__n">\u2116' + fmt(n) + '</span>' +
+    return '<div class="e' + (silent ? " is-silent" : "") +
+      (state.joined && n === state.myNumber ? " is-mine" : "") + '" data-n="' + n + '">' +
+      '<span class="e__n">' + fmt(n) + '</span>' +
       '<span class="e__w">' + (silent ? "said nothing" : esc(w)) + '</span>' +
     '</div>';
   }
 
-  function milestone(walked, left){
-    return '<div class="mile">' +
+  function milestoneHTML(walked, left){
+    return '<section class="page"><div class="inner mile">' +
       '<p class="mile__big">' + fmt(walked) + ' m</p>' +
-      '<p class="mile__t">That is how far you have walked. <strong>' + fmt(left) +
-      '</strong> people are still ahead of you.</p>' +
+      '<p class="mile__t">That is how far down the line you have walked. <strong>' +
+        fmt(left) + '</strong> people are still ahead of you.</p>' +
       '<p class="mile__s">At the pace a real queue moves, the door is ' + pace(left) +
-      ' away. It does not open.</p>' +
-    '</div>';
+        ' away. It does not open.</p>' +
+    '</div></section>';
   }
 
-  function extend(){
-    var html = "", i;
-    for(i = 0; i < CHUNK && state.cursor > 1; i++){
-      state.cursor -= 1; sinceMile += 1;
-      html += entry(state.cursor);
-      if(sinceMile >= 100){ html += milestone(COUNT - state.cursor, state.cursor); sinceMile = 0; }
+  function render(){
+    var list = ordered(), per = state.perPage, out = [], i, page, k;
+    var maxPages = 24;                              /* enough to scroll a long way */
+    for(i = 0; i < list.length && out.length < maxPages; i += per){
+      page = list.slice(i, i + per);
+      out.push(
+        '<section class="page"><div class="inner wallpage">' +
+          '<div class="grid">' + page.map(entryHTML).join("") + '</div>' +
+          '<div class="pagefoot">' +
+            '<span>' + (state.sort === "order"
+              ? "\u2116 " + fmt(page[0]) + " \u2013 " + fmt(page[page.length - 1])
+              : state.sort === "random" ? "in no order at all" : "most felt") +
+            '</span>' +
+            '<span><b>' + fmt(i + page.length) + '</b> of ' + fmt(COUNT) + ' read</span>' +
+          '</div>' +
+        '</div></section>'
+      );
+      k = out.length;
+      if(state.sort === "order" && k % 5 === 0){
+        out.push(milestoneHTML(COUNT - page[page.length - 1], page[page.length - 1]));
+      }
     }
-    spine.insertAdjacentHTML("beforeend", html);
-    if(state.cursor <= 1) $("loading").style.display = "none";
+    $("pages").innerHTML = out.join("");
   }
 
-  extend(); extend();
+  function fitPerPage(){
+    state.perPage = window.innerWidth < 700 ? 50 : 100;
+  }
+  fitPerPage(); render();
 
-  /* ---------- infinite walk + HUD ---------- */
-  var ticking = false;
-  window.addEventListener("scroll", function(){
+  var rt;
+  window.addEventListener("resize", function(){
+    clearTimeout(rt);
+    rt = setTimeout(function(){
+      var was = state.perPage; fitPerPage();
+      if(was !== state.perPage) render();
+    }, 250);
+  });
+
+  /* ---------- sorting ---------- */
+  document.querySelectorAll(".bar__sorts button").forEach(function(b){
+    b.addEventListener("click", function(){
+      document.querySelectorAll(".bar__sorts button").forEach(function(x){ x.classList.remove("is-on"); });
+      b.classList.add("is-on");
+      state.sort = b.dataset.sort;
+      render();
+      $("pages").scrollIntoView();
+    });
+  });
+
+  /* ---------- scroll state ---------- */
+  var deck = $("deck"), ticking = false;
+  deck.addEventListener("scroll", function(){
     if(ticking) return;
     ticking = true;
     requestAnimationFrame(function(){
-      /* which entry sits at the middle of the screen */
-      var mid = window.innerHeight / 2, best = null, all = spine.children, i, r;
-      for(i = 0; i < all.length; i += 7){         /* sample, don't measure all */
-        r = all[i].getBoundingClientRect();
-        if(r.top <= mid) best = all[i]; else break;
+      var past = deck.scrollTop > window.innerHeight * 0.6;
+      $("bar").classList.toggle("is-on", past);
+      $("sticky").classList.toggle("is-on", past);
+
+      var pages = $("pages").querySelectorAll(".wallpage");
+      var seen = 0, i, r;
+      for(i = 0; i < pages.length; i++){
+        r = pages[i].getBoundingClientRect();
+        if(r.top < window.innerHeight * 0.5) seen = i + 1; else break;
       }
-      if(best && best.dataset.n){
-        var n = Number(best.dataset.n);
-        $("hud-w").textContent = fmt(COUNT - n) + " m";
-        $("hud-l").textContent = fmt(n);
-      }
-      if(window.innerHeight + window.scrollY > document.body.offsetHeight - window.innerHeight * 2.5){
-        extend();
-      }
-      /* sticky CTA appears once you are past the hook */
-      $("sticky").classList.toggle("is-on", window.scrollY > window.innerHeight * 0.9);
+      $("pos").textContent = fmt(seen * state.perPage) + " m";
       ticking = false;
     });
   }, { passive:true });
 
-  /* ---------- the roving spotlight ----------
-     One line at a time turns red. It makes a wall of thousands feel like it
-     is being read by someone, and it pulls the eye to one story instead of
-     letting the scale flatten them all. */
+  /* ---------- roving spotlight ----------
+     One line at a time turns red. On a wall of a hundred it stops the scale
+     from flattening everyone into noise, and pulls the eye to one story. */
   var flared = null;
   setInterval(function(){
     if(flared){ flared.classList.remove("is-flare"); flared = null; }
-    var vis = [], all = spine.children, i, r;
+    var all = document.querySelectorAll(".e"), vis = [], i, r;
     for(i = 0; i < all.length; i++){
-      if(!all[i].dataset.n) continue;
       r = all[i].getBoundingClientRect();
-      if(r.top > 80 && r.bottom < window.innerHeight - 80) vis.push(all[i]);
-      if(r.top > window.innerHeight) break;
+      if(r.top > 60 && r.bottom < window.innerHeight - 60 && r.width) vis.push(all[i]);
     }
     if(!vis.length) return;
     flared = vis[Math.floor(Math.random() * vis.length)];
     flared.classList.add("is-flare");
   }, 5000);
 
-  /* ---------- join ---------- */
-  function toJoin(){ $("join").scrollIntoView({ behavior:"smooth" }); setTimeout(function(){ $("said").focus(); }, 500); }
-  $("hook-cta").addEventListener("click", toJoin);
-  $("sticky-btn").addEventListener("click", toJoin);
+  /* ---------- detail sheet ---------- */
+  function openSheet(n){
+    state.current = n;
+    var w = lineFor(n);
+    $("c-n").textContent = "\u2116 " + fmt(n);
+    $("c-w").textContent = w ? "\u201C" + w + "\u201D" : "Said nothing.";
+    $("c-m").innerHTML =
+      (n / 1000).toFixed(2) + " km from the door<br>" +
+      "standing at " + coordFor(n) + "<br>" +
+      "estimated wait: never";
+    $("c-likes").textContent = fmt(likes(n));
+    $("c-like").classList.toggle("is-liked", !!liked[n]);
+    $("c-busy").classList.remove("is-on");
+    $("sheet").classList.add("is-on");
+  }
+  document.addEventListener("click", function(e){
+    var el = e.target.closest(".e");
+    if(el) openSheet(Number(el.dataset.n));
+  });
+  $("c-close").addEventListener("click", function(){ $("sheet").classList.remove("is-on"); });
+  $("sheet").addEventListener("click", function(e){ if(e.target === $("sheet")) $("sheet").classList.remove("is-on"); });
 
-  document.querySelectorAll(".price").forEach(function(b){
-    b.addEventListener("click", function(){
-      /* → real flow: open Paddle checkout, write the position server-side in
-         the transaction.completed webhook, then reload from the server. */
-      var places = Number(b.dataset.places);
-      state.said     = ($("said").value || "").trim();
-      state.myNumber = COUNT + 1;
-      state.joined   = true;
-
-      $("tk-n").textContent = fmt(state.myNumber);
-      $("tk-s").textContent = state.said ? "\u201C" + state.said + "\u201D" : "You said nothing.";
-      $("tk-d").textContent = (state.myNumber / 1000).toFixed(2) + " km";
-      $("tk-b").textContent = fmt(places - 1);
-      $("tkwrap").classList.add("is-open");
-      $("tkwrap").scrollIntoView({ behavior:"smooth", block:"center" });
-    });
+  $("c-like").addEventListener("click", function(){
+    var n = state.current;
+    if(liked[n]){ liked[n] = false; extraLikes[n] = (extraLikes[n] || 0) - 1; }
+    else        { liked[n] = true;  extraLikes[n] = (extraLikes[n] || 0) + 1; }
+    $("c-likes").textContent = fmt(likes(n));
+    $("c-like").classList.toggle("is-liked", !!liked[n]);
   });
 
-  /* ---------- share card ---------- */
+  /* ---------- share: still image ---------- */
   function wrapT(ctx, t, maxW){
     var out = [], line = "";
     String(t).split(" ").forEach(function(w){
@@ -470,54 +459,115 @@
     return out;
   }
 
-  function card(W, H){
-    var c = document.createElement("canvas");
-    c.width = W; c.height = H;
-    var x = c.getContext("2d");
+  function paint(x, W, H, n, reveal){
+    var w = lineFor(n), pad = W * 0.11;
     x.fillStyle = "#131316"; x.fillRect(0, 0, W, H);
-    var pad = W * 0.11;
     x.textAlign = "left";
 
     x.fillStyle = "#E39B2E";
     x.font = "500 " + (W * 0.026) + "px 'DM Mono', monospace";
-    x.fillText("THE QUEUE \u00B7 \u2116 " + fmt(state.myNumber), pad, H * 0.29);
+    x.fillText("WHAT ARE YOU WAITING FOR?", pad, H * 0.24);
 
     x.fillStyle = "#F2F0EA";
-    x.font = "600 " + (W * 0.088) + "px Archivo, sans-serif";
-    var ty = H * 0.39;
-    wrapT(x, state.said ? "\u201C" + state.said + "\u201D" : "Said nothing.", W - pad * 2)
-      .slice(0, 4).forEach(function(l){ x.fillText(l, pad, ty); ty += W * 0.105; });
+    x.font = "600 " + (W * 0.086) + "px Archivo, sans-serif";
+    var full = w ? "\u201C" + w + "\u201D" : "Said nothing.";
+    var rows = wrapT(x, full, W - pad * 2).slice(0, 4);
+    var shown = typeof reveal === "number" ? Math.max(1, Math.ceil(rows.length * reveal)) : rows.length;
+    var ty = H * 0.36;
+    rows.slice(0, shown).forEach(function(l){ x.fillText(l, pad, ty); ty += W * 0.103; });
 
     x.strokeStyle = "#31313A"; x.lineWidth = 2;
-    x.beginPath(); x.moveTo(pad, ty + H * 0.02); x.lineTo(W - pad, ty + H * 0.02); x.stroke();
+    x.beginPath(); x.moveTo(pad, H * 0.66); x.lineTo(W - pad, H * 0.66); x.stroke();
 
     x.fillStyle = "#7E7E88";
-    x.font = "400 " + (W * 0.031) + "px 'DM Mono', monospace";
-    x.fillText((state.myNumber / 1000).toFixed(2) + " km from a door that never opens", pad, ty + H * 0.065);
-    x.fillText("Estimated wait: never", pad, ty + H * 0.105);
-    x.fillStyle = "#E39B2E";
-    x.fillText(SITE, pad, ty + H * 0.155);
-    return c;
+    x.font = "400 " + (W * 0.03) + "px 'DM Mono', monospace";
+    x.fillText("\u2116 " + fmt(n) + " in a queue with nothing at the end", pad, H * 0.71);
+    x.fillText((n / 1000).toFixed(2) + " km from a door that never opens", pad, H * 0.75);
+    x.fillStyle = "#E39B2E"; x.fillText(SITE, pad, H * 0.80);
   }
 
-  function save(W, H){
-    if(!state.joined) return;
-    var go = function(){
-      card(W, H).toBlob(function(b){
-        var u = URL.createObjectURL(b), a = document.createElement("a");
-        a.href = u; a.download = "the-queue.png"; a.click();
-        setTimeout(function(){ URL.revokeObjectURL(u); }, 1500);
-      });
-    };
-    if(document.fonts && document.fonts.ready) document.fonts.ready.then(go); else go();
+  function saveBlob(blob, name){
+    var u = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = u; a.download = name; a.click();
+    setTimeout(function(){ URL.revokeObjectURL(u); }, 2000);
   }
-  $("dl").addEventListener("click", function(){ save(1080, 1920); });
-  $("dl2").addEventListener("click", function(){ save(1080, 1080); });
+  function withFonts(fn){
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(fn); else fn();
+  }
+
+  $("c-img").addEventListener("click", function(){
+    var n = state.current;
+    withFonts(function(){
+      var c = document.createElement("canvas");
+      c.width = 1080; c.height = 1920;
+      paint(c.getContext("2d"), 1080, 1920, n);
+      c.toBlob(function(b){ saveBlob(b, "queue-" + n + ".png"); });
+    });
+  });
+
+  /* ---------- share: short video ----------
+     Canvas is recorded to WebM via MediaRecorder. Instagram and TikTok
+     generally prefer MP4; browsers cannot encode MP4 without a library, so
+     this exports WebM. If you want MP4, convert server-side at launch. */
+  $("c-vid").addEventListener("click", function(){
+    var n = state.current;
+    if(typeof MediaRecorder === "undefined"){ $("c-img").click(); return; }
+
+    withFonts(function(){
+      var W = 1080, H = 1920, DUR = 6000;
+      var c = document.createElement("canvas");
+      c.width = W; c.height = H;
+      var x = c.getContext("2d");
+      paint(x, W, H, n, 0);
+
+      var stream = c.captureStream(30);
+      var type = MediaRecorder.isTypeSupported("video/webm;codecs=vp9")
+        ? "video/webm;codecs=vp9" : "video/webm";
+      var rec = new MediaRecorder(stream, { mimeType:type, videoBitsPerSecond:6000000 });
+      var chunks = [];
+      rec.ondataavailable = function(e){ if(e.data.size) chunks.push(e.data); };
+      rec.onstop = function(){ saveBlob(new Blob(chunks, { type:"video/webm" }), "queue-" + n + ".webm"); };
+
+      $("c-busy").classList.add("is-on");
+      rec.start();
+      var t0 = performance.now();
+      (function frame(now){
+        var p = Math.min((now - t0) / DUR, 1);
+        /* text reveals over the first 60%, then holds */
+        paint(x, W, H, n, Math.min(1, p / 0.6));
+        if(p < 1) requestAnimationFrame(frame);
+        else { rec.stop(); $("c-busy").classList.remove("is-on"); }
+      })(t0);
+    });
+  });
+
+  /* ---------- join ---------- */
+  function toJoin(){
+    $("sheet").classList.remove("is-on");
+    $("join").scrollIntoView({ behavior:"smooth" });
+    setTimeout(function(){ $("said").focus(); }, 600);
+  }
+  $("hook-go").addEventListener("click", toJoin);
+  $("sticky-btn").addEventListener("click", toJoin);
+  $("c-join").addEventListener("click", toJoin);
+  $("hook-read").addEventListener("click", function(){
+    $("pages").querySelector(".page").scrollIntoView({ behavior:"smooth" });
+  });
+
+  document.querySelectorAll(".price").forEach(function(b){
+    b.addEventListener("click", function(){
+      /* → real flow: open Paddle checkout, write the position server-side in
+         the transaction.completed webhook, then reload from the server. */
+      state.said = ($("said").value || "").trim();
+      state.myNumber = COUNT + 1;
+      state.joined = true;
+      alert("Demo: you would now be \u2116" + fmt(state.myNumber) +
+            (state.said ? ", waiting for \u201C" + state.said + "\u201D." : "."));
+    });
+  });
 
   $("hook-n").textContent = fmt(COUNT);
-  $("hud-l").textContent  = fmt(COUNT);
-  $("door-c").textContent = DOOR.lat.toFixed(5) + "\u00B0, " + DOOR.lng.toFixed(5) + "\u00B0";
-  document.querySelectorAll(".price")[0].lastChild.textContent = "$" + PRICE;
+  $("hook-p").textContent = "$" + PRICE;
 })();
 </script>
 </body>
