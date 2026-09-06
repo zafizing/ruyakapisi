@@ -13,7 +13,7 @@
 <style>
   :root{
     --night:#131316; --night-2:#1A1A1E; --line:#2C2C34;
-    --bone:#F2F0EA; --read:#C8C6C0; --dim:#7E7E88; --faint:#4A4A54;
+    --bone:#F2F0EA; --read:#E4E2DC; --dim:#7E7E88; --faint:#4A4A54;
     --amber:#E39B2E; --flare:#E4483A;
   }
   *{box-sizing:border-box;}
@@ -28,7 +28,7 @@
   .inner{max-width:1180px; margin:0 auto; min-height:100svh; display:flex; flex-direction:column;}
 
   /* ---------- HOOK ---------- */
-  .hook{justify-content:center; padding:96px 0 80px;}
+  .hook{justify-content:center; padding:100px 0 80px;}
   .hook h1{font-weight:600; font-size:clamp(38px,9vw,110px); line-height:.96; letter-spacing:-.042em; margin:0; max-width:13ch;}
   .hook h1 span{display:block; color:var(--amber);}
   .hook__sting{margin:26px 0 0; font-size:clamp(19px,3vw,28px); font-weight:500; letter-spacing:-.018em;}
@@ -44,63 +44,60 @@
   .btn:hover{background:var(--amber); border-color:var(--amber);}
   .btn--ghost{background:transparent; color:var(--bone); border-color:var(--line);}
   .btn--ghost:hover{background:transparent; border-color:var(--bone);}
-  .cue{margin:26px 0 0; font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); animation:drift 2.6s ease-in-out infinite;}
+  .cue{margin:26px 0 0; font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); animation:drift 2.6s ease-in-out infinite;}
   @keyframes drift{0%,100%{transform:translateY(0); opacity:.5;} 50%{transform:translateY(6px); opacity:1;}}
 
   /* ---------- CONTROL BAR ---------- */
   .bar{
     position:fixed; inset:0 0 auto 0; z-index:50;
-    display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;
-    padding:10px 22px; background:rgba(19,19,22,.95); backdrop-filter:blur(10px);
+    display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
+    padding:9px 20px; background:rgba(19,19,22,.95); backdrop-filter:blur(10px);
     border-bottom:1px solid var(--line);
   }
   .bar__l,.bar__r{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
-  .bar__k{font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--dim); margin-right:2px;}
-  .sortbtn{
-    padding:9px 15px; cursor:pointer; background:transparent; color:var(--read);
+  .home{
+    padding:9px 14px; cursor:pointer; background:transparent; color:var(--bone);
     border:1px solid var(--line);
+    font-family:"DM Mono",monospace; font-size:11px; font-weight:500; letter-spacing:.16em; text-transform:uppercase;
+  }
+  .home:hover{border-color:var(--amber); color:var(--amber);}
+  .bar__k{font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--dim);}
+  .sortbtn{
+    padding:9px 15px; cursor:pointer; background:transparent; color:var(--read); border:1px solid var(--line);
     font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
     transition:background .15s ease, color .15s ease, border-color .15s ease;
   }
-  .sortbtn:hover{border-color:var(--bone); color:var(--bone);}
+  .sortbtn:hover{border-color:var(--bone);}
   .sortbtn.is-on{background:var(--amber); color:var(--night); border-color:var(--amber); font-weight:500;}
-
   .search{display:flex; align-items:stretch; border:1px solid var(--line);}
-  .search input{
-    width:150px; min-width:0; padding:9px 12px; background:transparent; color:var(--bone);
-    border:none; outline:none; font-family:"DM Mono",monospace; font-size:11px;
-  }
+  .search input{width:148px; min-width:0; padding:9px 12px; background:transparent; color:var(--bone); border:none; outline:none; font-family:"DM Mono",monospace; font-size:11px;}
   .search input::placeholder{color:var(--faint);}
   .search button{padding:0 12px; cursor:pointer; background:transparent; color:var(--dim); border:none; border-left:1px solid var(--line); font-family:"DM Mono",monospace; font-size:11px;}
   .search button:hover{color:var(--amber);}
-
-  .navbtn{
-    padding:9px 12px; cursor:pointer; background:transparent; color:var(--dim); border:1px solid var(--line);
-    font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
-  }
+  .navbtn{padding:9px 12px; cursor:pointer; background:transparent; color:var(--dim); border:1px solid var(--line); font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase;}
   .navbtn:hover{color:var(--bone); border-color:var(--bone);}
 
   /* ---------- SERPENTINE WALL ---------- */
-  .wall{padding-top:82px; padding-bottom:70px; justify-content:flex-start;}
+  .wall{padding-top:84px; padding-bottom:70px; justify-content:flex-start;}
   .snake{flex:1; min-height:0; display:flex; flex-direction:column; justify-content:space-between; gap:2px;}
-  .lane{display:flex; align-items:stretch; gap:8px;}
+  .lane{display:flex; align-items:stretch; gap:9px;}
   .lane--rtl{flex-direction:row-reverse;}
 
   .e{
     flex:1 1 0; min-width:0; padding:6px 6px 7px; cursor:pointer; text-align:center;
     display:flex; flex-direction:column; justify-content:center; gap:2px;
     border-bottom:1px solid var(--line);
-    transition:transform .16s ease, color .16s ease, border-color .16s ease;
+    transition:transform .18s ease, color .18s ease, border-color .18s ease;
   }
-  .e__n{font-family:"DM Mono",monospace; font-size:8.5px; letter-spacing:.04em; color:var(--faint); transition:color .16s ease;}
+  .e__n{font-family:"DM Mono",monospace; font-size:8.5px; letter-spacing:.04em; color:var(--faint); transition:color .18s ease;}
   .e__w{
-    font-size:clamp(10px,1.4vh,13.5px); line-height:1.25; color:var(--read);
-    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; transition:color .16s ease;
+    font-size:clamp(10.5px,1.45vh,14px); line-height:1.25; color:var(--read); font-weight:400;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; transition:color .18s ease;
   }
   .e__amt{font-family:"DM Mono",monospace; font-size:8.5px; color:var(--amber); display:none;}
   .is-amount .e__amt{display:block;}
   .e.is-silent .e__w{font-style:italic; color:var(--dim);}
-  .e:hover{transform:scale(1.14); border-color:var(--flare);}
+  .e:hover{transform:scale(1.32); border-color:var(--flare); position:relative; z-index:5;}
   .e:hover .e__w,.e:hover .e__n{color:var(--flare);}
 
   .wallfoot{
@@ -119,22 +116,30 @@
   /* ---------- SHEET ---------- */
   .sheet{position:fixed; inset:0; z-index:70; display:none; background:rgba(10,10,12,.88); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:24px;}
   .sheet.is-on{display:flex;}
-  .card{width:min(520px,100%); background:var(--night-2); border:1px solid var(--line); padding:30px 28px; max-height:86svh; overflow-y:auto;}
+  .card{width:min(540px,100%); background:var(--night-2); border:1px solid var(--line); padding:30px 28px; max-height:88svh; overflow-y:auto;}
   .card__n{font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--amber); margin:0;}
   .card__w{font-weight:600; font-size:clamp(24px,4.4vw,38px); line-height:1.18; letter-spacing:-.024em; margin:14px 0 0;}
-  .card__by{margin:14px 0 0; font-size:16px; color:var(--read);}
+  .card__by{margin:12px 0 0; font-size:16px; color:var(--dim);}
   .card__by b{color:var(--bone); font-weight:600;}
-  .card__m{margin:16px 0 0; font-family:"DM Mono",monospace; font-size:11.5px; line-height:1.85; color:var(--dim);}
-  .card__acts{display:flex; gap:9px; flex-wrap:wrap; margin:24px 0 0;}
-  .act{padding:11px 16px; cursor:pointer; background:transparent; color:var(--bone); border:1px solid var(--line); font-family:"DM Mono",monospace; font-size:10.5px; letter-spacing:.11em; text-transform:uppercase;}
+  .card__c{
+    margin:20px 0 0; padding:14px 0 0; border-top:1px solid var(--line);
+    font-size:16px; line-height:1.6; color:var(--read);
+  }
+  .card__c:empty{display:none;}
+  .card__m{margin:18px 0 0; font-family:"DM Mono",monospace; font-size:11.5px; line-height:1.85; color:var(--dim);}
+  .card__m b{color:var(--amber); font-weight:500;}
+
+  .sharek{margin:22px 0 9px; font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--dim);}
+  .card__acts{display:flex; gap:8px; flex-wrap:wrap;}
+  .act{padding:11px 15px; cursor:pointer; background:transparent; color:var(--bone); border:1px solid var(--line); font-family:"DM Mono",monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;}
   .act:hover{border-color:var(--bone);}
-  .act--go{background:var(--bone); color:var(--night); border-color:var(--bone);}
+  .act--go{background:var(--bone); color:var(--night); border-color:var(--bone); margin-top:16px;}
   .card__x{margin:18px 0 0; font-family:"DM Mono",monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); cursor:pointer;}
-  .busy{margin:14px 0 0; font-family:"DM Mono",monospace; font-size:10.5px; color:var(--amber); display:none;}
+  .busy{margin:12px 0 0; font-family:"DM Mono",monospace; font-size:10.5px; color:var(--amber); line-height:1.6; display:none;}
   .busy.is-on{display:block;}
 
-  /* ---------- SEARCH RESULTS ---------- */
-  .results{position:fixed; inset:0; z-index:65; display:none; background:rgba(19,19,22,.97); padding:78px 24px 30px; overflow-y:auto;}
+  /* ---------- RESULTS ---------- */
+  .results{position:fixed; inset:0; z-index:65; display:none; background:rgba(19,19,22,.97); padding:80px 24px 30px; overflow-y:auto;}
   .results.is-on{display:block;}
   .results__in{max-width:760px; margin:0 auto;}
   .results__k{font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); margin:0 0 20px;}
@@ -146,16 +151,25 @@
   .results__x{margin:26px 0 0; font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--amber); cursor:pointer;}
 
   /* ---------- JOIN ---------- */
-  .join{justify-content:center; padding:100px 0 80px;}
+  .join{justify-content:center; padding:104px 0 80px;}
   .join h2{font-weight:600; font-size:clamp(30px,6.4vw,62px); line-height:1.04; letter-spacing:-.034em; margin:0;}
   .join h2 span{display:block; color:var(--amber);}
   .join__p{margin:22px 0 0; font-size:17px; line-height:1.55; color:var(--dim); max-width:520px;}
   .join__p b{color:var(--bone); font-weight:500;}
   .flabel{font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); margin:26px 0 8px;}
+  .flabel s{text-decoration:none; color:var(--faint);}
   .field{display:flex; max-width:600px; border-bottom:2px solid var(--bone);}
   .field input{flex:1; min-width:0; font-family:Archivo,sans-serif; font-size:clamp(17px,2.6vw,22px); padding:11px 2px; background:transparent; color:var(--bone); border:none; outline:none;}
   .field input::placeholder{color:var(--faint);}
   .field--sm{max-width:330px;}
+  .note{
+    display:block; width:100%; max-width:600px; resize:vertical; min-height:76px;
+    font-family:Archivo,sans-serif; font-size:16px; line-height:1.55; padding:12px 13px;
+    background:transparent; color:var(--bone); border:1px solid var(--line); outline:none;
+  }
+  .note:focus{border-color:var(--bone);}
+  .note::placeholder{color:var(--faint);}
+  .count{margin:7px 0 0; font-family:"DM Mono",monospace; font-size:10.5px; color:var(--faint);}
 
   .pay__row{display:flex; align-items:baseline; gap:6px; border-bottom:2px solid var(--bone); max-width:250px;}
   .pay__cur{font-family:"DM Mono",monospace; font-size:24px; color:var(--dim);}
@@ -173,13 +187,13 @@
   .sticky.is-on{opacity:1;}
   .sticky .btn{pointer-events:auto; box-shadow:0 6px 26px rgba(0,0,0,.6);}
 
-  @media (max-width:760px){
+  @media (max-width:820px){
     .page{padding:0 14px;}
-    .bar{padding:8px 14px; gap:8px;}
+    .bar{padding:8px 13px; gap:7px;}
     .bar__k{display:none;}
-    .search input{width:110px;}
-    .wall{padding-top:104px;}
-    .e:hover{transform:scale(1.06);}
+    .search input{width:104px;}
+    .wall{padding-top:112px;}
+    .e:hover{transform:scale(1.12);}
   }
   @media (prefers-reduced-motion:reduce){ *{animation:none !important; transition:none !important;} .deck{scroll-snap-type:none;} }
 </style>
@@ -188,10 +202,11 @@
 
 <div class="bar" id="bar">
   <div class="bar__l">
+    <button class="home" id="home">The Queue</button>
     <span class="bar__k">Sort</span>
     <button class="sortbtn is-on" data-sort="order">In line</button>
     <button class="sortbtn" data-sort="random">Random</button>
-    <button class="sortbtn" data-sort="paid">Most paid</button>
+    <button class="sortbtn" data-sort="paid">Most valued</button>
   </div>
   <div class="bar__r">
     <div class="search">
@@ -205,7 +220,7 @@
 
 <div class="deck" id="deck">
 
-  <section class="page"><div class="inner hook">
+  <section class="page" id="top"><div class="inner hook">
     <h1>What are you waiting for?<span>Get in line.</span></h1>
     <p class="hook__sting">Whatever it is, you are not first.</p>
     <p class="hook__p">
@@ -217,7 +232,7 @@
       <button class="btn" id="hook-go">Answer it</button>
       <button class="btn btn--ghost" id="hook-read">Read theirs first</button>
     </div>
-    <p class="cue">100 people per screen &middot; scroll &darr;</p>
+    <p class="cue">To see what people are waiting for, scroll &darr;</p>
   </div></section>
 
   <div id="pages"></div>
@@ -230,17 +245,21 @@
       what you are paying for.
     </p>
 
-    <p class="flabel">What are you waiting for?</p>
+    <p class="flabel">1 &middot; What are you waiting for?</p>
     <div class="field">
       <input id="said" type="text" maxlength="70" placeholder="a phone call &middot; nothing &middot; my results" aria-label="What are you waiting for?">
     </div>
 
-    <p class="flabel">Name to show &middot; anything you like</p>
+    <p class="flabel">2 &middot; Say more <s>&mdash; optional, shown only when someone opens your entry</s></p>
+    <textarea id="note" class="note" maxlength="280" placeholder="Since March. He said he would call on a Sunday and I have not liked Sundays since."></textarea>
+    <p class="count"><span id="note-c">0</span>/280</p>
+
+    <p class="flabel">3 &middot; Name to show <s>&mdash; leave blank to stay anonymous</s></p>
     <div class="field field--sm">
-      <input id="nick" type="text" maxlength="24" placeholder="or leave blank to stay anonymous" aria-label="Display name">
+      <input id="nick" type="text" maxlength="24" placeholder="anything you like" aria-label="Display name">
     </div>
 
-    <p class="flabel">Name your price &middot; minimum $5</p>
+    <p class="flabel">4 &middot; What is this worth to you? <s>&mdash; minimum $5</s></p>
     <div class="pay__row">
       <span class="pay__cur">$</span>
       <input id="amt" type="number" min="5" step="1" value="5" aria-label="Amount to pay">
@@ -253,7 +272,7 @@
     </div>
     <p class="paynote">
       Paying more buys nothing extra. It does not move you forward &mdash; nothing
-      moves anyone forward. It only changes where you sit in <b>Most paid</b>,
+      moves anyone forward. It only changes where you sit in <b>Most valued</b>,
       which is a list of the people who wanted this written down the most.
     </p>
     <button class="btn" id="pay-go" style="margin-top:22px">Take my place</button>
@@ -274,7 +293,6 @@
 
 </div>
 
-<!-- SEARCH RESULTS -->
 <div class="results" id="results">
   <div class="results__in">
     <p class="results__k" id="r-k"></p>
@@ -283,19 +301,24 @@
   </div>
 </div>
 
-<!-- DETAIL -->
 <div class="sheet" id="sheet">
   <div class="card">
     <p class="card__n" id="c-n">&#8470; 0</p>
     <p class="card__w" id="c-w"></p>
     <p class="card__by" id="c-by"></p>
+    <p class="card__c" id="c-c"></p>
     <p class="card__m" id="c-m"></p>
+
+    <p class="sharek">Share this one</p>
     <div class="card__acts">
-      <button class="act" id="c-img">Image</button>
-      <button class="act" id="c-vid">Video</button>
-      <button class="act act--go" id="c-join">Add mine</button>
+      <button class="act" id="s-ig">Instagram</button>
+      <button class="act" id="s-tt">TikTok</button>
+      <button class="act" id="s-x">X</button>
+      <button class="act" id="s-img">Save image</button>
+      <button class="act" id="s-vid">Save video</button>
     </div>
-    <p class="busy" id="c-busy">recording&hellip; about 6 seconds</p>
+    <p class="busy" id="c-busy"></p>
+    <button class="act act--go" id="c-join">Add mine</button>
     <p class="card__x" id="c-close">Close</p>
   </div>
 </div>
@@ -307,12 +330,13 @@
   "use strict";
 
   /* ---------------------------------------------------------------
-     DEMO DATA. Replace with a real feed. The lines, names and amounts
-     ARE the product — inventing them is the one lie this page cannot
-     survive.
+     DEMO DATA. Replace with a real feed. The lines, notes, names and
+     amounts ARE the product — inventing them is the one lie this page
+     cannot survive.
   ----------------------------------------------------------------*/
   var COUNT = 12847, MIN = 5;
   var SITE = "thequeue.example";
+  var ORIGIN = "https://" + SITE;
 
   var lines = [
     "a phone call","my visa","nothing, I was curious","the results","him to notice",
@@ -328,6 +352,21 @@
     "my citizenship","the second interview","a friend to move back","the noise to stop",
     "someone to notice I left","the ferry","my brother's release","to find out",
     "a normal week","the scan","to stop waiting","",""
+  ];
+
+  var notes = [
+    "Since March. It is not a big thing, it just sits there.",
+    "Everyone says it will come. Nobody says when.",
+    "I check twice a day. I have stopped telling people that.",
+    "Two years of this now. You get used to the shape of it.",
+    "It is fine. I would just like to know either way.",
+    "My mother asks every Sunday and I say soon.",
+    "I did the maths and it should have happened by now.",
+    "Honestly I only came here to read the others.",
+    "I am not sure I want it anymore. I am still waiting though.",
+    "Third time applying. This one feels different, which is what I said last time.",
+    "It has been long enough that waiting is just what I do now.",
+    "Nothing dramatic. Just a small thing that has not arrived."
   ];
 
   var nickA = ["quiet","late","small","half","north","paper","winter","slow","open","tired",
@@ -347,15 +386,19 @@
     return function(){ s = s * 16807 % 2147483647; return (s - 1) / 2147483646; };
   }
   function lineFor(n){ return lines[Math.floor(seeded(n)() * lines.length)]; }
+  function noteFor(n){
+    var r = seeded(n + 1213);
+    return r() < 0.42 ? notes[Math.floor(r() * notes.length)] : "";
+  }
   function nickFor(n){
     var r = seeded(n + 3301);
-    if(r() < 0.28) return "";                      /* plenty stay anonymous */
+    if(r() < 0.28) return "";
     return nickA[Math.floor(r() * nickA.length)] + nickB[Math.floor(r() * nickB.length)];
   }
   /* Most pay the minimum; a few pay a great deal more. */
-  function paidFor(n){ return MIN + Math.floor(Math.pow(seeded(n + 8807)(), 9) * 700); }
+  function valueFor(n){ return MIN + Math.floor(Math.pow(seeded(n + 8807)(), 9) * 700); }
   function pace(left){
-    var h = left / 20;                             /* a real queue: ~20 m an hour */
+    var h = left / 20;                        /* a real queue: about 20 m an hour */
     if(h < 48) return Math.round(h) + " hours";
     var d = h / 24;
     return d < 60 ? Math.round(d) + " days" : Math.round(d / 30) + " months";
@@ -373,12 +416,12 @@
       for(k = a.length - 1; k > 0; k--){ j = Math.floor(Math.random() * (k + 1)); t = a[k]; a[k] = a[j]; a[j] = t; }
       return a;
     }
-    return pool.slice().sort(function(x, y){ return paidFor(y) - paidFor(x); });
+    return pool.slice().sort(function(x, y){ return valueFor(y) - valueFor(x); });
   }
 
   function fit(){
     var w = window.innerWidth;
-    state.perLane = w >= 1000 ? 10 : w >= 760 ? 8 : 5;
+    state.perLane = w >= 1000 ? 10 : w >= 820 ? 8 : 5;
   }
 
   function entryHTML(n){
@@ -386,7 +429,7 @@
     return '<div class="e' + (silent ? " is-silent" : "") + '" data-n="' + n + '">' +
       '<span class="e__n">' + fmt(n) + '</span>' +
       '<span class="e__w">' + (silent ? "said nothing" : esc(w)) + '</span>' +
-      '<span class="e__amt">$' + paidFor(n) + '</span>' +
+      '<span class="e__amt">$' + valueFor(n) + '</span>' +
     '</div>';
   }
 
@@ -416,7 +459,7 @@
         '<span>' + (state.sort === "order"
           ? "\u2116 " + fmt(first) + " \u2013 " + fmt(last)
           : state.sort === "random" ? "in no order at all"
-          : "$" + paidFor(first) + " down to $" + paidFor(last)) + '</span>' +
+          : "$" + valueFor(first) + " down to $" + valueFor(last)) + '</span>' +
         '<span><b>' + fmt(idx + items.length) + '</b> of ' + fmt(COUNT) + ' read</span>' +
       '</div>' +
     '</div></section>';
@@ -453,7 +496,6 @@
     });
   });
 
-  /* ---------- scroll state ---------- */
   var deck = $("deck"), ticking = false;
   deck.addEventListener("scroll", function(){
     if(ticking) return;
@@ -464,18 +506,25 @@
     });
   }, { passive:true });
 
-  $("to-top").addEventListener("click", function(){ deck.scrollTo({ top:0, behavior:"smooth" }); });
+  function goTop(){
+    $("sheet").classList.remove("is-on");
+    $("results").classList.remove("is-on");
+    deck.scrollTo({ top:0, behavior:"smooth" });
+  }
+  $("home").addEventListener("click", goTop);
+  $("to-top").addEventListener("click", goTop);
   $("to-end").addEventListener("click", function(){ $("join").scrollIntoView({ behavior:"smooth" }); });
 
   /* ---------- detail ---------- */
   function openSheet(n){
     state.current = n;
-    var w = lineFor(n), nk = nickFor(n);
+    var w = lineFor(n), nk = nickFor(n), nt = noteFor(n);
     $("c-n").textContent = "\u2116 " + fmt(n);
     $("c-w").textContent = w ? "\u201C" + w + "\u201D" : "Said nothing.";
-    $("c-by").innerHTML = nk ? "&mdash; <b>" + esc(nk) + "</b>" : "&mdash; <b>anonymous</b>";
+    $("c-by").innerHTML = "\u2014 <b>" + esc(nk || "anonymous") + "</b>";
+    $("c-c").textContent = nt;
     $("c-m").innerHTML =
-      "paid $" + paidFor(n) + "<br>" +
+      "value: <b>$" + valueFor(n) + "</b><br>" +
       fmt(n - 1) + " people ahead<br>" +
       "estimated wait: never";
     $("c-busy").classList.remove("is-on");
@@ -488,12 +537,11 @@
   $("c-close").addEventListener("click", function(){ $("sheet").classList.remove("is-on"); });
   $("sheet").addEventListener("click", function(e){ if(e.target === $("sheet")) $("sheet").classList.remove("is-on"); });
 
-  /* ---------- search: by number or by name ---------- */
+  /* ---------- search ---------- */
   function runSearch(){
     var term = $("q").value.trim().toLowerCase();
     if(!term) return;
     var found = [], n, nk;
-
     if(/^#?\d+$/.test(term)){
       n = parseInt(term.replace("#", ""), 10);
       if(n >= 1 && n <= COUNT) found.push(n);
@@ -503,27 +551,24 @@
         if(nk && nk.toLowerCase().indexOf(term) > -1) found.push(n);
       }
     }
-
     $("r-k").textContent = found.length
-      ? found.length + (found.length === 1 ? " person found" : " people found") + " for \u201C" + term + "\u201D"
+      ? found.length + (found.length === 1 ? " person" : " people") + " found for \u201C" + term + "\u201D"
       : "Nobody in this line matches \u201C" + term + "\u201D";
-
     $("r-list").innerHTML = found.map(function(m){
       var w = lineFor(m), nk2 = nickFor(m);
       return '<div class="r" data-n="' + m + '">' +
         '<span class="r__n">\u2116' + fmt(m) + '</span>' +
         '<span class="r__w">' + (w ? esc(w) : "said nothing") + '</span>' +
-        '<span class="r__by">' + (nk2 ? esc(nk2) : "anonymous") + '</span>' +
+        '<span class="r__by">' + esc(nk2 || "anonymous") + '</span>' +
       '</div>';
     }).join("");
-
     $("results").classList.add("is-on");
   }
   $("q-go").addEventListener("click", runSearch);
   $("q").addEventListener("keydown", function(e){ if(e.key === "Enter") runSearch(); });
   $("r-x").addEventListener("click", function(){ $("results").classList.remove("is-on"); });
 
-  /* ---------- share ---------- */
+  /* ---------- card rendering ---------- */
   function wrapT(ctx, t, maxW){
     var out = [], line = "";
     String(t).split(" ").forEach(function(w){
@@ -536,57 +581,59 @@
   }
 
   function paint(x, W, H, n, reveal){
-    var w = lineFor(n), nk = nickFor(n), pad = W * 0.11;
+    var w = lineFor(n), nk = nickFor(n), nt = noteFor(n), pad = W * 0.11;
     x.fillStyle = "#131316"; x.fillRect(0, 0, W, H);
     x.textAlign = "left";
 
     x.fillStyle = "#E39B2E";
     x.font = "500 " + (W * 0.026) + "px 'DM Mono', monospace";
-    x.fillText("WHAT ARE YOU WAITING FOR?", pad, H * 0.24);
+    x.fillText("WHAT ARE YOU WAITING FOR?", pad, H * 0.22);
 
     x.fillStyle = "#F2F0EA";
     x.font = "600 " + (W * 0.086) + "px Archivo, sans-serif";
     var rows = wrapT(x, w ? "\u201C" + w + "\u201D" : "Said nothing.", W - pad * 2).slice(0, 4);
     var shown = typeof reveal === "number" ? Math.max(1, Math.ceil(rows.length * reveal)) : rows.length;
-    var ty = H * 0.36;
+    var ty = H * 0.33;
     rows.slice(0, shown).forEach(function(l){ x.fillText(l, pad, ty); ty += W * 0.103; });
 
-    x.fillStyle = "#C8C6C0";
-    x.font = "400 " + (W * 0.042) + "px Archivo, sans-serif";
-    x.fillText("\u2014 " + (nk || "anonymous"), pad, ty + W * 0.02);
+    x.fillStyle = "#7E7E88";
+    x.font = "400 " + (W * 0.04) + "px Archivo, sans-serif";
+    x.fillText("\u2014 " + (nk || "anonymous"), pad, ty + W * 0.015);
+    ty += W * 0.085;
+
+    if(nt && (typeof reveal !== "number" || reveal > .85)){
+      x.fillStyle = "#C8C6C0";
+      x.font = "400 " + (W * 0.038) + "px Archivo, sans-serif";
+      wrapT(x, nt, W - pad * 2).slice(0, 3).forEach(function(l){
+        x.fillText(l, pad, ty); ty += W * 0.052;
+      });
+    }
 
     x.strokeStyle = "#2C2C34"; x.lineWidth = 2;
-    x.beginPath(); x.moveTo(pad, H * 0.68); x.lineTo(W - pad, H * 0.68); x.stroke();
+    x.beginPath(); x.moveTo(pad, H * 0.70); x.lineTo(W - pad, H * 0.70); x.stroke();
 
     x.fillStyle = "#7E7E88";
     x.font = "400 " + (W * 0.03) + "px 'DM Mono', monospace";
-    x.fillText("\u2116 " + fmt(n) + " \u00B7 paid $" + paidFor(n), pad, H * 0.73);
-    x.fillText("estimated wait: never", pad, H * 0.77);
-    x.fillStyle = "#E39B2E"; x.fillText("GET IN LINE \u00B7 " + SITE, pad, H * 0.82);
+    x.fillText("\u2116 " + fmt(n) + " \u00B7 value $" + valueFor(n), pad, H * 0.75);
+    x.fillText("estimated wait: never", pad, H * 0.79);
+    x.fillStyle = "#E39B2E"; x.fillText("GET IN LINE \u00B7 " + SITE, pad, H * 0.84);
   }
 
-  function saveBlob(b, name){
-    var u = URL.createObjectURL(b), a = document.createElement("a");
-    a.href = u; a.download = name; a.click();
-    setTimeout(function(){ URL.revokeObjectURL(u); }, 2000);
-  }
   function withFonts(fn){ if(document.fonts && document.fonts.ready) document.fonts.ready.then(fn); else fn(); }
+  function say(msg){ $("c-busy").textContent = msg; $("c-busy").classList.add("is-on"); }
+  function hush(){ $("c-busy").classList.remove("is-on"); }
 
-  $("c-img").addEventListener("click", function(){
-    var n = state.current;
+  function makeImage(n, cb){
     withFonts(function(){
       var c = document.createElement("canvas");
       c.width = 1080; c.height = 1920;
       paint(c.getContext("2d"), 1080, 1920, n);
-      c.toBlob(function(b){ saveBlob(b, "queue-" + n + ".png"); });
+      c.toBlob(function(b){ cb(new File([b], "queue-" + n + ".png", { type:"image/png" })); });
     });
-  });
+  }
 
-  /* Canvas → WebM. Browsers cannot encode MP4 unaided; convert server-side
-     at launch if Instagram rejects the upload. */
-  $("c-vid").addEventListener("click", function(){
-    var n = state.current;
-    if(typeof MediaRecorder === "undefined"){ $("c-img").click(); return; }
+  function makeVideo(n, cb){
+    if(typeof MediaRecorder === "undefined") return makeImage(n, cb);
     withFonts(function(){
       var W = 1080, H = 1920, DUR = 6000;
       var c = document.createElement("canvas");
@@ -597,20 +644,84 @@
       var rec = new MediaRecorder(c.captureStream(30), { mimeType:type, videoBitsPerSecond:6000000 });
       var chunks = [];
       rec.ondataavailable = function(e){ if(e.data.size) chunks.push(e.data); };
-      rec.onstop = function(){ saveBlob(new Blob(chunks, { type:"video/webm" }), "queue-" + n + ".webm"); };
-      $("c-busy").classList.add("is-on");
+      rec.onstop = function(){
+        cb(new File([new Blob(chunks, { type:"video/webm" })], "queue-" + n + ".webm", { type:"video/webm" }));
+      };
+      say("Making a six second clip\u2026");
       rec.start();
       var t0 = performance.now();
       (function frame(now){
         var p = Math.min((now - t0) / DUR, 1);
         paint(x, W, H, n, Math.min(1, p / 0.6));
         if(p < 1) requestAnimationFrame(frame);
-        else { rec.stop(); $("c-busy").classList.remove("is-on"); }
+        else rec.stop();
       })(t0);
     });
+  }
+
+  function download(file){
+    var u = URL.createObjectURL(file), a = document.createElement("a");
+    a.href = u; a.download = file.name; a.click();
+    setTimeout(function(){ URL.revokeObjectURL(u); }, 2000);
+  }
+
+  /* Instagram and TikTok have no web endpoint that accepts media, so the
+     only real path is the device share sheet. On desktop that does not
+     exist, and the honest fallback is to save the file and post it. */
+  function shareFile(file, text, app){
+    if(navigator.canShare && navigator.canShare({ files:[file] })){
+      navigator.share({ files:[file], text:text })
+        .then(hush)
+        .catch(function(){ hush(); });
+    } else {
+      download(file);
+      say("Saved. " + app + " has no web upload, so post the file you just downloaded.");
+      setTimeout(hush, 6000);
+    }
+  }
+
+  function shareText(n){
+    var w = lineFor(n);
+    return (w ? "\u201C" + w + "\u201D" : "Said nothing.") +
+           " \u2014 \u2116" + fmt(n) + " in a queue with nothing at the end.";
+  }
+
+  $("s-ig").addEventListener("click", function(){
+    var n = state.current;
+    say("Preparing\u2026");
+    makeVideo(n, function(f){ shareFile(f, shareText(n), "Instagram"); });
+  });
+  $("s-tt").addEventListener("click", function(){
+    var n = state.current;
+    say("Preparing\u2026");
+    makeVideo(n, function(f){ shareFile(f, shareText(n), "TikTok"); });
+  });
+  $("s-x").addEventListener("click", function(){
+    var n = state.current;
+    say("Preparing\u2026");
+    makeImage(n, function(f){
+      if(navigator.canShare && navigator.canShare({ files:[f] })){
+        navigator.share({ files:[f], text:shareText(n) }).then(hush).catch(hush);
+      } else {
+        download(f);
+        window.open("https://x.com/intent/post?text=" +
+          encodeURIComponent(shareText(n)) + "&url=" +
+          encodeURIComponent(ORIGIN + "/" + n), "_blank", "noopener");
+        say("Image saved \u2014 attach it to the post that just opened.");
+        setTimeout(hush, 6000);
+      }
+    });
+  });
+  $("s-img").addEventListener("click", function(){
+    say("Preparing\u2026");
+    makeImage(state.current, function(f){ download(f); hush(); });
+  });
+  $("s-vid").addEventListener("click", function(){
+    makeVideo(state.current, function(f){ download(f); hush(); });
   });
 
-  /* ---------- pay what you want ---------- */
+  /* ---------- join ---------- */
+  $("note").addEventListener("input", function(){ $("note-c").textContent = $("note").value.length; });
   document.querySelectorAll(".chip").forEach(function(c){
     c.addEventListener("click", function(){
       document.querySelectorAll(".chip").forEach(function(x){ x.classList.remove("is-on"); });
@@ -623,19 +734,17 @@
       x.classList.toggle("is-on", x.dataset.amt === $("amt").value);
     });
   });
-
   $("pay-go").addEventListener("click", function(){
     var amt = Math.max(MIN, Math.floor(Number($("amt").value) || MIN));
     $("amt").value = amt;
     /* → real flow: open Paddle checkout for this amount, write the position
        server-side in the transaction.completed webhook, reload from server. */
     var said = ($("said").value || "").trim(), nk = ($("nick").value || "").trim();
-    alert("Demo: \u2116" + fmt(COUNT + 1) + " for $" + amt +
-          (nk ? " as " + nk : " as anonymous") +
-          (said ? ", waiting for \u201C" + said + "\u201D." : "."));
+    alert("Demo: \u2116" + fmt(COUNT + 1) + " \u00B7 value $" + amt +
+          (nk ? " \u00B7 " + nk : " \u00B7 anonymous") +
+          (said ? "\n\u201C" + said + "\u201D" : ""));
   });
 
-  /* ---------- nav ---------- */
   function toJoin(){
     $("sheet").classList.remove("is-on");
     $("results").classList.remove("is-on");
