@@ -96,6 +96,8 @@
   }
   .e__amt{font-family:"DM Mono",monospace; font-size:8.5px; color:var(--amber); display:none;}
   .is-amount .e__amt{display:block;}
+  .e__lk{font-family:"DM Mono",monospace; font-size:8.5px; color:var(--flare); display:none;}
+  .is-likes .e__lk{display:block;}
   .e.is-silent .e__w{font-style:italic; color:var(--dim);}
   .e:hover{transform:scale(1.32); border-color:var(--flare); position:relative; z-index:5;}
   .e:hover .e__w,.e:hover .e__n{color:var(--flare);}
@@ -137,6 +139,33 @@
   .card__x{margin:18px 0 0; font-family:"DM Mono",monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); cursor:pointer;}
   .busy{margin:12px 0 0; font-family:"DM Mono",monospace; font-size:10.5px; color:var(--amber); line-height:1.6; display:none;}
   .busy.is-on{display:block;}
+
+  /* card navigation */
+  .card__nav{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    margin:-6px 0 18px; padding-bottom:14px; border-bottom:1px solid var(--line);
+  }
+  .navarrow{
+    padding:9px 14px; cursor:pointer; background:transparent; color:var(--read);
+    border:1px solid var(--line);
+    font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  }
+  .navarrow:hover{border-color:var(--bone); color:var(--bone);}
+  .navarrow:disabled{opacity:.3; cursor:default;}
+  .card__where{font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); text-align:center;}
+
+  /* like */
+  .likebtn{
+    display:inline-flex; align-items:center; gap:8px;
+    margin:20px 0 0; padding:11px 18px; cursor:pointer;
+    background:transparent; color:var(--read); border:1px solid var(--line);
+    font-family:"DM Mono",monospace; font-size:12px; letter-spacing:.08em;
+    transition:color .15s ease, border-color .15s ease, transform .15s ease;
+  }
+  .likebtn:hover{border-color:var(--flare); color:var(--flare);}
+  .likebtn.is-on{color:var(--flare); border-color:var(--flare);}
+  .likebtn.is-on .heart{transform:scale(1.2);}
+  .heart{transition:transform .18s ease;}
 
   /* ---------- RESULTS ---------- */
   .results{position:fixed; inset:0; z-index:65; display:none; background:rgba(19,19,22,.97); padding:80px 24px 30px; overflow-y:auto;}
@@ -207,6 +236,7 @@
     <button class="sortbtn is-on" data-sort="order">In line</button>
     <button class="sortbtn" data-sort="random">Random</button>
     <button class="sortbtn" data-sort="paid">Most valued</button>
+    <button class="sortbtn" data-sort="liked">Most liked</button>
   </div>
   <div class="bar__r">
     <div class="search">
@@ -303,11 +333,20 @@
 
 <div class="sheet" id="sheet">
   <div class="card">
+    <div class="card__nav">
+      <button class="navarrow" id="c-prev">&larr; Ahead</button>
+      <span class="card__where" id="c-where"></span>
+      <button class="navarrow" id="c-next">Behind &rarr;</button>
+    </div>
     <p class="card__n" id="c-n">&#8470; 0</p>
     <p class="card__w" id="c-w"></p>
     <p class="card__by" id="c-by"></p>
     <p class="card__c" id="c-c"></p>
     <p class="card__m" id="c-m"></p>
+
+    <button class="likebtn" id="c-like">
+      <span class="heart">&#9829;</span><span id="c-likes">0</span>
+    </button>
 
     <p class="sharek">Share this one</p>
     <div class="card__acts">
@@ -397,6 +436,15 @@
   }
   /* Most pay the minimum; a few pay a great deal more. */
   function valueFor(n){ return MIN + Math.floor(Math.pow(seeded(n + 8807)(), 9) * 700); }
+
+  /* Likes are long-tailed too: a handful of lines are felt by thousands,
+     most by nobody. Silent entries collect almost none. */
+  var myLikes = {}, likeDelta = {};
+  function baseLikes(n){
+    if(!lineFor(n)) return Math.floor(Math.pow(seeded(n + 44)(), 6) * 40);
+    return Math.floor(Math.pow(seeded(n + 6607)(), 5) * 2600);
+  }
+  function likesFor(n){ return baseLikes(n) + (likeDelta[n] || 0); }
   function pace(left){
     var h = left / 20;                        /* a real queue: about 20 m an hour */
     if(h < 48) return Math.round(h) + " hours";
@@ -407,7 +455,7 @@
   var pool = [];
   for(var i = COUNT; i >= 1; i--) pool.push(i);
 
-  var state = { sort:"order", perLane:10, lanes:10, current:null };
+  var state = { sort:"order", perLane:10, lanes:10, current:null, navList:[], navFrom:"line" };
 
   function ordered(){
     if(state.sort === "order") return pool;
@@ -415,6 +463,9 @@
       var a = pool.slice(), j, t, k;
       for(k = a.length - 1; k > 0; k--){ j = Math.floor(Math.random() * (k + 1)); t = a[k]; a[k] = a[j]; a[j] = t; }
       return a;
+    }
+    if(state.sort === "liked"){
+      return pool.slice().sort(function(x, y){ return likesFor(y) - likesFor(x); });
     }
     return pool.slice().sort(function(x, y){ return valueFor(y) - valueFor(x); });
   }
@@ -430,6 +481,7 @@
       '<span class="e__n">' + fmt(n) + '</span>' +
       '<span class="e__w">' + (silent ? "said nothing" : esc(w)) + '</span>' +
       '<span class="e__amt">$' + valueFor(n) + '</span>' +
+      '<span class="e__lk">\u2665 ' + fmt(likesFor(n)) + '</span>' +
     '</div>';
   }
 
@@ -453,13 +505,17 @@
               lane.map(entryHTML).join("") + '</div>';
     }
     var first = items[0], last = items[items.length - 1];
-    return '<section class="page"><div class="inner wall' + (state.sort === "paid" ? " is-amount" : "") + '">' +
+    var mode = state.sort === "paid" ? " is-amount" : state.sort === "liked" ? " is-likes" : "";
+    var label = state.sort === "order"
+      ? "\u2116 " + fmt(first) + " \u2013 " + fmt(last)
+      : state.sort === "random" ? "in no order at all"
+      : state.sort === "liked"
+        ? "\u2665 " + fmt(likesFor(first)) + " down to " + fmt(likesFor(last))
+        : "$" + valueFor(first) + " down to $" + valueFor(last);
+    return '<section class="page"><div class="inner wall' + mode + '">' +
       '<div class="snake">' + html + '</div>' +
       '<div class="wallfoot">' +
-        '<span>' + (state.sort === "order"
-          ? "\u2116 " + fmt(first) + " \u2013 " + fmt(last)
-          : state.sort === "random" ? "in no order at all"
-          : "$" + valueFor(first) + " down to $" + valueFor(last)) + '</span>' +
+        '<span>' + label + '</span>' +
         '<span><b>' + fmt(idx + items.length) + '</b> of ' + fmt(COUNT) + ' read</span>' +
       '</div>' +
     '</div></section>';
@@ -477,6 +533,9 @@
       }
     }
     $("pages").innerHTML = out.join("");
+    /* the card arrows walk this same order, so browsing matches what is on screen */
+    state.navList = list;
+    state.navFrom = "line";
   }
   render();
 
@@ -516,6 +575,8 @@
   $("to-end").addEventListener("click", function(){ $("join").scrollIntoView({ behavior:"smooth" }); });
 
   /* ---------- detail ---------- */
+  function navIndex(n){ return state.navList.indexOf(n); }
+
   function openSheet(n){
     state.current = n;
     var w = lineFor(n), nk = nickFor(n), nt = noteFor(n);
@@ -527,9 +588,64 @@
       "value: <b>$" + valueFor(n) + "</b><br>" +
       fmt(n - 1) + " people ahead<br>" +
       "estimated wait: never";
+
+    $("c-likes").textContent = fmt(likesFor(n));
+    $("c-like").classList.toggle("is-on", !!myLikes[n]);
+
+    var i = navIndex(n), total = state.navList.length;
+    $("c-prev").disabled = i <= 0;
+    $("c-next").disabled = i < 0 || i >= total - 1;
+    $("c-where").textContent = i >= 0
+      ? (state.navFrom === "search" ? "result " : "") + fmt(i + 1) + " of " + fmt(total)
+      : "";
+
     $("c-busy").classList.remove("is-on");
     $("sheet").classList.add("is-on");
   }
+
+  function step(dir){
+    var i = navIndex(state.current);
+    if(i < 0) return;
+    var j = i + dir;
+    if(j < 0 || j >= state.navList.length) return;
+    openSheet(state.navList[j]);
+  }
+  $("c-prev").addEventListener("click", function(){ step(-1); });
+  $("c-next").addEventListener("click", function(){ step(1); });
+
+  /* arrows on a keyboard, swipes on a phone */
+  document.addEventListener("keydown", function(e){
+    if(!$("sheet").classList.contains("is-on")) return;
+    if(e.key === "ArrowLeft")  step(-1);
+    if(e.key === "ArrowRight") step(1);
+    if(e.key === "Escape") $("sheet").classList.remove("is-on");
+  });
+  (function(){
+    var x0 = null, y0 = null;
+    var card = document.querySelector(".card");
+    card.addEventListener("touchstart", function(e){
+      x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+    }, { passive:true });
+    card.addEventListener("touchend", function(e){
+      if(x0 === null) return;
+      var dx = e.changedTouches[0].clientX - x0;
+      var dy = e.changedTouches[0].clientY - y0;
+      if(Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.6) step(dx < 0 ? 1 : -1);
+      x0 = y0 = null;
+    }, { passive:true });
+  })();
+
+  $("c-like").addEventListener("click", function(){
+    var n = state.current;
+    if(myLikes[n]){ myLikes[n] = false; likeDelta[n] = (likeDelta[n] || 0) - 1; }
+    else          { myLikes[n] = true;  likeDelta[n] = (likeDelta[n] || 0) + 1; }
+    $("c-likes").textContent = fmt(likesFor(n));
+    $("c-like").classList.toggle("is-on", !!myLikes[n]);
+    /* keep the wall in step without a full re-render */
+    var cell = document.querySelector('.e[data-n="' + n + '"] .e__lk');
+    if(cell) cell.textContent = "\u2665 " + fmt(likesFor(n));
+  });
+
   document.addEventListener("click", function(e){
     var el = e.target.closest(".e, .r");
     if(el && el.dataset.n) openSheet(Number(el.dataset.n));
@@ -562,11 +678,18 @@
         '<span class="r__by">' + esc(nk2 || "anonymous") + '</span>' +
       '</div>';
     }).join("");
+    /* arrows inside a card then walk the results, not the whole line */
+    state.navList = found;
+    state.navFrom = "search";
     $("results").classList.add("is-on");
   }
   $("q-go").addEventListener("click", runSearch);
   $("q").addEventListener("keydown", function(e){ if(e.key === "Enter") runSearch(); });
-  $("r-x").addEventListener("click", function(){ $("results").classList.remove("is-on"); });
+  $("r-x").addEventListener("click", function(){
+    $("results").classList.remove("is-on");
+    state.navList = ordered();
+    state.navFrom = "line";
+  });
 
   /* ---------- card rendering ---------- */
   function wrapT(ctx, t, maxW){
@@ -614,7 +737,8 @@
 
     x.fillStyle = "#7E7E88";
     x.font = "400 " + (W * 0.03) + "px 'DM Mono', monospace";
-    x.fillText("\u2116 " + fmt(n) + " \u00B7 value $" + valueFor(n), pad, H * 0.75);
+    x.fillText("\u2116 " + fmt(n) + " \u00B7 value $" + valueFor(n) +
+               " \u00B7 \u2665 " + fmt(likesFor(n)), pad, H * 0.75);
     x.fillText("estimated wait: never", pad, H * 0.79);
     x.fillStyle = "#E39B2E"; x.fillText("GET IN LINE \u00B7 " + SITE, pad, H * 0.84);
   }
