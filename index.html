@@ -154,6 +154,26 @@
   .navarrow:disabled{opacity:.3; cursor:default;}
   .card__where{font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); text-align:center;}
 
+  /* side arrows: desktop only, sitting outside the card */
+  .side{
+    position:absolute; top:50%; transform:translateY(-50%); z-index:2;
+    display:none; flex-direction:column; align-items:center; gap:9px;
+    padding:20px 16px; cursor:pointer;
+    background:transparent; color:var(--dim); border:1px solid var(--line);
+    font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+    transition:color .15s ease, border-color .15s ease;
+  }
+  .side:hover{color:var(--bone); border-color:var(--bone);}
+  .side:disabled{opacity:.22; cursor:default;}
+  .side em{font-style:normal; font-size:20px; line-height:1;}
+  .side--l{right:calc(50% + min(270px, 46vw) + 16px);}
+  .side--r{left:calc(50% + min(270px, 46vw) + 16px);}
+  @media (min-width:860px){
+    .side{display:flex;}
+    .card__nav .navarrow{display:none;}
+    .card__nav{justify-content:center; margin-top:-8px;}
+  }
+
   /* like */
   .likebtn{
     display:inline-flex; align-items:center; gap:8px;
@@ -332,6 +352,8 @@
 </div>
 
 <div class="sheet" id="sheet">
+  <button class="side side--l" id="s-prev"><em>&larr;</em>Ahead</button>
+  <button class="side side--r" id="s-next"><em>&rarr;</em>Behind</button>
   <div class="card">
     <div class="card__nav">
       <button class="navarrow" id="c-prev">&larr; Ahead</button>
@@ -593,8 +615,9 @@
     $("c-like").classList.toggle("is-on", !!myLikes[n]);
 
     var i = navIndex(n), total = state.navList.length;
-    $("c-prev").disabled = i <= 0;
-    $("c-next").disabled = i < 0 || i >= total - 1;
+    var atStart = i <= 0, atEnd = i < 0 || i >= total - 1;
+    $("c-prev").disabled = atStart; $("s-prev").disabled = atStart;
+    $("c-next").disabled = atEnd;   $("s-next").disabled = atEnd;
     $("c-where").textContent = i >= 0
       ? (state.navFrom === "search" ? "result " : "") + fmt(i + 1) + " of " + fmt(total)
       : "";
@@ -612,6 +635,8 @@
   }
   $("c-prev").addEventListener("click", function(){ step(-1); });
   $("c-next").addEventListener("click", function(){ step(1); });
+  $("s-prev").addEventListener("click", function(e){ e.stopPropagation(); step(-1); });
+  $("s-next").addEventListener("click", function(e){ e.stopPropagation(); step(1); });
 
   /* arrows on a keyboard, swipes on a phone */
   document.addEventListener("keydown", function(e){
@@ -708,39 +733,51 @@
     x.fillStyle = "#131316"; x.fillRect(0, 0, W, H);
     x.textAlign = "left";
 
+    /* Measure everything first, then lay it out from a fixed top anchor, so a
+       long quote can never push the comment past the divider. */
+    x.font = "600 " + (W * 0.082) + "px Archivo, sans-serif";
+    var qRows = wrapT(x, w ? "\u201C" + w + "\u201D" : "Said nothing.", W - pad * 2).slice(0, 3);
+    x.font = "400 " + (W * 0.038) + "px Archivo, sans-serif";
+    var cRows = nt ? wrapT(x, nt, W - pad * 2).slice(0, 4) : [];
+
+    var qLead = W * 0.098, cLead = W * 0.054;
+    var blockH = qRows.length * qLead + W * 0.085 + (cRows.length ? cRows.length * cLead + W * 0.03 : 0);
+    var ty = Math.max(H * 0.30, (H * 0.66 - blockH) / 2 + H * 0.10);
+
     x.fillStyle = "#E39B2E";
     x.font = "500 " + (W * 0.026) + "px 'DM Mono', monospace";
-    x.fillText("WHAT ARE YOU WAITING FOR?", pad, H * 0.22);
+    x.fillText("WHAT ARE YOU WAITING FOR?", pad, ty - W * 0.075);
 
+    /* the quote */
     x.fillStyle = "#F2F0EA";
-    x.font = "600 " + (W * 0.086) + "px Archivo, sans-serif";
-    var rows = wrapT(x, w ? "\u201C" + w + "\u201D" : "Said nothing.", W - pad * 2).slice(0, 4);
-    var shown = typeof reveal === "number" ? Math.max(1, Math.ceil(rows.length * reveal)) : rows.length;
-    var ty = H * 0.33;
-    rows.slice(0, shown).forEach(function(l){ x.fillText(l, pad, ty); ty += W * 0.103; });
+    x.font = "600 " + (W * 0.082) + "px Archivo, sans-serif";
+    var shown = typeof reveal === "number" ? Math.max(1, Math.ceil(qRows.length * reveal)) : qRows.length;
+    qRows.slice(0, shown).forEach(function(l){ x.fillText(l, pad, ty); ty += qLead; });
+    ty += qRows.length > shown ? (qRows.length - shown) * qLead : 0;
 
+    /* who said it */
     x.fillStyle = "#7E7E88";
     x.font = "400 " + (W * 0.04) + "px Archivo, sans-serif";
-    x.fillText("\u2014 " + (nk || "anonymous"), pad, ty + W * 0.015);
+    x.fillText("\u2014 " + (nk || "anonymous"), pad, ty);
     ty += W * 0.085;
 
-    if(nt && (typeof reveal !== "number" || reveal > .85)){
+    /* their comment — the part people actually stop to read */
+    if(cRows.length){
+      ty += W * 0.03;
       x.fillStyle = "#C8C6C0";
       x.font = "400 " + (W * 0.038) + "px Archivo, sans-serif";
-      wrapT(x, nt, W - pad * 2).slice(0, 3).forEach(function(l){
-        x.fillText(l, pad, ty); ty += W * 0.052;
-      });
+      cRows.forEach(function(l){ x.fillText(l, pad, ty); ty += cLead; });
     }
 
     x.strokeStyle = "#2C2C34"; x.lineWidth = 2;
-    x.beginPath(); x.moveTo(pad, H * 0.70); x.lineTo(W - pad, H * 0.70); x.stroke();
+    x.beginPath(); x.moveTo(pad, H * 0.755); x.lineTo(W - pad, H * 0.755); x.stroke();
 
     x.fillStyle = "#7E7E88";
     x.font = "400 " + (W * 0.03) + "px 'DM Mono', monospace";
     x.fillText("\u2116 " + fmt(n) + " \u00B7 value $" + valueFor(n) +
-               " \u00B7 \u2665 " + fmt(likesFor(n)), pad, H * 0.75);
-    x.fillText("estimated wait: never", pad, H * 0.79);
-    x.fillStyle = "#E39B2E"; x.fillText("GET IN LINE \u00B7 " + SITE, pad, H * 0.84);
+               " \u00B7 \u2665 " + fmt(likesFor(n)), pad, H * 0.80);
+    x.fillText("estimated wait: never", pad, H * 0.838);
+    x.fillStyle = "#E39B2E"; x.fillText("GET IN LINE \u00B7 " + SITE, pad, H * 0.885);
   }
 
   function withFonts(fn){ if(document.fonts && document.fonts.ready) document.fonts.ready.then(fn); else fn(); }
