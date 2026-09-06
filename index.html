@@ -139,6 +139,20 @@
   .card__x{margin:18px 0 0; font-family:"DM Mono",monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); cursor:pointer;}
   .busy{margin:12px 0 0; font-family:"DM Mono",monospace; font-size:10.5px; color:var(--amber); line-height:1.6; display:none;}
   .busy.is-on{display:block;}
+  .sharenow{
+    display:none; margin:12px 0 0; padding:13px 20px; cursor:pointer;
+    background:var(--amber); color:var(--night); border:1px solid var(--amber);
+    font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+  }
+  .sharenow.is-on{display:inline-block;}
+  .hint{
+    position:absolute; left:50%; bottom:26px; transform:translateX(-50%);
+    padding:9px 16px; background:rgba(19,19,22,.92); border:1px solid var(--line);
+    font-family:"DM Mono",monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--dim); pointer-events:none; opacity:0; transition:opacity .4s ease;
+  }
+  .hint.is-on{opacity:1;}
+  @media (min-width:860px){ .hint{display:none;} }
 
   /* card navigation */
   .card__nav{
@@ -379,9 +393,11 @@
       <button class="act" id="s-vid">Save video</button>
     </div>
     <p class="busy" id="c-busy"></p>
+    <button class="sharenow" id="c-now">Share now &rarr;</button>
     <button class="act act--go" id="c-join">Add mine</button>
     <p class="card__x" id="c-close">Close</p>
   </div>
+  <div class="hint" id="hint">Swipe left or right &middot; down to close</div>
 </div>
 
 <div class="sticky" id="sticky"><button class="btn" id="sticky-btn">What are you waiting for?</button></div>
@@ -623,7 +639,22 @@
       : "";
 
     $("c-busy").classList.remove("is-on");
+    $("c-now").classList.remove("is-on");
+    state.pending = null;
     $("sheet").classList.add("is-on");
+
+    /* show the swipe hint once, the first time a card is opened */
+    if(!state.hinted){
+      state.hinted = true;
+      var h = $("hint");
+      setTimeout(function(){ h.classList.add("is-on"); }, 500);
+      setTimeout(function(){ h.classList.remove("is-on"); }, 3600);
+    }
+  }
+
+  function closeSheet(){
+    $("sheet").classList.remove("is-on");
+    $("hint").classList.remove("is-on");
   }
 
   function step(dir){
@@ -643,7 +674,7 @@
     if(!$("sheet").classList.contains("is-on")) return;
     if(e.key === "ArrowLeft")  step(-1);
     if(e.key === "ArrowRight") step(1);
-    if(e.key === "Escape") $("sheet").classList.remove("is-on");
+    if(e.key === "Escape") closeSheet();
   });
   (function(){
     var x0 = null, y0 = null;
@@ -655,7 +686,13 @@
       if(x0 === null) return;
       var dx = e.changedTouches[0].clientX - x0;
       var dy = e.changedTouches[0].clientY - y0;
-      if(Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.6) step(dx < 0 ? 1 : -1);
+      /* sideways moves along the line; downward closes, which is what people
+         already expect from a panel sitting on top of a page */
+      if(Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.6){
+        step(dx < 0 ? 1 : -1);
+      } else if(dy > 90 && Math.abs(dy) > Math.abs(dx) * 1.6 && card.scrollTop <= 2){
+        closeSheet();
+      }
       x0 = y0 = null;
     }, { passive:true });
   })();
@@ -675,8 +712,8 @@
     var el = e.target.closest(".e, .r");
     if(el && el.dataset.n) openSheet(Number(el.dataset.n));
   });
-  $("c-close").addEventListener("click", function(){ $("sheet").classList.remove("is-on"); });
-  $("sheet").addEventListener("click", function(e){ if(e.target === $("sheet")) $("sheet").classList.remove("is-on"); });
+  $("c-close").addEventListener("click", closeSheet);
+  $("sheet").addEventListener("click", function(e){ if(e.target === $("sheet")) closeSheet(); });
 
   /* ---------- search ---------- */
   function runSearch(){
@@ -826,20 +863,42 @@
     setTimeout(function(){ URL.revokeObjectURL(u); }, 2000);
   }
 
-  /* Instagram and TikTok have no web endpoint that accepts media, so the
-     only real path is the device share sheet. On desktop that does not
-     exist, and the honest fallback is to save the file and post it. */
-  function shareFile(file, text, app){
-    if(navigator.canShare && navigator.canShare({ files:[file] })){
-      navigator.share({ files:[file], text:text })
-        .then(hush)
-        .catch(function(){ hush(); });
+  /* Instagram and TikTok have no web endpoint that accepts media, so the only
+     real path is the device share sheet. It also demands a *fresh* tap: by the
+     time a six second clip has finished rendering the original tap has expired
+     and the browser refuses silently. So we render first, then offer a second
+     button — that tap is what opens the sheet. */
+  function canShareFile(file){
+    return !!(navigator.canShare && navigator.share && navigator.canShare({ files:[file] }));
+  }
+
+  function offerShare(file, text, app){
+    state.pending = { file:file, text:text, app:app };
+    if(canShareFile(file)){
+      say("Ready. Tap below to send it to " + app + ".");
+      $("c-now").textContent = "Share now \u2192";
+      $("c-now").classList.add("is-on");
     } else {
       download(file);
-      say("Saved. " + app + " has no web upload, so post the file you just downloaded.");
-      setTimeout(hush, 6000);
+      $("c-now").classList.remove("is-on");
+      say("Saved to your device. " + app + " has no web upload, so post the file from there.");
+      setTimeout(hush, 7000);
     }
   }
+
+  $("c-now").addEventListener("click", function(){
+    var p = state.pending;
+    if(!p) return;
+    navigator.share({ files:[p.file], text:p.text })
+      .then(function(){ hush(); $("c-now").classList.remove("is-on"); })
+      .catch(function(err){
+        $("c-now").classList.remove("is-on");
+        if(err && err.name === "AbortError"){ hush(); return; }
+        download(p.file);
+        say("Sharing was blocked, so the file was saved instead.");
+        setTimeout(hush, 6000);
+      });
+  });
 
   function shareText(n){
     var w = lineFor(n);
@@ -847,32 +906,41 @@
            " \u2014 \u2116" + fmt(n) + " in a queue with nothing at the end.";
   }
 
-  $("s-ig").addEventListener("click", function(){
+  /* Safari cannot handle WebM, so on iOS the still image is the shareable one. */
+  function videoLikelyShareable(){
+    var probe = new File([new Blob([], { type:"video/webm" })], "p.webm", { type:"video/webm" });
+    return canShareFile(probe);
+  }
+
+  function shareClip(app){
     var n = state.current;
     say("Preparing\u2026");
-    makeVideo(n, function(f){ shareFile(f, shareText(n), "Instagram"); });
-  });
-  $("s-tt").addEventListener("click", function(){
-    var n = state.current;
-    say("Preparing\u2026");
-    makeVideo(n, function(f){ shareFile(f, shareText(n), "TikTok"); });
-  });
+    $("c-now").classList.remove("is-on");
+    if(videoLikelyShareable()){
+      makeVideo(n, function(f){ offerShare(f, shareText(n), app); });
+    } else {
+      makeImage(n, function(f){ offerShare(f, shareText(n), app); });
+    }
+  }
+
+  $("s-ig").addEventListener("click", function(){ shareClip("Instagram"); });
+  $("s-tt").addEventListener("click", function(){ shareClip("TikTok"); });
+
   $("s-x").addEventListener("click", function(){
     var n = state.current;
     say("Preparing\u2026");
+    $("c-now").classList.remove("is-on");
     makeImage(n, function(f){
-      if(navigator.canShare && navigator.canShare({ files:[f] })){
-        navigator.share({ files:[f], text:shareText(n) }).then(hush).catch(hush);
-      } else {
-        download(f);
-        window.open("https://x.com/intent/post?text=" +
-          encodeURIComponent(shareText(n)) + "&url=" +
-          encodeURIComponent(ORIGIN + "/" + n), "_blank", "noopener");
-        say("Image saved \u2014 attach it to the post that just opened.");
-        setTimeout(hush, 6000);
-      }
+      if(canShareFile(f)){ offerShare(f, shareText(n), "X"); return; }
+      download(f);
+      window.open("https://x.com/intent/post?text=" +
+        encodeURIComponent(shareText(n)) + "&url=" +
+        encodeURIComponent(ORIGIN + "/" + n), "_blank", "noopener");
+      say("Image saved \u2014 attach it to the post that just opened.");
+      setTimeout(hush, 7000);
     });
   });
+
   $("s-img").addEventListener("click", function(){
     say("Preparing\u2026");
     makeImage(state.current, function(f){ download(f); hush(); });
