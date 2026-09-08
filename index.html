@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>What are you waiting for? Get in line.</title>
-<meta name="description" content="Thousands of people paid to answer one question and stand in a line with nothing at the end. Whatever you are waiting for, you are not first.">
+<meta name="description" content="People answer one question and take a place in a line with nothing at the end. Whatever you are waiting for, you are not first.">
 <meta property="og:title" content="What are you waiting for? Get in line.">
 <meta property="og:description" content="Whatever it is, you are not first.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,7 +13,7 @@
 <style>
   :root{
     --night:#131316; --night-2:#1A1A1E; --line:#2C2C34;
-    --bone:#F2F0EA; --read:#E4E2DC; --dim:#7E7E88; --faint:#4A4A54;
+    --bone:#F2F0EA; --read:#E4E2DC; --dim:#8A8A94; --faint:#5A5A64;
     --amber:#E39B2E; --flare:#E4483A;
   }
   *{box-sizing:border-box;}
@@ -22,10 +22,20 @@
     background:var(--night); color:var(--bone);
     font-family:Archivo,system-ui,sans-serif; -webkit-font-smoothing:antialiased; overflow:hidden;
   }
+  :focus-visible{outline:2px solid var(--amber); outline-offset:2px;}
   .deck{height:100svh; overflow-y:scroll; scroll-snap-type:y mandatory; -webkit-overflow-scrolling:touch;}
   .deck::-webkit-scrollbar{width:0;}
   .page{min-height:100svh; scroll-snap-align:start; scroll-snap-stop:always; padding:0 24px;}
   .inner{max-width:1180px; margin:0 auto; min-height:100svh; display:flex; flex-direction:column;}
+
+  /* ---------- DEMO NOTICE ----------
+     Delete this block, and set DEMO=false in the script, before launch. */
+  .demo{
+    position:fixed; left:0; right:0; bottom:0; z-index:80;
+    padding:7px 14px; background:var(--flare); color:#fff; text-align:center;
+    font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.06em;
+  }
+  .demo.is-off{display:none;}
 
   /* ---------- HOOK ---------- */
   .hook{justify-content:center; padding:100px 0 80px;}
@@ -85,21 +95,26 @@
 
   .e{
     flex:1 1 0; min-width:0; padding:6px 6px 7px; cursor:pointer; text-align:center;
-    display:flex; flex-direction:column; justify-content:center; gap:2px;
-    border-bottom:1px solid var(--line);
+    display:flex; flex-direction:column; justify-content:center; gap:3px;
+    background:transparent; border:none; border-bottom:1px solid var(--line);
+    color:inherit; font-family:inherit;
     transition:transform .18s ease, color .18s ease, border-color .18s ease;
   }
-  .e__n{font-family:"DM Mono",monospace; font-size:8.5px; letter-spacing:.04em; color:var(--faint); transition:color .18s ease;}
+  .e__n{font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.04em; color:var(--faint); transition:color .18s ease;}
+  /* The sentences are the product, so let them wrap rather than truncate to
+     two words. Two lines on a phone, one on a wide screen where they fit. */
   .e__w{
-    font-size:clamp(10.5px,1.45vh,14px); line-height:1.25; color:var(--read); font-weight:400;
-    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; transition:color .18s ease;
+    font-size:clamp(11px,1.5vh,14px); line-height:1.22; color:var(--read); font-weight:400;
+    display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2;
+    overflow:hidden; transition:color .18s ease;
   }
-  .e__amt{font-family:"DM Mono",monospace; font-size:8.5px; color:var(--amber); display:none;}
+  .e__amt{font-family:"DM Mono",monospace; font-size:10px; color:var(--amber); display:none;}
   .is-amount .e__amt{display:block;}
-  .e__lk{font-family:"DM Mono",monospace; font-size:8.5px; color:var(--flare); display:none;}
+  .e__lk{font-family:"DM Mono",monospace; font-size:10px; color:var(--flare); display:none;}
   .is-likes .e__lk{display:block;}
   .e.is-silent .e__w{font-style:italic; color:var(--dim);}
-  .e:hover{transform:scale(1.32); border-color:var(--flare); position:relative; z-index:5;}
+  .e.is-free .e__amt{color:var(--dim);}
+  .e:hover{transform:scale(1.3); border-color:var(--flare); position:relative; z-index:5;}
   .e:hover .e__w,.e:hover .e__n{color:var(--flare);}
 
   .wallfoot{
@@ -136,7 +151,7 @@
   .act{padding:11px 15px; cursor:pointer; background:transparent; color:var(--bone); border:1px solid var(--line); font-family:"DM Mono",monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;}
   .act:hover{border-color:var(--bone);}
   .act--go{background:var(--bone); color:var(--night); border-color:var(--bone); margin-top:16px;}
-  .card__x{margin:18px 0 0; font-family:"DM Mono",monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); cursor:pointer;}
+  .card__x{margin:18px 0 0; padding:0; background:transparent; border:none; font-family:"DM Mono",monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); cursor:pointer;}
   .busy{margin:12px 0 0; font-family:"DM Mono",monospace; font-size:10.5px; color:var(--amber); line-height:1.6; display:none;}
   .busy.is-on{display:block;}
   .sharenow{
@@ -168,7 +183,6 @@
   .navarrow:disabled{opacity:.3; cursor:default;}
   .card__where{font-family:"DM Mono",monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); text-align:center;}
 
-  /* side arrows: desktop only, sitting outside the card */
   .side{
     position:absolute; top:50%; transform:translateY(-50%); z-index:2;
     display:none; flex-direction:column; align-items:center; gap:9px;
@@ -188,7 +202,6 @@
     .card__nav{justify-content:center; margin-top:-8px;}
   }
 
-  /* like */
   .likebtn{
     display:inline-flex; align-items:center; gap:8px;
     margin:20px 0 0; padding:11px 18px; cursor:pointer;
@@ -206,12 +219,12 @@
   .results.is-on{display:block;}
   .results__in{max-width:760px; margin:0 auto;}
   .results__k{font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); margin:0 0 20px;}
-  .r{display:flex; gap:14px; align-items:baseline; padding:13px 0; border-bottom:1px solid var(--line); cursor:pointer;}
+  .r{display:flex; gap:14px; align-items:baseline; width:100%; text-align:left; padding:13px 0; background:transparent; border:none; border-bottom:1px solid var(--line); cursor:pointer; font-family:inherit;}
   .r:hover .r__w{color:var(--flare);}
   .r__n{font-family:"DM Mono",monospace; font-size:11px; color:var(--faint); flex:0 0 62px;}
   .r__w{flex:1; min-width:0; font-size:16px; color:var(--read); transition:color .15s ease;}
   .r__by{font-family:"DM Mono",monospace; font-size:11px; color:var(--dim); flex:0 0 auto;}
-  .results__x{margin:26px 0 0; font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--amber); cursor:pointer;}
+  .results__x{margin:26px 0 0; padding:0; background:transparent; border:none; font-family:"DM Mono",monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--amber); cursor:pointer;}
 
   /* ---------- JOIN ---------- */
   .join{justify-content:center; padding:104px 0 80px;}
@@ -233,6 +246,20 @@
   .note:focus{border-color:var(--bone);}
   .note::placeholder{color:var(--faint);}
   .count{margin:7px 0 0; font-family:"DM Mono",monospace; font-size:10.5px; color:var(--faint);}
+
+  /* free / paid choice */
+  .modes{display:flex; gap:8px; flex-wrap:wrap; margin:0 0 16px;}
+  .mode{
+    flex:1 1 240px; padding:15px 17px; cursor:pointer; text-align:left;
+    background:transparent; color:var(--read); border:1px solid var(--line); font-family:inherit;
+    transition:border-color .15s ease;
+  }
+  .mode:hover{border-color:var(--bone);}
+  .mode.is-on{border-color:var(--amber);}
+  .mode b{display:block; font-size:16px; font-weight:600; color:var(--bone); margin-bottom:4px;}
+  .mode span{font-family:"DM Mono",monospace; font-size:11px; line-height:1.6; color:var(--dim);}
+  .mode.is-on b{color:var(--amber);}
+  .paybox.is-off{display:none;}
 
   .pay__row{display:flex; align-items:baseline; gap:6px; border-bottom:2px solid var(--bone); max-width:250px;}
   .pay__cur{font-family:"DM Mono",monospace; font-size:24px; color:var(--dim);}
@@ -256,7 +283,7 @@
     .bar__k{display:none;}
     .search input{width:104px;}
     .wall{padding-top:112px;}
-    .e:hover{transform:scale(1.12);}
+    .e:hover{transform:scale(1.1);}
   }
   @media (prefers-reduced-motion:reduce){ *{animation:none !important; transition:none !important;} .deck{scroll-snap-type:none;} }
 </style>
@@ -275,7 +302,7 @@
   <div class="bar__r">
     <div class="search">
       <input id="q" type="text" placeholder="number or name" aria-label="Search by number or name">
-      <button id="q-go">&#8981;</button>
+      <button id="q-go" aria-label="Search">&#8981;</button>
     </div>
     <button class="navbtn" id="to-top">&uarr; Top</button>
     <button class="navbtn" id="to-end">&darr; End</button>
@@ -288,9 +315,9 @@
     <h1>What are you waiting for?<span>Get in line.</span></h1>
     <p class="hook__sting">Whatever it is, you are not first.</p>
     <p class="hook__p">
-      <em id="hook-n">12,847</em> people have paid to answer that question and take
-      a place in a queue with nothing at the end of it. You choose what you pay.
-      Their answers are the only thing here.
+      <em id="hook-n">0</em> people have answered that question and taken a place
+      in a queue with nothing at the end of it. Joining is free. You can pay if
+      you want the answer to count for more. Their answers are the only thing here.
     </p>
     <div class="hook__row">
       <button class="btn" id="hook-go">Answer it</button>
@@ -304,9 +331,9 @@
   <section class="page" id="join"><div class="inner join">
     <h2>What are you waiting for?<span>Get in line.</span></h2>
     <p class="join__p">
-      It stays exactly as you typed it, and <b>it is never edited, moved or
-      deleted</b> &mdash; not by you, not by me. That permanence is the whole of
-      what you are paying for.
+      It stays exactly as you typed it. <b>We never move it, never edit it, and
+      never let you take it back</b> &mdash; the number you get can only go up.
+      That permanence is the whole of what this is.
     </p>
 
     <p class="flabel">1 &middot; What are you waiting for?</p>
@@ -323,28 +350,46 @@
       <input id="nick" type="text" maxlength="24" placeholder="anything you like" aria-label="Display name">
     </div>
 
-    <p class="flabel">4 &middot; What is this worth to you? <s>&mdash; minimum $5</s></p>
-    <div class="pay__row">
-      <span class="pay__cur">$</span>
-      <input id="amt" type="number" min="5" step="1" value="5" aria-label="Amount to pay">
+    <p class="flabel">4 &middot; How you want to join</p>
+    <div class="modes">
+      <button class="mode is-on" id="m-free" aria-pressed="true">
+        <b>Free</b>
+        <span>A number, a place in the line, and everything else on this page.</span>
+      </button>
+      <button class="mode" id="m-paid" aria-pressed="false">
+        <b>Pay what it is worth</b>
+        <span>The same, plus a place in Most valued &mdash; the list of people who wanted this written down the most.</span>
+      </button>
     </div>
-    <div class="chips">
-      <button class="chip is-on" data-amt="5">5</button>
-      <button class="chip" data-amt="10">10</button>
-      <button class="chip" data-amt="25">25</button>
-      <button class="chip" data-amt="100">100</button>
+
+    <div class="paybox is-off" id="paybox">
+      <div class="pay__row">
+        <span class="pay__cur">$</span>
+        <input id="amt" type="number" min="5" step="1" value="5" aria-label="Amount to pay">
+      </div>
+      <div class="chips">
+        <button class="chip is-on" data-amt="5">5</button>
+        <button class="chip" data-amt="25">25</button>
+        <button class="chip" data-amt="100">100</button>
+        <button class="chip" data-amt="500">500</button>
+        <button class="chip" data-amt="1000">1000</button>
+      </div>
+      <p class="paynote">
+        Minimum $5, and you can type any amount above it. Paying buys nothing
+        extra. It does not move you forward &mdash; <b>nothing moves anyone
+        forward</b>. It only changes where you sit in Most valued.
+      </p>
     </div>
-    <p class="paynote">
-      Paying more buys nothing extra. It does not move you forward &mdash; nothing
-      moves anyone forward. It only changes where you sit in <b>Most valued</b>,
-      which is a list of the people who wanted this written down the most.
-    </p>
+
     <button class="btn" id="pay-go" style="margin-top:22px">Take my place</button>
 
     <p class="fine">
       Your number is permanent and can only go up.<br>
-      Nothing is posted to you. No refunds, no transfers, no leaving.<br>
-      The door never opens. Said plainly, so nobody is surprised.
+      Nothing is posted to you. No transfers, no leaving.<br>
+      The door never opens. Said plainly, so nobody is surprised.<br>
+      <!-- Refund and takedown wording still needs a lawyer. UK/EU consumers
+           have a 14-day withdrawal right unless they waive it at checkout,
+           and you must be able to remove unlawful content on request. -->
     </p>
 
     <!-- COLOPHON — replace with your own words. -->
@@ -361,11 +406,11 @@
   <div class="results__in">
     <p class="results__k" id="r-k"></p>
     <div id="r-list"></div>
-    <p class="results__x" id="r-x">&larr; Back to the line</p>
+    <button class="results__x" id="r-x">&larr; Back to the line</button>
   </div>
 </div>
 
-<div class="sheet" id="sheet">
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Entry">
   <button class="side side--l" id="s-prev"><em>&larr;</em>Ahead</button>
   <button class="side side--r" id="s-next"><em>&rarr;</em>Behind</button>
   <div class="card">
@@ -395,22 +440,25 @@
     <p class="busy" id="c-busy"></p>
     <button class="sharenow" id="c-now">Share now &rarr;</button>
     <button class="act act--go" id="c-join">Add mine</button>
-    <p class="card__x" id="c-close">Close</p>
+    <button class="card__x" id="c-close">Close</button>
   </div>
   <div class="hint" id="hint">Swipe left or right &middot; down to close</div>
 </div>
 
 <div class="sticky" id="sticky"><button class="btn" id="sticky-btn">What are you waiting for?</button></div>
 
+<div class="demo" id="demo">Demo. Every entry below is invented and the count is not real.</div>
+
 <script>
 (function(){
   "use strict";
 
   /* ---------------------------------------------------------------
-     DEMO DATA. Replace with a real feed. The lines, notes, names and
-     amounts ARE the product — inventing them is the one lie this page
-     cannot survive.
+     DEMO DATA. Set DEMO=false and replace with a real feed before
+     launch. The lines, notes, names and amounts ARE the product —
+     inventing them in public is the one lie this page cannot survive.
   ----------------------------------------------------------------*/
+  var DEMO = true;
   var COUNT = 12847, MIN = 5;
   var SITE = "thequeue.example";
   var ORIGIN = "https://" + SITE;
@@ -472,11 +520,18 @@
     if(r() < 0.28) return "";
     return nickA[Math.floor(r() * nickA.length)] + nickB[Math.floor(r() * nickB.length)];
   }
-  /* Most pay the minimum; a few pay a great deal more. */
-  function valueFor(n){ return MIN + Math.floor(Math.pow(seeded(n + 8807)(), 9) * 700); }
+  /* Most people join free. Of those who pay, most pay the minimum and a few
+     pay a great deal more. That shape is what makes an amount mean anything. */
+  function valueFor(n){
+    var r = seeded(n + 8807);
+    if(r() < 0.62) return 0;
+    return MIN + Math.floor(Math.pow(r(), 9) * 700);
+  }
+  function money(v){ return v ? "$" + fmt(v) : "free"; }
 
   /* Likes are long-tailed too: a handful of lines are felt by thousands,
-     most by nobody. Silent entries collect almost none. */
+     most by nobody. Silent entries collect almost none.
+     NOTE: likes live in memory only. Real ones belong on the server. */
   var myLikes = {}, likeDelta = {};
   function baseLikes(n){
     if(!lineFor(n)) return Math.floor(Math.pow(seeded(n + 44)(), 6) * 40);
@@ -493,34 +548,47 @@
   var pool = [];
   for(var i = COUNT; i >= 1; i--) pool.push(i);
 
-  var state = { sort:"order", perLane:10, lanes:10, current:null, navList:[], navFrom:"line" };
+  var state = { sort:"order", perLane:10, lanes:10, current:null, navList:[], navFrom:"line", shuffled:null };
+
+  function shuffle(){
+    var a = pool.slice(), j, t, k;
+    for(k = a.length - 1; k > 0; k--){ j = Math.floor(Math.random() * (k + 1)); t = a[k]; a[k] = a[j]; a[j] = t; }
+    return a;
+  }
 
   function ordered(){
     if(state.sort === "order") return pool;
+    /* the shuffle is kept, so a resize does not silently reorder the line
+       under someone who was reading it */
     if(state.sort === "random"){
-      var a = pool.slice(), j, t, k;
-      for(k = a.length - 1; k > 0; k--){ j = Math.floor(Math.random() * (k + 1)); t = a[k]; a[k] = a[j]; a[j] = t; }
-      return a;
+      if(!state.shuffled) state.shuffled = shuffle();
+      return state.shuffled;
     }
     if(state.sort === "liked"){
       return pool.slice().sort(function(x, y){ return likesFor(y) - likesFor(x); });
     }
-    return pool.slice().sort(function(x, y){ return valueFor(y) - valueFor(x); });
+    /* paid: free entries fall to the bottom, in line order among themselves */
+    return pool.slice().sort(function(x, y){
+      var d = valueFor(y) - valueFor(x);
+      return d !== 0 ? d : x - y;
+    });
   }
 
   function fit(){
     var w = window.innerWidth;
-    state.perLane = w >= 1000 ? 10 : w >= 820 ? 8 : 5;
+    state.perLane = w >= 1000 ? 10 : w >= 820 ? 8 : 4;
   }
 
   function entryHTML(n){
-    var w = lineFor(n), silent = !w;
-    return '<div class="e' + (silent ? " is-silent" : "") + '" data-n="' + n + '">' +
+    var w = lineFor(n), silent = !w, v = valueFor(n);
+    var label = (w ? w : "said nothing") + ", number " + fmt(n);
+    return '<button class="e' + (silent ? " is-silent" : "") + (v ? "" : " is-free") +
+      '" data-n="' + n + '" aria-label="' + esc(label) + '">' +
       '<span class="e__n">' + fmt(n) + '</span>' +
       '<span class="e__w">' + (silent ? "said nothing" : esc(w)) + '</span>' +
-      '<span class="e__amt">$' + valueFor(n) + '</span>' +
+      '<span class="e__amt">' + money(v) + '</span>' +
       '<span class="e__lk">\u2665 ' + fmt(likesFor(n)) + '</span>' +
-    '</div>';
+    '</button>';
   }
 
   function milestoneHTML(walked, left){
@@ -549,7 +617,7 @@
       : state.sort === "random" ? "in no order at all"
       : state.sort === "liked"
         ? "\u2665 " + fmt(likesFor(first)) + " down to " + fmt(likesFor(last))
-        : "$" + valueFor(first) + " down to $" + valueFor(last);
+        : money(valueFor(first)) + " down to " + money(valueFor(last));
     return '<section class="page"><div class="inner wall' + mode + '">' +
       '<div class="snake">' + html + '</div>' +
       '<div class="wallfoot">' +
@@ -617,13 +685,13 @@
 
   function openSheet(n){
     state.current = n;
-    var w = lineFor(n), nk = nickFor(n), nt = noteFor(n);
+    var w = lineFor(n), nk = nickFor(n), nt = noteFor(n), v = valueFor(n);
     $("c-n").textContent = "\u2116 " + fmt(n);
     $("c-w").textContent = w ? "\u201C" + w + "\u201D" : "Said nothing.";
     $("c-by").innerHTML = "\u2014 <b>" + esc(nk || "anonymous") + "</b>";
     $("c-c").textContent = nt;
     $("c-m").innerHTML =
-      "value: <b>$" + valueFor(n) + "</b><br>" +
+      (v ? "value: <b>$" + fmt(v) + "</b>" : "joined free") + "<br>" +
       fmt(n - 1) + " people ahead<br>" +
       "estimated wait: never";
 
@@ -642,6 +710,7 @@
     $("c-now").classList.remove("is-on");
     state.pending = null;
     $("sheet").classList.add("is-on");
+    $("c-close").focus();
 
     /* show the swipe hint once, the first time a card is opened */
     if(!state.hinted){
@@ -734,11 +803,11 @@
       : "Nobody in this line matches \u201C" + term + "\u201D";
     $("r-list").innerHTML = found.map(function(m){
       var w = lineFor(m), nk2 = nickFor(m);
-      return '<div class="r" data-n="' + m + '">' +
+      return '<button class="r" data-n="' + m + '">' +
         '<span class="r__n">\u2116' + fmt(m) + '</span>' +
         '<span class="r__w">' + (w ? esc(w) : "said nothing") + '</span>' +
         '<span class="r__by">' + esc(nk2 || "anonymous") + '</span>' +
-      '</div>';
+      '</button>';
     }).join("");
     /* arrows inside a card then walk the results, not the whole line */
     state.navList = found;
@@ -766,7 +835,7 @@
   }
 
   function paint(x, W, H, n, reveal){
-    var w = lineFor(n), nk = nickFor(n), nt = noteFor(n), pad = W * 0.11;
+    var w = lineFor(n), nk = nickFor(n), nt = noteFor(n), v = valueFor(n), pad = W * 0.11;
     x.fillStyle = "#131316"; x.fillRect(0, 0, W, H);
     x.textAlign = "left";
 
@@ -793,7 +862,7 @@
     ty += qRows.length > shown ? (qRows.length - shown) * qLead : 0;
 
     /* who said it */
-    x.fillStyle = "#7E7E88";
+    x.fillStyle = "#8A8A94";
     x.font = "400 " + (W * 0.04) + "px Archivo, sans-serif";
     x.fillText("\u2014 " + (nk || "anonymous"), pad, ty);
     ty += W * 0.085;
@@ -809,9 +878,9 @@
     x.strokeStyle = "#2C2C34"; x.lineWidth = 2;
     x.beginPath(); x.moveTo(pad, H * 0.755); x.lineTo(W - pad, H * 0.755); x.stroke();
 
-    x.fillStyle = "#7E7E88";
+    x.fillStyle = "#8A8A94";
     x.font = "400 " + (W * 0.03) + "px 'DM Mono', monospace";
-    x.fillText("\u2116 " + fmt(n) + " \u00B7 value $" + valueFor(n) +
+    x.fillText("\u2116 " + fmt(n) + " \u00B7 " + (v ? "value $" + fmt(v) : "joined free") +
                " \u00B7 \u2665 " + fmt(likesFor(n)), pad, H * 0.80);
     x.fillText("estimated wait: never", pad, H * 0.838);
     x.fillStyle = "#E39B2E"; x.fillText("GET IN LINE \u00B7 " + SITE, pad, H * 0.885);
@@ -950,6 +1019,21 @@
   });
 
   /* ---------- join ---------- */
+  var paying = false;
+
+  function setMode(isPaid){
+    paying = isPaid;
+    $("m-free").classList.toggle("is-on", !isPaid);
+    $("m-paid").classList.toggle("is-on", isPaid);
+    $("m-free").setAttribute("aria-pressed", String(!isPaid));
+    $("m-paid").setAttribute("aria-pressed", String(isPaid));
+    $("paybox").classList.toggle("is-off", !isPaid);
+    $("pay-go").textContent = isPaid ? "Pay and take my place" : "Take my place";
+    if(isPaid) $("amt").focus();
+  }
+  $("m-free").addEventListener("click", function(){ setMode(false); });
+  $("m-paid").addEventListener("click", function(){ setMode(true); });
+
   $("note").addEventListener("input", function(){ $("note-c").textContent = $("note").value.length; });
   document.querySelectorAll(".chip").forEach(function(c){
     c.addEventListener("click", function(){
@@ -963,15 +1047,20 @@
       x.classList.toggle("is-on", x.dataset.amt === $("amt").value);
     });
   });
+
   $("pay-go").addEventListener("click", function(){
-    var amt = Math.max(MIN, Math.floor(Number($("amt").value) || MIN));
-    $("amt").value = amt;
-    /* → real flow: open Paddle checkout for this amount, write the position
-       server-side in the transaction.completed webhook, reload from server. */
     var said = ($("said").value || "").trim(), nk = ($("nick").value || "").trim();
-    alert("Demo: \u2116" + fmt(COUNT + 1) + " \u00B7 value $" + amt +
+    if(!said){ $("said").focus(); return; }
+    var amt = 0;
+    if(paying){
+      amt = Math.max(MIN, Math.floor(Number($("amt").value) || MIN));
+      $("amt").value = amt;
+    }
+    /* → real flow: free entries write straight to the server; paid ones open
+       checkout and are written in the payment webhook, then reloaded. */
+    alert("Demo: \u2116" + fmt(COUNT + 1) + " \u00B7 " + (amt ? "value $" + fmt(amt) : "free") +
           (nk ? " \u00B7 " + nk : " \u00B7 anonymous") +
-          (said ? "\n\u201C" + said + "\u201D" : ""));
+          "\n\u201C" + said + "\u201D");
   });
 
   function toJoin(){
@@ -988,6 +1077,7 @@
   });
 
   $("hook-n").textContent = fmt(COUNT);
+  $("demo").classList.toggle("is-off", !DEMO);
 })();
 </script>
 </body>
