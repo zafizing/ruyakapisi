@@ -18,7 +18,7 @@
         content engine your visitors fill for you. -->
 <meta property="og:title" content="What are you waiting for? Get in line.">
 <meta property="og:description" content="Whatever it is, you are not first.">
-<meta property="og:image" content="https://thequeue.example/og/default.png">
+<meta property="og:image" content="https://ruyakapisi.vercel.app/og/default.png">
 <meta name="twitter:card" content="summary_large_image">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -215,6 +215,20 @@
   .heart{min-width:92px; min-height:56px; display:flex; align-items:center; justify-content:center; gap:8px; border:1px solid var(--line-2); font-size:17px; font-variant-numeric:tabular-nums;}
   .heart.is-on{color:var(--brass); border-color:var(--brass);}
   .acts .btn{flex:1;}
+
+  /* The core social loop: solidarity without opening the door to comments. */
+  .together{
+    display:block; width:100%; margin-top:10px; padding:15px 16px; text-align:left;
+    background:var(--ground-3); border:1px solid var(--line-2); transition:background .15s ease, border-color .15s ease;
+  }
+  .together:hover{border-color:var(--brass);}
+  .together:active{background:var(--ground);}
+  .together[aria-pressed="true"]{border-color:var(--brass); background:var(--ground);}
+  .together__main{display:block; font-size:16px; font-weight:600; color:var(--text);}
+  .together[aria-pressed="true"] .together__main{color:var(--brass);}
+  .together__count{display:block; margin-top:3px; font-size:14px; color:var(--dim);}
+  .together__count b{font-variant-numeric:tabular-nums; color:var(--text); font-weight:500;}
+
   .p-join{margin:10px 0 0;}
   .p-links{display:flex; flex-wrap:wrap; justify-content:center; gap:0 20px; margin-top:6px;}
   .p-links .textlink{font-size:15px;}
@@ -304,7 +318,7 @@
   <div class="demo" id="demo">Demo. Every entry here is invented and the count is not real.</div>
 
   <header class="top"><div class="top__in">
-    <button class="mark" id="home">The Queue</button>
+    <button class="mark" id="home">Rüya Kapısı</button>
     <button class="ibtn" id="open-search" aria-label="Search">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l5 5"/></svg>
     </button>
@@ -351,7 +365,7 @@
           <p>Every sentence is public and permanent. <b>Ask us to remove your name and we will</b>; the sentence stays, anonymous. The door never opens.</p>
           <!-- COLOPHON: replace with your own words. An unsigned absurd project
                reads as a scam; a signed one reads as a piece of work. -->
-          <p>Made by <b>[your name]</b>. I photographed the door, measured the pavement behind it, and built the rest at a kitchen table. There is no company. Press and removals: <a href="mailto:hello@example.com">hello@example.com</a></p>
+          <p>Built as a public ritual for the things people are waiting for. No comments, no arguments, just a place to leave your sentence. Press and removals: <a href="mailto:hello@example.com">hello@example.com</a></p>
         </footer>
       </div></div>
     </section>
@@ -383,6 +397,12 @@
       <button class="heart" id="c-like" aria-pressed="false"><span aria-hidden="true">&#9825;</span><span id="c-likes">0</span></button>
       <button class="btn" id="c-share">Share</button>
     </div>
+
+    <button class="together" id="c-together" aria-pressed="false">
+      <span class="together__main" id="c-together-label">I'm waiting for this too</span>
+      <span class="together__count"><b id="c-together-count">0</b> people are waiting for this too</span>
+    </button>
+
     <button class="btn btn--ghost p-join" id="c-join">Add yours</button>
     <div class="p-links">
       <button class="textlink" id="s-link">Copy link</button>
@@ -533,6 +553,7 @@
        GET  /api/search?q=             matches
        POST /api/join                  free entries (rate limited, captcha)
        POST /api/like/:n               one per session, checked server-side
+       POST /api/together/:n            one per session, checked server-side
   ================================================================== */
   var mine = {};   /* entries created in this demo session */
 
@@ -551,12 +572,19 @@
   function supFor(n){ return mine[n] ? mine[n].sup : seeded(n + 8807)() < 0.06; }
 
   var myLikes = {}, likeDelta = {};
+  var myTogether = {}, togetherDelta = {};
   function baseLikes(n){
     if(mine[n]) return 0;
     if(!lineFor(n)) return Math.floor(Math.pow(seeded(n + 44)(), 6) * 40);
     return Math.floor(Math.pow(seeded(n + 6607)(), 5) * 2600);
   }
   function likesFor(n){ return baseLikes(n) + (likeDelta[n] || 0); }
+  function baseTogether(n){
+    if(mine[n]) return 0;
+    if(!lineFor(n)) return 0;
+    return Math.floor(Math.pow(seeded(n + 9127)(), 3) * 28);
+  }
+  function togetherFor(n){ return baseTogether(n) + (togetherDelta[n] || 0); }
 
   function pace(left){
     var h = left / 20;                       /* a real queue moves about 20 m an hour */
@@ -694,7 +722,9 @@
     $("c-m").innerHTML = fmt(n - 1) + " people ahead<br>Estimated wait: never";
     $("c-banner").hidden = !fresh;
     $("c-likes").textContent = fmt(likesFor(n));
+    $("c-together-count").textContent = fmt(togetherFor(n));
     syncLike();
+    syncTogether();
 
     var i = navIndex(n), atStart = i <= 0, atEnd = i < 0 || i >= S.nav.length - 1;
     var inLine = (S.nav === pool && S.sort === "order");
@@ -760,6 +790,13 @@
     $("c-like").setAttribute("aria-pressed", String(on));
     $("c-like").firstChild.textContent = on ? "\u2665" : "\u2661";
   }
+
+  function syncTogether(){
+    var on = !!myTogether[S.cur];
+    $("c-together").setAttribute("aria-pressed", String(on));
+    $("c-together-label").textContent = on ? "You're waiting for this too" : "I'm waiting for this too";
+  }
+
   $("c-like").addEventListener("click", function(){
     var n = S.cur;
     /* -> server: POST /api/like/:n, one per session, rate limited. A like
@@ -768,6 +805,23 @@
     else { myLikes[n] = true; likeDelta[n] = (likeDelta[n] || 0) + 1; track("like", { n:n }); }
     $("c-likes").textContent = fmt(likesFor(n));
     syncLike();
+  });
+
+  $("c-together").addEventListener("click", function(){
+    var n = S.cur;
+    /* -> server: POST /api/together/:n, one per session, rate limited.
+       Unlike likes, this is intentionally framed as a statement of solidarity. */
+    if(myTogether[n]){
+      myTogether[n] = false;
+      togetherDelta[n] = (togetherDelta[n] || 0) - 1;
+      track("together_remove", { n:n });
+    }else{
+      myTogether[n] = true;
+      togetherDelta[n] = (togetherDelta[n] || 0) + 1;
+      track("together", { n:n });
+    }
+    $("c-together-count").textContent = fmt(togetherFor(n));
+    syncTogether();
   });
 
   /* one tap on any row, result or the hero line opens its entry */
