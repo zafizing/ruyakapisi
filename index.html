@@ -4,356 +4,223 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#3A0A12">
-<title>What are you waiting for? Get in line.</title>
+<title>The Queue: What are you waiting for? Get in line.</title>
 <meta name="description" content="Everyone is waiting for something. A queue with nothing at the end, made of one sentence from each of us. Joining is free.">
-
-<!-- SERVER NOTES. Two jobs here are worth more than any styling.
-     1. PER-ENTRY PAGES. Each entry needs a real page at /<number> that renders
-        its own og:title, og:description and og:image (port paint() below to a
-        server canvas). Until then links use the #/<number> form, which works on
-        any static host. Flip PRETTY_URLS once the server pages exist.
-     2. AUTOPOSTING. Instagram Graph API (Reels), TikTok Content Posting API and
-        the X API all accept posts from your own accounts, server-side. A daily
-        job that picks the most-felt entry, renders the clip and posts it is a
-        content engine your visitors fill for you. -->
+<link rel="canonical" href="https://thequeue.example/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%233A0A12'/%3E%3Ccircle cx='11' cy='16' r='4' fill='%23C9AB62'/%3E%3Ccircle cx='22' cy='16' r='4' fill='%23F4F0E6'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="The Queue">
+<meta property="og:url" content="https://thequeue.example/">
 <meta property="og:title" content="What are you waiting for? Get in line.">
 <meta property="og:description" content="Whatever it is, you are not first.">
-<meta property="og:image" content="https://thequeue.example/og/default.png">
+<meta property="og:image" content="https://thequeue.example/og/default.png"><!-- TODO: real image -->
 <meta name="twitter:card" content="summary_large_image">
-
+<meta name="twitter:title" content="What are you waiting for? Get in line.">
+<meta name="twitter:description" content="Whatever it is, you are not first.">
+<!-- SERVER NOTES: (1) real pages at /<number> with their own og tags, then flip PRETTY_URLS;
+     (2) self-host the fonts as subsets; (3) POST /api/translate for translation at scale;
+     (4) captcha, rate limits, review queue, server-side copy of every check done here. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
-
 <style>
-  /* The whole look lives in these tokens, and the share images read the same
-     tokens, so changing a colour here changes it everywhere.
-     A true bordeaux is a deep red with almost no blue in it. If it ever drifts
-     pink, lower the blue (the last pair of digits) and keep the red high.
-     A lighter wine: --ground #4A0E18, --ground-2 #571523, --ground-3 #651C2D. */
-  :root{
-    --ground:#3A0A12; --ground-2:#47101B; --ground-3:#561624;
-    --line:#5A1C29;   --line-2:#74303D;   --trail:#8E3E4B;
-    --text:#F4F0E6;   --read:#E6DDD2;     --dim:#CBB1A8;   --faint:#A98A84;
-    --brass:#C9AB62;
-    --scrim:rgba(20,3,7,.88);
-    --top:52px;
-    /* Newsreader was drawn for reading on screens: sturdy strokes at small
-       sizes, an elegant high-contrast cut at large ones. Hanken Grotesk
-       carries the interface. */
-    --serif:"Newsreader",Georgia,"Times New Roman",serif;
-    --sans:"Hanken Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
-  }
-  *{box-sizing:border-box;}
-  html,body{height:100%;}
-  html{background:var(--ground); -webkit-text-size-adjust:100%;}
-  body{
-    margin:0; overflow:hidden; color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.5;
-    -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent;
-  }
-  button{font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer;}
-  button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--brass); outline-offset:3px;}
-  [hidden]{display:none !important;}
-  .voice{font-family:var(--serif); font-optical-sizing:auto; font-weight:400;}
-  .col{max-width:680px; margin:0 auto; padding:0 22px;}
-
-  /* The page is an app shell: a bar, then a deck of two full screens. */
-  .shell{height:100vh; height:100dvh; display:flex; flex-direction:column;}
-  .demo{flex:0 0 auto; padding:6px 14px; background:var(--brass); color:var(--ground); text-align:center; font-size:12.5px; font-weight:500;}
-
-  .top{flex:0 0 auto; padding-top:env(safe-area-inset-top); background:var(--ground); border-bottom:1px solid var(--line);}
-  .top__in{height:var(--top); max-width:680px; margin:0 auto; padding:0 8px 0 22px; display:flex; align-items:center; justify-content:space-between;}
-  .top__l{display:flex; align-items:center; min-width:0;}
-  .mark{font-family:var(--serif); font-size:21px; font-weight:500; letter-spacing:.005em; white-space:nowrap;}
-  .about-link{
-    margin-left:16px; min-height:44px; padding:0 2px; font-size:15px; color:var(--dim); white-space:nowrap;
-    text-decoration:underline; text-underline-offset:5px; text-decoration-color:var(--line-2);
-  }
-  .about-link:hover{color:var(--text);}
-  .ibtn{width:44px; height:44px; display:grid; place-items:center; color:var(--dim);}
-  .ibtn:hover{color:var(--text);}
-
-  /* Two screens, each exactly one viewport tall, so the snap is clean. */
-  .deck{
-    flex:1 1 auto; min-height:0; overflow-y:auto; scroll-snap-type:y mandatory;
-    overscroll-behavior-y:contain; -webkit-overflow-scrolling:touch;
-  }
-  .hero,.feed{scroll-snap-align:start; scroll-snap-stop:always;}
-
-  /* ---------- screen 1: the question ---------- */
-  .hero{min-height:100%; display:flex; flex-direction:column; justify-content:center; padding:20px 0 24px;}
-  .h1{
-    font-family:var(--serif); font-weight:400; margin:0;
-    font-size:clamp(42px,12.8vw,84px); line-height:1.04; letter-spacing:-.022em;
-  }
-  .sting{margin:16px 0 0; font-size:clamp(18px,5vw,22px); color:var(--text);}
-  .about-p{margin:10px 0 0; font-size:16.5px; line-height:1.55; color:var(--dim); max-width:460px;}
-  .about-p b{color:var(--text); font-weight:500; font-variant-numeric:tabular-nums;}
-
-  .peek{
-    display:block; width:100%; text-align:left; margin:22px 0 0; padding:12px 0 12px 18px;
-    border-left:2px solid var(--brass); transition:opacity .45s ease;
-  }
-  .peek.is-out{opacity:0;}
-  .peek__k{display:block; font-size:15px; color:var(--dim);}
-  .peek__v{display:block; margin-top:4px; font-size:clamp(25px,7.2vw,33px); line-height:1.18; color:var(--text);}
-
-  .btn{
-    display:flex; align-items:center; justify-content:center; width:100%; min-height:56px; padding:0 24px;
-    background:var(--text); color:var(--ground); font-size:17px; font-weight:600; letter-spacing:-.005em;
-    transition:background .18s ease;
-  }
-  .btn:active{background:var(--brass);}
-  @media (hover:hover){ .btn:hover{background:var(--brass);} }
-  .btn--ghost{background:transparent; color:var(--text); border:1px solid var(--line-2);}
-  .btn--ghost:active{background:var(--ground-3);}
-  @media (hover:hover){ .btn--ghost:hover{background:var(--ground-3);} }
-  .hero .btn{margin-top:22px;}
-
-  /* the invitation to scroll is deliberately the loudest line below the button */
-  .scrollrow{
-    display:flex; align-items:center; justify-content:space-between; gap:16px; width:100%; text-align:left;
-    margin-top:14px; padding:15px 2px; border-top:1px solid var(--line-2); border-bottom:1px solid var(--line-2);
-    font-size:17.5px; font-weight:500; line-height:1.3; color:var(--text);
-  }
-  .scrollrow svg{flex:0 0 auto; color:var(--brass); animation:bob 2.4s ease-in-out infinite;}
-  @keyframes bob{0%,100%{transform:translateY(0);} 50%{transform:translateY(5px);} }
-  @media (hover:hover){ .scrollrow:hover{border-color:var(--brass);} }
-
-  .textlink{
-    display:inline-flex; align-items:center; min-height:44px; color:var(--dim); font-size:15.5px;
-    text-decoration:underline; text-underline-offset:4px; text-decoration-color:var(--line-2);
-  }
-  .textlink:hover{color:var(--text);}
-
-  /* ---------- screen 2: the line ---------- */
-  .feed{height:100%; display:flex; flex-direction:column;}
-  .feed__head{flex:0 0 auto; padding-top:14px; padding-bottom:10px; width:100%;}
-  .h2{font-family:var(--serif); font-weight:500; font-size:27px; line-height:1.1; margin:0; letter-spacing:-.01em;}
-  .k{margin:3px 0 0; font-size:14.5px; color:var(--dim);}
-  .sortbar{flex:0 0 auto; border-bottom:1px solid var(--line);}
-  .seg{max-width:680px; margin:0 auto; padding:0 22px 11px; display:flex; gap:6px;}
-  .seg button{
-    flex:1; min-height:44px; border:1px solid var(--line); color:var(--dim); font-size:15px; font-weight:500;
-    transition:background .15s ease, color .15s ease, border-color .15s ease;
-  }
-  .seg button[aria-pressed="true"]{background:var(--text); color:var(--ground); border-color:var(--text);}
-
-  /* only this region moves while you read; the title and the sort stay put */
-  .scroller{flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch;}
-
-  /* The trail. Everyone in the line is walking the same way, toward a door that
-     never opens, so the line is drawn as footprints heading down the page. The
-     footprints are a mask, so they take their colour from --trail. Each person
-     stands in the trail as a pair of feet; brass feet mean they left something
-     to keep the line going. */
-  .line{list-style:none; margin:0; padding:6px 0 20px; position:relative;}
-  .line::before{
-    content:""; position:absolute; left:0; top:0; bottom:0; width:22px; background:var(--trail); opacity:.85;
-    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='48' viewBox='0 0 22 48'%3E%3Cg fill='black'%3E%3Cg transform='translate(5 3) rotate(-7 3 8)'%3E%3Cellipse cx='3' cy='3.6' rx='2.1' ry='2.5'/%3E%3Cellipse cx='3' cy='10.6' rx='2.9' ry='4.3'/%3E%3C/g%3E%3Cg transform='translate(12 27) rotate(7 3 8)'%3E%3Cellipse cx='3' cy='3.6' rx='2.1' ry='2.5'/%3E%3Cellipse cx='3' cy='10.6' rx='2.9' ry='4.3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") 0 0/22px 48px repeat-y;
-            mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='48' viewBox='0 0 22 48'%3E%3Cg fill='black'%3E%3Cg transform='translate(5 3) rotate(-7 3 8)'%3E%3Cellipse cx='3' cy='3.6' rx='2.1' ry='2.5'/%3E%3Cellipse cx='3' cy='10.6' rx='2.9' ry='4.3'/%3E%3C/g%3E%3Cg transform='translate(12 27) rotate(7 3 8)'%3E%3Cellipse cx='3' cy='3.6' rx='2.1' ry='2.5'/%3E%3Cellipse cx='3' cy='10.6' rx='2.9' ry='4.3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") 0 0/22px 48px repeat-y;
-  }
-  .row{position:relative; display:block; width:100%; text-align:left; padding:18px 4px 18px 38px;}
-  .row:active{background:var(--ground-2);}
-  @media (hover:hover){ .row:hover{background:var(--ground-2);} }
-  .dot{
-    position:absolute; left:0; top:17px; width:22px; height:22px; display:grid; place-items:center;
-    background:var(--ground);
-  }
-  .row:active .dot{background:var(--ground-2);}
-  @media (hover:hover){ .row:hover .dot{background:var(--ground-2);} }
-  .feet{display:block; width:22px; height:20px; color:var(--faint);}
-  .dot.is-sup .feet{color:var(--brass);}
-  .dot.inline{position:static; width:auto; height:auto; background:none; flex:0 0 auto;}
-  .dot.inline .feet{width:20px; height:18px;}
-  .row__no{display:block; font-size:14px; color:var(--faint); font-variant-numeric:tabular-nums;}
-  .row__w{display:block; margin-top:2px; font-size:clamp(22px,6.3vw,27px); line-height:1.25; color:var(--text);}
-  .row__w.is-silent{font-style:italic; color:var(--dim);}
-  .row__by{display:block; margin-top:5px; font-size:15px; color:var(--dim);}
-
-  .mile{position:relative; padding:34px 0 34px 38px; border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
-  .mile b{display:block; font-family:var(--serif); font-weight:400; font-size:clamp(42px,12vw,66px); line-height:1; color:var(--brass);}
-  .mile span{display:block; margin-top:10px; font-size:17px; color:var(--read);}
-  .mile small{display:block; margin-top:6px; font-size:15px; color:var(--dim);}
-
-  #more{margin:6px 0 30px;}
-  .foot{padding-top:34px; padding-bottom:calc(120px + env(safe-area-inset-bottom)); border-top:1px solid var(--line);}
-  .foot p{margin:0 0 12px; font-size:15px; line-height:1.65; color:var(--dim); max-width:520px;}
-  .foot b{color:var(--read); font-weight:500;}
-  .foot a{color:var(--brass);}
-
-  .cta{
-    position:fixed; left:0; right:0; bottom:0; z-index:40; display:flex; justify-content:center;
-    padding:0 18px calc(16px + env(safe-area-inset-bottom)); pointer-events:none;
-    opacity:0; transform:translateY(12px); transition:opacity .25s ease, transform .25s ease;
-  }
-  .cta.is-on{opacity:1; transform:none;}
-  .pill{
-    pointer-events:auto; min-height:54px; padding:0 30px; background:var(--text); color:var(--ground);
-    font-size:16.5px; font-weight:600; box-shadow:0 10px 34px rgba(0,0,0,.5);
-  }
-  .cta:not(.is-on) .pill{pointer-events:none;}
-
-  /* ---------- layers: entry box, join, search, about ---------- */
-  html.lock .deck,html.lock .scroller{overflow:hidden;}
-  .layer{position:fixed; inset:0; z-index:60; display:none;}
-  .layer.is-on{display:flex;}
-  @keyframes rise{from{transform:translateY(36px); opacity:0;} to{transform:none; opacity:1;}}
-  @keyframes pop{from{transform:scale(.95); opacity:0;} to{transform:none; opacity:1;}}
-  @keyframes fade{from{opacity:0;} to{opacity:1;}}
-
-  /* the entry is a box in the middle of the screen with air around it */
-  .sheet{
-    align-items:center; justify-content:center;
-    padding:calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
-  }
-  .scrim{position:absolute; inset:0; background:var(--scrim); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); animation:fade .2s ease;}
-  .panel{
-    position:relative; width:100%; max-width:500px; max-height:100%; overflow-y:auto; overscroll-behavior:contain;
-    background:var(--ground-2); border:1px solid var(--line-2); border-radius:16px; padding:8px 22px 22px;
-    animation:pop .26s cubic-bezier(.2,.8,.2,1); transition:transform .2s ease;
-  }
-
-  .p-top{display:flex; align-items:center; justify-content:space-between; min-height:44px;}
-  .p-no{font-size:15px; color:var(--dim); font-variant-numeric:tabular-nums;}
-  .p-right{display:flex; align-items:center;}
-  .p-right button{width:44px; height:44px; display:grid; place-items:center; color:var(--dim); font-size:27px; line-height:1;}
-  .p-right button:hover{color:var(--text);}
-  .p-right button:disabled{opacity:.25; cursor:default;}
-  .banner{margin:6px 0 0; padding:12px 14px; border:1px solid var(--brass); color:var(--brass); font-size:15.5px; line-height:1.45;}
-  .p-w{font-size:clamp(29px,8vw,39px); line-height:1.17; letter-spacing:-.012em; margin:14px 0 0;}
-  .p-by{margin:14px 0 0; display:flex; align-items:center; gap:9px; font-size:16px; color:var(--dim);}
-  .p-note{margin:16px 0 0; font-size:17px; line-height:1.6; color:var(--read);}
-  .p-note:empty{display:none;}
-  .p-meta{margin:16px 0 0; padding-top:12px; border-top:1px solid var(--line); font-size:15px; line-height:1.65; color:var(--faint);}
-
-  /* people who are waiting for the same thing */
-  .also{margin:18px 0 0;}
-  .btn.also__btn[aria-pressed="true"]{background:transparent; color:var(--brass); border:1px solid var(--brass);}
-  @media (hover:hover){ .btn.also__btn[aria-pressed="true"]:hover{background:transparent;} }
-  .also__who{margin:12px 0 0; font-size:15.5px; line-height:1.55; color:var(--read);}
-  .also__who b{font-weight:500; color:var(--text);}
-  .also__list{list-style:none; margin:10px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:6px;}
-  .also__list li{padding:5px 11px; border:1px solid var(--line-2); font-size:14.5px; color:var(--read);}
-  .also__links{display:flex; flex-wrap:wrap; gap:0 18px; margin-top:2px;}
-  .also__links .textlink{font-size:15px;}
-
-  .acts{display:grid; grid-template-columns:auto 1fr 1fr; gap:8px; margin:14px 0 0;}
-  .acts .btn{min-height:56px; padding:0 10px; font-size:16px;}
-  .heart{min-width:88px; min-height:56px; display:flex; align-items:center; justify-content:center; gap:8px; border:1px solid var(--line-2); font-size:17px; font-variant-numeric:tabular-nums;}
-  .heart.is-on{color:var(--brass); border-color:var(--brass);}
-  /* right after joining, sharing is the thing worth doing, so it takes the lead */
-  .acts.is-fresh #c-share{background:var(--text); color:var(--ground); border-color:var(--text);}
-  .p-links{display:flex; flex-wrap:wrap; justify-content:center; gap:0 20px; margin-top:6px;}
-  .p-links .textlink{font-size:15px;}
-  .busy{margin:10px 0 0; font-size:14.5px; line-height:1.55; color:var(--brass);}
-  .busy:empty{display:none;}
-  .hint{margin:10px 0 0; text-align:center; font-size:13.5px; color:var(--faint); transition:opacity .5s ease;}
-
-  /* ---------- search ---------- */
-  .search{flex-direction:column; background:var(--ground); padding-top:env(safe-area-inset-top);}
-  .search__top{display:flex; align-items:center; gap:8px; padding:10px 22px; border-bottom:1px solid var(--line);}
-  .search__top input{
-    flex:1; min-width:0; height:48px; background:none; border:0; outline:none; border-radius:0;
-    color:var(--text); font-family:var(--serif); font-size:23px;
-  }
-  .search__top input::placeholder{color:var(--faint); font-family:var(--sans); font-size:17px;}
-  .search .k{padding:16px 22px 4px; margin:0;}
-  .search__list{flex:1; overflow-y:auto; overscroll-behavior:contain; padding:0 22px calc(30px + env(safe-area-inset-bottom));}
-  .res{display:block; width:100%; text-align:left; padding:16px 0; border-bottom:1px solid var(--line);}
-  .res:active{background:var(--ground-2);}
-  .res__no{display:block; font-size:14px; color:var(--faint);}
-  .res__w{display:block; margin-top:2px; font-size:22px; line-height:1.25;}
-  .res__by{display:block; margin-top:4px; font-size:15px; color:var(--dim);}
-
-  /* ---------- join and who we are ---------- */
-  .join,.about{background:var(--ground); animation:rise .3s cubic-bezier(.2,.8,.2,1);}
-  .join__scroll,.about__scroll{width:100%; height:100%; overflow-y:auto; overscroll-behavior:contain;}
-  .join__in{max-width:560px; margin:0 auto; padding:0 22px calc(210px + env(safe-area-inset-bottom));}
-  .about__in{max-width:560px; margin:0 auto; padding:0 22px calc(60px + env(safe-area-inset-bottom));}
-  .join__bar{
-    position:sticky; top:0; z-index:2; display:flex; align-items:center; justify-content:space-between;
-    padding:calc(8px + env(safe-area-inset-top)) 0 8px; background:var(--ground);
-  }
-  .join__bar .h3{font-family:var(--serif); font-weight:500; font-size:23px;}
-  .join__bar .ibtn{font-size:28px; margin-right:-10px;}
-
-  .about__lead{margin:22px 0 0; font-size:clamp(32px,9vw,46px); line-height:1.1; letter-spacing:-.018em;}
-  .about p{margin:18px 0 0; font-size:17.5px; line-height:1.68; color:var(--read);}
-  .about p b{color:var(--text); font-weight:500;}
-  .about a{color:var(--brass);}
-  .about .btn{margin-top:30px;}
-
-  .fl{display:block; margin:30px 0 8px; font-size:16px; font-weight:500;}
-  .fl i{font-style:normal; font-weight:400; color:var(--dim); margin-left:6px;}
-  .big{
-    display:block; width:100%; resize:none; background:none; border:0; border-bottom:1px solid var(--line-2);
-    border-radius:0; outline:none; color:var(--text); font-family:var(--serif); font-size:28px; line-height:1.24;
-    padding:6px 0 10px;
-  }
-  .big:focus{border-color:var(--text);}
-  .big::placeholder{color:var(--faint);}
-  .inp,.mid{
-    display:block; width:100%; background:var(--ground-2); border:1px solid var(--line); border-radius:0; outline:none;
-    color:var(--text); font-family:var(--sans); font-size:17px; line-height:1.5; padding:13px 14px;
-  }
-  .mid{resize:none; height:96px;}
-  .inp:focus,.mid:focus{border-color:var(--dim);}
-  .inp::placeholder,.mid::placeholder{color:var(--faint);}
-  .fh{margin:7px 0 0; font-size:13.5px; color:var(--faint);}
-  .err{margin:8px 0 0; font-size:14.5px; line-height:1.5; color:#FFC4B2; display:none;}
-  .err.is-on{display:block;}
-
-  .support{margin-top:38px; padding:20px 18px; background:var(--ground-2); border-left:2px solid var(--brass);}
-  .support .fl{margin:0 0 8px;}
-  .support p{margin:0 0 14px; font-size:15.5px; line-height:1.55; color:var(--read);}
-  .support p.err{margin:10px 0 0;}
-  .amts{display:flex; flex-wrap:wrap; gap:8px;}
-  .amt{min-height:46px; padding:0 18px; border:1px solid var(--line-2); color:var(--dim); font-size:15.5px; font-weight:500;}
-  .amt[aria-checked="true"]{border-color:var(--brass); color:var(--brass);}
-  .other{display:flex; align-items:baseline; gap:6px; margin:14px 0 0; max-width:190px; border-bottom:1px solid var(--line-2);}
-  .other span{font-family:var(--serif); font-size:27px; color:var(--dim);}
-  .other input{flex:1; min-width:0; background:none; border:0; outline:none; color:var(--text); font-family:var(--serif); font-size:31px; padding:4px 0;}
-  .hp{position:absolute; left:-9999px; width:1px; height:1px; opacity:0;}
-
-  .sub{
-    position:absolute; left:0; right:0; bottom:0; z-index:3; padding:26px 22px calc(14px + env(safe-area-inset-bottom));
-    background:linear-gradient(to top,var(--ground) 72%,transparent);
-  }
-  .sub__in{max-width:560px; margin:0 auto;}
-  .tiny{margin:10px 0 0; font-size:13px; line-height:1.5; color:var(--faint); text-align:center;}
-
-  @media (max-width:360px){
-    .about-link{margin-left:10px; font-size:14px;}
-    .mark{font-size:19px;}
-  }
-  @media (max-height:700px){
-    .h1{font-size:clamp(36px,10.6vw,60px);}
-    .about-p{font-size:15.5px; line-height:1.5;}
-    .peek{margin-top:14px;} .hero .btn{margin-top:16px;}
-    .scrollrow{padding:11px 2px; margin-top:10px;}
-  }
-  @media (prefers-reduced-motion:reduce){
-    *{animation:none !important; transition:none !important;}
-  }
+:root{
+  --ground:#3A0A12;--ground-2:#47101B;--ground-3:#561624;
+  --line:#5A1C29;--line-2:#74303D;--trail:#8E3E4B;
+  --text:#F4F0E6;--read:#E6DDD2;--dim:#CBB1A8;--faint:#A98A84;--brass:#C9AB62;
+  --scrim:rgba(20,3,7,.88);--top:52px;--kb:0px;
+  --serif:"Newsreader",Georgia,"Times New Roman","Noto Serif","Hiragino Mincho ProN","Noto Naskh Arabic",serif;
+  --sans:"Hanken Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --feet:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='48' viewBox='0 0 22 48'%3E%3Cg fill='black'%3E%3Cg transform='translate(5 3) rotate(-7 3 8)'%3E%3Cellipse cx='3' cy='3.6' rx='2.1' ry='2.5'/%3E%3Cellipse cx='3' cy='10.6' rx='2.9' ry='4.3'/%3E%3C/g%3E%3Cg transform='translate(12 27) rotate(7 3 8)'%3E%3Cellipse cx='3' cy='3.6' rx='2.1' ry='2.5'/%3E%3Cellipse cx='3' cy='10.6' rx='2.9' ry='4.3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+html{background:var(--ground);-webkit-text-size-adjust:100%}
+body{margin:0;overflow:hidden;color:var(--text);font-family:var(--sans);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible,.amt input:focus-visible+span{outline:2px solid var(--brass);outline-offset:3px}
+[hidden]{display:none!important}
+.voice{font-family:var(--serif);font-optical-sizing:auto;font-weight:400}
+.col{max-width:680px;margin:0 auto;padding:0 22px}
+.shell{height:100vh;height:100dvh;display:flex;flex-direction:column}
+.demo{flex:0 0 auto;padding:6px 14px;background:var(--brass);color:var(--ground);text-align:center;font-size:13px;font-weight:500}
+.top{flex:0 0 auto;padding-top:env(safe-area-inset-top);background:var(--ground);border-bottom:1px solid var(--line)}
+.top__in{height:var(--top);max-width:680px;margin:0 auto;padding:0 8px 0 22px;display:flex;align-items:center;justify-content:space-between}
+.top__l{display:flex;align-items:center;min-width:0}
+.mark{font-family:var(--serif);font-size:21px;font-weight:500;white-space:nowrap}
+.about-link{margin-left:16px;min-height:44px;padding:0 2px;font-size:15px;color:var(--dim);white-space:nowrap;text-decoration:underline;text-underline-offset:5px;text-decoration-color:var(--line-2)}
+.about-link:hover,.textlink:hover,.ibtn:hover{color:var(--text)}
+.ibtn{width:44px;height:44px;display:grid;place-items:center;color:var(--dim)}
+.deck{flex:1 1 auto;min-height:0;overflow-y:auto;scroll-snap-type:y proximity;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
+.hero,.feed{scroll-snap-align:start}
+.hero{min-height:100%;display:flex;flex-direction:column;justify-content:center;padding:20px 0 24px}
+.h1{font-family:var(--serif);font-weight:400;margin:0;font-size:clamp(42px,12.8vw,84px);line-height:1.04;letter-spacing:-.022em}
+.sting{margin:16px 0 0;font-size:clamp(18px,5vw,22px)}
+.about-p{margin:10px 0 0;font-size:16.5px;line-height:1.55;color:var(--dim);max-width:460px}
+.about-p b{color:var(--text);font-weight:500;font-variant-numeric:tabular-nums}
+.peek{display:block;width:100%;text-align:start;margin:22px 0 0;padding:12px 0 12px 18px;border-inline-start:2px solid var(--brass);transition:opacity .45s ease}
+.peek.is-out{opacity:0}
+.peek__k{display:block;font-size:15px;color:var(--dim)}
+.peek__v{display:block;margin-top:4px;font-size:clamp(25px,7.2vw,33px);line-height:1.18}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:56px;padding:0 24px;background:var(--text);color:var(--ground);font-size:17px;font-weight:600;transition:background .18s ease}
+.btn:active{background:var(--brass)}
+.btn:disabled{opacity:.6;cursor:default}
+@media (hover:hover){.btn:not(:disabled):hover{background:var(--brass)}}
+.btn--ghost{background:transparent;color:var(--text);border:1px solid var(--line-2)}
+.btn--ghost:active{background:var(--ground-3)}
+@media (hover:hover){.btn--ghost:not(:disabled):hover{background:var(--ground-3)}}
+.hero .btn{margin-top:22px}
+.scrollrow{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;text-align:start;margin-top:14px;padding:15px 2px;border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2);font-size:17.5px;font-weight:500;line-height:1.3}
+.scrollrow svg{flex:0 0 auto;color:var(--brass);animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+.textlink{display:inline-flex;align-items:center;min-height:44px;color:var(--dim);font-size:15.5px;text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--line-2)}
+.feed{height:100%;display:flex;flex-direction:column}
+.feed__head{flex:0 0 auto;padding-top:14px;padding-bottom:6px;width:100%}
+.h2{font-family:var(--serif);font-weight:500;font-size:27px;line-height:1.1;margin:0}
+.krow{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.k{margin:3px 0 0;font-size:14.5px;color:var(--dim)}
+.krow .textlink{min-height:32px;font-size:14.5px;white-space:nowrap}
+.sortbar{flex:0 0 auto;border-bottom:1px solid var(--line)}
+.seg{max-width:680px;margin:0 auto;padding:0 22px 11px;display:flex;gap:6px}
+.seg button{flex:1;min-height:44px;border:1px solid var(--line);color:var(--dim);font-size:15px;font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--text);color:var(--ground);border-color:var(--text)}
+.scroller{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.line{list-style:none;margin:0;padding:6px 0 20px;position:relative}
+.line::before{content:"";position:absolute;left:0;top:0;bottom:0;width:22px;background:var(--trail);opacity:.85;-webkit-mask:var(--feet) 0 0/22px 48px repeat-y;mask:var(--feet) 0 0/22px 48px repeat-y}
+.row{position:relative;display:block;width:100%;text-align:start;padding:18px 4px 18px 38px}
+.row:active{background:var(--ground-2)}
+@media (hover:hover){.row:hover{background:var(--ground-2)}.row:hover .dot{background:var(--ground-2)}}
+.dot{position:absolute;left:0;top:17px;width:22px;height:22px;display:grid;place-items:center;background:var(--ground)}
+.feet{display:block;width:22px;height:20px;color:var(--faint)}
+.dot.is-sup .feet{color:var(--brass)}
+.dot.inline{position:static;width:auto;height:auto;background:none}
+.dot.inline .feet{width:20px;height:18px}
+.row__no{display:block;font-size:14px;color:var(--faint);font-variant-numeric:tabular-nums}
+.row__w{display:block;margin-top:2px;font-size:clamp(22px,6.3vw,27px);line-height:1.25}
+.row__w.is-silent{font-style:italic;color:var(--dim)}
+.row__by{display:block;margin-top:5px;font-size:15px;color:var(--dim)}
+.mile{position:relative;padding:34px 0 34px 38px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.mile b{display:block;font-family:var(--serif);font-weight:400;font-size:clamp(42px,12vw,66px);line-height:1;color:var(--brass)}
+.mile span{display:block;margin-top:10px;font-size:17px;color:var(--read)}
+.mile small{display:block;margin-top:6px;font-size:15px;color:var(--dim)}
+#more{margin:6px 0 30px}
+.foot{padding-top:34px;padding-bottom:calc(120px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.foot p{margin:0 0 12px;font-size:15px;line-height:1.65;color:var(--dim);max-width:520px}
+.foot b{color:var(--read);font-weight:500}
+.foot a,.about a,.banner a{color:var(--brass)}
+.cta{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;justify-content:center;padding:0 18px calc(16px + env(safe-area-inset-bottom));pointer-events:none;opacity:0;visibility:hidden;transform:translateY(12px);transition:opacity .25s ease,transform .25s ease,visibility 0s .25s}
+.cta.is-on{opacity:1;visibility:visible;transform:none;transition-delay:0s}
+.pill{pointer-events:auto;min-height:54px;padding:0 30px;background:var(--text);color:var(--ground);font-size:16.5px;font-weight:600;box-shadow:0 10px 34px rgba(0,0,0,.5)}
+html.lock .deck,html.lock .scroller{overflow:hidden}
+.layer{position:fixed;inset:0;z-index:60;display:none}
+.layer.is-on{display:flex}
+@keyframes rise{from{transform:translateY(36px);opacity:0}to{transform:none;opacity:1}}
+@keyframes pop{from{transform:scale(.95);opacity:0}to{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.sheet{align-items:center;justify-content:center;padding:calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom))}
+.scrim{position:absolute;inset:0;background:var(--scrim);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);animation:fade .2s ease}
+.panel{position:relative;width:100%;max-width:500px;max-height:100%;overflow-y:auto;overscroll-behavior:contain;background:var(--ground-2);border:1px solid var(--line-2);border-radius:16px;padding:8px 22px 22px;animation:pop .26s cubic-bezier(.2,.8,.2,1);transition:transform .2s ease}
+.p-top{display:flex;align-items:center;justify-content:space-between;min-height:44px}
+.p-no{font-size:15px;color:var(--dim);font-variant-numeric:tabular-nums}
+.p-right{display:flex;align-items:center}
+.p-right button{width:44px;height:44px;display:grid;place-items:center;color:var(--dim);font-size:27px;line-height:1}
+.p-right button:hover{color:var(--text)}
+.p-right button:disabled{opacity:.25;cursor:default}
+.banner{margin:6px 0 0;padding:12px 14px;border:1px solid var(--brass);color:var(--brass);font-size:15.5px;line-height:1.45}
+.p-w{font-size:clamp(29px,8vw,39px);line-height:1.17;letter-spacing:-.012em;margin:14px 0 0}
+.p-by{margin:14px 0 0;display:flex;align-items:center;gap:9px;font-size:16px;color:var(--dim)}
+.p-note{margin:16px 0 0;font-size:17px;line-height:1.6;color:var(--read)}
+.p-note:empty{display:none}
+.tr{margin:10px 0 0;display:flex;flex-wrap:wrap;align-items:center;gap:0 18px}
+.tr .textlink{min-height:40px}
+.tr-note{margin:0;font-size:13.5px;color:var(--faint)}
+.p-meta{margin:16px 0 0;padding-top:12px;border-top:1px solid var(--line);font-size:15px;line-height:1.65;color:var(--faint)}
+.also{margin:18px 0 0}
+.btn.also__btn[aria-pressed="true"]{background:transparent;color:var(--brass);border:1px solid var(--brass)}
+.also__who{margin:12px 0 0;font-size:15.5px;line-height:1.55;color:var(--read)}
+.also__who b{font-weight:500;color:var(--text)}
+.also__list{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.also__list li{padding:5px 11px;border:1px solid var(--line-2);font-size:14.5px;color:var(--read)}
+.also__links{display:flex;flex-wrap:wrap;gap:0 18px;margin-top:2px}
+.also__links .textlink{font-size:15px}
+.acts{display:grid;grid-template-columns:auto 1fr 1fr;gap:8px;margin:14px 0 0}
+.acts .btn{min-height:56px;padding:0 10px;font-size:16px}
+.heart{min-width:88px;min-height:56px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line-2);font-size:17px;font-variant-numeric:tabular-nums}
+.heart.is-on{color:var(--brass);border-color:var(--brass)}
+.acts.is-fresh #c-share{background:var(--text);color:var(--ground);border-color:var(--text)}
+.p-links{display:flex;flex-wrap:wrap;justify-content:center;gap:0 20px;margin-top:6px}
+.p-links .textlink{font-size:15px}
+.busy{margin:10px 0 0;font-size:14.5px;line-height:1.55;color:var(--brass)}
+.busy:empty{display:none}
+.hint{margin:10px 0 0;text-align:center;font-size:14px;color:var(--faint);transition:opacity .5s ease}
+.search{flex-direction:column;background:var(--ground);padding-top:env(safe-area-inset-top)}
+.search__top{display:flex;align-items:center;gap:8px;padding:10px 22px;border-bottom:1px solid var(--line)}
+.search__top input{flex:1;min-width:0;height:48px;background:none;border:0;outline:none;border-radius:0;color:var(--text);font-family:var(--serif);font-size:23px}
+.search__top input::placeholder{color:var(--faint);font-family:var(--sans);font-size:17px}
+.search .k{padding:16px 22px 4px;margin:0}
+.search__list{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:0 22px calc(30px + env(safe-area-inset-bottom))}
+.res{display:block;width:100%;text-align:start;padding:16px 0;border-bottom:1px solid var(--line)}
+.res:active{background:var(--ground-2)}
+.res__no{display:block;font-size:14px;color:var(--faint)}
+.res__w{display:block;margin-top:2px;font-size:22px;line-height:1.25}
+.res__by{display:block;margin-top:4px;font-size:15px;color:var(--dim)}
+.join,.about{background:var(--ground);animation:rise .3s cubic-bezier(.2,.8,.2,1)}
+.join__scroll,.about__scroll{width:100%;height:100%;overflow-y:auto;overscroll-behavior:contain}
+.join__in{max-width:560px;margin:0 auto;padding:0 22px calc(210px + env(safe-area-inset-bottom))}
+.about__in{max-width:560px;margin:0 auto;padding:0 22px calc(60px + env(safe-area-inset-bottom))}
+.join__bar{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:calc(8px + env(safe-area-inset-top)) 0 8px;background:var(--ground)}
+.join__bar .h3{font-family:var(--serif);font-weight:500;font-size:23px}
+.join__bar .ibtn{font-size:28px;margin-right:-10px}
+.about__lead{margin:22px 0 0;font-size:clamp(32px,9vw,46px);line-height:1.1;letter-spacing:-.018em}
+.about p{margin:18px 0 0;font-size:17.5px;line-height:1.68;color:var(--read)}
+.about p b{color:var(--text);font-weight:500}
+.about .btn{margin-top:30px}
+.fl{display:block;margin:30px 0 8px;font-size:16px;font-weight:500}
+.fl i{font-style:normal;font-weight:400;color:var(--dim);margin-left:6px}
+.big{display:block;width:100%;resize:none;background:none;border:0;border-bottom:1px solid var(--line-2);border-radius:0;outline:none;color:var(--text);font-family:var(--serif);font-size:28px;line-height:1.24;padding:6px 0 10px}
+.big:focus{border-color:var(--text)}
+.big::placeholder,.inp::placeholder,.mid::placeholder{color:var(--faint)}
+.inp,.mid{display:block;width:100%;background:var(--ground-2);border:1px solid var(--line);border-radius:0;outline:none;color:var(--text);font-family:var(--sans);font-size:17px;line-height:1.5;padding:13px 14px}
+.mid{resize:none;height:96px}
+.inp:focus,.mid:focus{border-color:var(--dim)}
+.fh{margin:7px 0 0;font-size:14px;color:var(--faint)}
+.err{margin:8px 0 0;font-size:14.5px;line-height:1.5;color:#FFC4B2;display:none}
+.err.is-on{display:block}
+.support{margin-top:38px;padding:20px 18px;background:var(--ground-2);border:0;border-inline-start:2px solid var(--brass)}
+.support legend{padding:0;font-size:16px;font-weight:500;margin-bottom:8px}
+.support legend i{font-style:normal;font-weight:400;color:var(--dim);margin-left:6px}
+.support p{margin:0 0 14px;font-size:15.5px;line-height:1.55;color:var(--read)}
+.support p.err{margin:10px 0 0}
+.amts{display:flex;flex-wrap:wrap;gap:8px}
+.amt{position:relative}
+.amt input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.amt span{display:flex;align-items:center;min-height:46px;padding:0 18px;border:1px solid var(--line-2);color:var(--dim);font-size:15.5px;font-weight:500}
+.amt input:checked+span{border-color:var(--brass);color:var(--brass)}
+.other{display:flex;align-items:baseline;gap:6px;margin:14px 0 0;max-width:190px;border-bottom:1px solid var(--line-2)}
+.other span{font-family:var(--serif);font-size:27px;color:var(--dim)}
+.other input{flex:1;min-width:0;background:none;border:0;outline:none;color:var(--text);font-family:var(--serif);font-size:31px;padding:4px 0}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.sub{position:absolute;left:0;right:0;bottom:var(--kb);z-index:3;padding:26px 22px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--ground) 72%,transparent)}
+.sub__in{max-width:560px;margin:0 auto}
+.tiny{margin:10px 0 0;font-size:13.5px;line-height:1.5;color:var(--faint);text-align:center}
+.nojs{padding:40px 22px;max-width:560px;margin:0 auto}
+@media (max-width:360px){.about-link{margin-left:10px;font-size:14px}.mark{font-size:19px}}
+@media (max-height:700px){.h1{font-size:clamp(36px,10.6vw,60px)}.about-p{font-size:15.5px}.peek{margin-top:14px}.hero .btn{margin-top:16px}.scrollrow{padding:11px 2px;margin-top:10px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
+<noscript><div class="nojs"><h1>What are you waiting for? Get in line.</h1><p>The Queue is a line with nothing at the end, made of one sentence from each of us. It needs JavaScript to run.</p></div></noscript>
 
-<!-- the pair of feet used for every person in the line -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-  <symbol id="feet" viewBox="0 0 22 20">
-    <g fill="currentColor">
-      <g transform="translate(3 2) rotate(-6 3 8)"><ellipse cx="3" cy="3.6" rx="2.1" ry="2.5"/><ellipse cx="3" cy="10.6" rx="2.9" ry="4.3"/></g>
-      <g transform="translate(12 2) rotate(6 3 8)"><ellipse cx="3" cy="3.6" rx="2.1" ry="2.5"/><ellipse cx="3" cy="10.6" rx="2.9" ry="4.3"/></g>
-    </g>
-  </symbol>
+  <symbol id="feet" viewBox="0 0 22 20"><g fill="currentColor">
+    <g transform="translate(3 2) rotate(-6 3 8)"><ellipse cx="3" cy="3.6" rx="2.1" ry="2.5"/><ellipse cx="3" cy="10.6" rx="2.9" ry="4.3"/></g>
+    <g transform="translate(12 2) rotate(6 3 8)"><ellipse cx="3" cy="3.6" rx="2.1" ry="2.5"/><ellipse cx="3" cy="10.6" rx="2.9" ry="4.3"/></g>
+  </g></symbol>
 </svg>
 
-<div class="shell">
-
+<div class="shell" id="shell">
   <div class="demo" id="demo">Demo. Every entry here is invented and the count is not real.</div>
-
   <header class="top"><div class="top__in">
     <div class="top__l">
       <button class="mark" id="home">The Queue</button>
@@ -365,57 +232,43 @@
   </div></header>
 
   <div class="deck" id="deck">
-
     <section class="hero" id="top"><div class="col">
       <h1 class="h1">What are you waiting for?<br>Get in line.</h1>
       <p class="sting">Whatever it is, you are not first.</p>
-      <p class="about-p">Everyone in the world is waiting for something, so you are not alone in it. This site collects those waitings, one sentence at a time. <b id="hero-n">0</b> so far.</p>
-
-      <button class="peek" id="peek" aria-label="Open this entry">
-        <span class="peek__k" id="peek-k"></span>
-        <span class="peek__v voice" id="peek-v"></span>
-      </button>
-
+      <p class="about-p">Everyone in the world is waiting for something, so you are not alone in it. This site collects those waitings, one sentence at a time, in any language. <b id="hero-n">0</b> so far.</p>
+      <button class="peek" id="peek"><span class="peek__k" id="peek-k"></span><span class="peek__v voice" id="peek-v" dir="auto"></span></button>
       <button class="btn" id="hero-join">Answer it. It's free.</button>
-      <button class="scrollrow" id="hero-read">
-        <span>Scroll to read what the people are waiting for</span>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
+      <button class="scrollrow" id="hero-read"><span>Scroll to read what the people are waiting for</span>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <button class="textlink" id="my-place" hidden>My place in the line</button>
     </div></section>
 
     <section class="feed" id="feed">
       <div class="col feed__head">
         <h2 class="h2">The line</h2>
-        <p class="k">Back of the line first. Tap anyone.</p>
+        <div class="krow"><p class="k">Newest first. Tap anyone.</p><button class="textlink" id="open-about2">Privacy &amp; removals</button></div>
       </div>
-
-      <div class="sortbar"><div class="seg" aria-label="Sort the line">
+      <div class="sortbar"><div class="seg" role="group" aria-label="Sort the line">
         <button data-sort="order" aria-pressed="true">In line</button>
         <button data-sort="random" aria-pressed="false">Random</button>
         <button data-sort="liked" aria-pressed="false">Most felt</button>
       </div></div>
-
       <div class="scroller" id="scroller"><div class="col">
         <ol class="line" id="line"></ol>
         <div id="sentinel"></div>
         <button class="btn btn--ghost" id="more" hidden>Show more</button>
-
         <footer class="foot">
           <p>Brass footprints mean that person left something to keep the line going. It changes nothing about where they stand.</p>
-          <p>Every sentence is public and permanent. <b>Ask us to remove your name and we will</b>; the sentence stays, anonymous. The door never opens.</p>
-          <!-- COLOPHON: replace with your own words. An unsigned absurd project
-               reads as a scam; a signed one reads as a piece of work. -->
-          <p>Made by <b>[your name]</b>. I photographed the door, measured the pavement behind it, and built the rest at a kitchen table. There is no company. Press and removals: <a href="mailto:hello@example.com">hello@example.com</a></p>
+          <p>Every sentence is public. <b>You can delete your own entry, or ask us to remove your name and we will</b>; the sentence stays, anonymous. The door never opens.</p>
+          <p>Made by <b>[your name]</b>. There is no company. Press and removals: <a href="mailto:hello@example.com">hello@example.com</a></p><!-- TODO: your name and address -->
         </footer>
       </div></div>
     </section>
-
   </div>
 </div>
 
 <div class="cta" id="cta"><button class="pill" id="cta-btn">What are you waiting for?</button></div>
 
-<!-- ENTRY -->
 <div class="layer sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="c-w">
   <div class="scrim" id="scrim"></div>
   <div class="panel" id="panel">
@@ -427,24 +280,27 @@
         <button id="c-close" aria-label="Close">&times;</button>
       </span>
     </div>
-    <p class="banner" id="c-banner" hidden>You're in the line. This is yours. Share it if you like.</p>
-    <p class="p-w voice" id="c-w"></p>
+    <p class="banner" id="c-banner" hidden></p>
+    <p class="p-w voice" id="c-w" dir="auto"></p>
     <p class="p-by" id="c-by"></p>
-    <p class="p-note" id="c-c"></p>
+    <p class="p-note" id="c-c" dir="auto"></p>
+    <div class="tr" id="c-trwrap" hidden>
+      <button class="textlink" id="c-tr">Translate to English</button>
+      <a class="textlink" id="c-gt" target="_blank" rel="noopener" hidden>Open in Google Translate</a>
+      <p class="tr-note" id="c-trnote"></p>
+    </div>
     <p class="p-meta" id="c-m"></p>
-
     <div class="also">
       <button class="btn also__btn" id="c-also" aria-pressed="false">I am waiting for this too</button>
       <p class="also__who" id="c-who"></p>
       <ul class="also__list" id="c-list" hidden></ul>
       <div class="also__links">
-        <button class="textlink" id="c-all" hidden>See everyone</button>
+        <button class="textlink" id="c-all" hidden></button>
         <button class="textlink" id="c-same" hidden></button>
       </div>
     </div>
-
     <div class="acts" id="acts">
-      <button class="heart" id="c-like" aria-pressed="false"><span aria-hidden="true">&#9825;</span><span id="c-likes">0</span></button>
+      <button class="heart" id="c-like" aria-pressed="false" aria-label="Felt it"><span aria-hidden="true">&#9825;</span><span id="c-likes">0</span></button>
       <button class="btn btn--ghost" id="c-share">Share</button>
       <button class="btn btn--ghost" id="c-join">Add yours</button>
     </div>
@@ -452,980 +308,632 @@
       <button class="textlink" id="s-link">Copy link</button>
       <button class="textlink" id="s-img">Save as image</button>
       <button class="textlink" id="s-vid">Save as video</button>
+      <button class="textlink" id="c-del" hidden>Delete my entry</button>
     </div>
     <p class="busy" id="c-busy" role="status"></p>
     <p class="hint" id="hint" hidden>Swipe sideways to move along the line. Swipe down to close.</p>
   </div>
 </div>
 
-<!-- SEARCH -->
 <div class="layer search" id="search" role="dialog" aria-modal="true" aria-label="Search the line">
   <div class="search__top">
     <input id="q" type="search" placeholder="A number, a name or a word" enterkeyhint="search" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Search">
     <button class="textlink" id="q-x">Cancel</button>
   </div>
-  <p class="k" id="res-k"></p>
+  <p class="k" id="res-k" role="status"></p>
   <div class="search__list" id="res"></div>
 </div>
 
-<!-- WHO WE ARE -->
 <div class="layer about" id="about" role="dialog" aria-modal="true" aria-labelledby="ab-h">
   <div class="about__scroll"><div class="about__in">
-    <div class="join__bar">
-      <span class="h3" id="ab-h">Who we are</span>
-      <button class="ibtn" id="ab-close" aria-label="Close">&times;</button>
-    </div>
-
+    <div class="join__bar"><span class="h3" id="ab-h">Who we are</span><button class="ibtn" id="ab-close" aria-label="Close">&times;</button></div>
     <p class="about__lead voice">We are the people in the line.</p>
-
     <p>Everyone is waiting for something. A phone call, a visa, a test result, an apology, the end of winter. Most of it we carry alone, and most days we never say it out loud.</p>
-
-    <p>The Queue is a line with nothing at the end of it. You write one sentence about what you are waiting for and you take a place. There is no prize, no draw, no door that opens. What matters is that you are standing there with thousands of other people who are also standing, and that you can read what they wrote.</p>
-
-    <p>There is also one person behind it, <b>[your name]</b>, who photographed the door, measured the pavement behind it, and keeps the line honest. Every sentence is kept exactly as it was written. Nothing is ever moved forward, and nobody can pay to get ahead of anyone.</p>
-
+    <p>The Queue is a line with nothing at the end of it. You write one sentence, in any language, about what you are waiting for and you take a place. There is no prize, no draw, no door that opens. If a sentence is not in English, you can translate it with one tap.</p>
+    <p>There is also one person behind it, <b>[your name]</b>, who keeps the line honest. Nothing is ever moved forward, and nobody can pay to get ahead of anyone.</p>
     <p>Joining is free. If you would like to leave something to keep the line going, you can. It turns your footprints brass and changes nothing else.</p>
-
-    <p>Your sentence is public and permanent. <b>Ask us to remove your name and we will</b>; the sentence stays, anonymous.</p>
-
+    <p id="privacy"><b>Privacy and removals.</b> We store what you type here. Please do not write other people's names or personal details. You can delete your own entry from the device you wrote it on (open it and press Delete), or ask us to remove your name and we will; the sentence stays, anonymous. <!-- TODO: replace with your real privacy text --></p>
     <p>Questions, press, removals: <a href="mailto:hello@example.com">hello@example.com</a></p>
-
     <button class="btn" id="ab-join">Add your sentence</button>
   </div></div>
 </div>
 
-<!-- JOIN -->
 <div class="layer join" id="join" role="dialog" aria-modal="true" aria-label="Get in line">
   <div class="join__scroll"><div class="join__in">
-    <div class="join__bar">
-      <span class="h3">Get in line</span>
-      <button class="ibtn" id="j-close" aria-label="Close">&times;</button>
-    </div>
-
+    <div class="join__bar"><span class="h3">Get in line</span><button class="ibtn" id="j-close" aria-label="Close">&times;</button></div>
     <form id="jform" novalidate autocomplete="off">
-      <label class="fl" for="said">What are you waiting for?</label>
-      <textarea id="said" class="big" rows="2" maxlength="70" placeholder="a phone call, nothing, my results" enterkeyhint="next"></textarea>
+      <label class="fl" for="said">What are you waiting for? <i>any language</i></label>
+      <textarea id="said" class="big" rows="2" maxlength="70" dir="auto" placeholder="a phone call, nothing, my results" enterkeyhint="next"></textarea>
       <p class="fh"><span id="said-c">0</span> of 70</p>
       <p class="err" id="said-err" role="alert"></p>
-
       <label class="fl" for="note">Say more <i>optional, about three lines</i></label>
-      <textarea id="note" class="mid" maxlength="120" placeholder="Since March. He said he would call on a Sunday and I have not liked Sundays since."></textarea>
+      <textarea id="note" class="mid" maxlength="120" dir="auto" placeholder="Since March. He said he would call on a Sunday and I have not liked Sundays since."></textarea>
       <p class="fh"><span id="note-c">0</span> of 120</p>
       <p class="err" id="note-err" role="alert"></p>
-
       <label class="fl" for="nick">Name <i>optional, blank stays anonymous</i></label>
-      <input id="nick" class="inp" maxlength="24" placeholder="anything you like" autocapitalize="off" spellcheck="false">
+      <input id="nick" class="inp" maxlength="24" dir="auto" placeholder="anything you like" autocapitalize="off" spellcheck="false">
       <p class="err" id="nick-err" role="alert"></p>
-
-      <div class="support">
-        <span class="fl">Keep the line going <i>optional</i></span>
+      <fieldset class="support">
+        <legend>Keep the line going <i>optional</i></legend>
         <p>Joining is free. If you want to leave something, you can. It changes nothing about your place; it only turns your footprints brass.</p>
-        <div class="amts" role="radiogroup" aria-label="Amount to leave">
-          <button type="button" class="amt" role="radio" aria-checked="true"  data-amt="0">Not now</button>
-          <button type="button" class="amt" role="radio" aria-checked="false" data-amt="3">$3</button>
-          <button type="button" class="amt" role="radio" aria-checked="false" data-amt="5">$5</button>
-          <button type="button" class="amt" role="radio" aria-checked="false" data-amt="10">$10</button>
-          <button type="button" class="amt" role="radio" aria-checked="false" data-amt="other">Other</button>
+        <div class="amts">
+          <label class="amt"><input type="radio" name="amt" value="0" checked><span>Not now</span></label>
+          <label class="amt"><input type="radio" name="amt" value="3"><span>$3</span></label>
+          <label class="amt"><input type="radio" name="amt" value="5"><span>$5</span></label>
+          <label class="amt"><input type="radio" name="amt" value="10"><span>$10</span></label>
+          <label class="amt"><input type="radio" name="amt" value="other"><span>Other</span></label>
         </div>
-        <div class="other" id="other" hidden>
-          <span>$</span>
-          <input id="amt" type="number" inputmode="numeric" min="3" step="1" placeholder="20" aria-label="Amount in dollars">
-        </div>
+        <div class="other" id="other" hidden><span>$</span><input id="amt" type="number" inputmode="numeric" min="3" step="1" placeholder="20" aria-label="Amount in US dollars"></div>
         <p class="err" id="amt-err" role="alert"></p>
-      </div>
-
-      <!-- honeypot: real people never see or fill this -->
+      </fieldset>
       <input class="hp" id="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
     </form>
   </div></div>
-
   <div class="sub"><div class="sub__in">
     <button class="btn" id="j-go" type="button">Take my place</button>
-    <p class="tiny">Public and permanent. The door never opens.</p>
+    <p class="tiny">Public. You can delete your entry later from this device. The door never opens.</p>
   </div></div>
 </div>
 
 <script>
 (function(){
-  "use strict";
-
-  /* =================================================================
-     DEMO DATA. Set DEMO=false and replace with a real feed before launch.
-     The sentences, notes and names ARE the product; inventing them in
-     public is the one lie this page cannot survive.
-  ================================================================== */
-  var DEMO = true;
-  var COUNT = 12847, MIN_SUPPORT = 3;
-  var SITE = "thequeue.example";
-  var ORIGIN = (location.origin && location.origin !== "null") ? location.origin : "https://" + SITE;
-  /* Links use #/<number> until the server renders real /<number> pages. A
-     /<number> link on a static host is a 404, so do not flip this early. */
-  var PRETTY_URLS = false;
-
-  var lines = [
-    "a phone call","my visa","nothing, I was curious","the results","him to notice",
-    "my mother to call first","spring","the last exam","a reply to one email",
-    "my sister to forgive me","the rent to be possible","someone to sit next to me",
-    "nothing in particular","the swelling to go down","my name called somewhere else",
-    "a job, any job","my flight","the dog to come back","to stop checking my phone",
-    "an apology I will not get","the kettle","my turn, generally","a sign",
-    "the divorce to finish","to feel like myself again","payday","the ceasefire",
-    "my hands to stop shaking","the bus","to be picked","him to text back",
-    "a house I can afford","the season to change","my father to wake up",
-    "nothing. I just liked the queue","the delivery","to be old enough","forgiveness",
-    "my citizenship","the second interview","a friend to move back","the noise to stop",
-    "someone to notice I left","the ferry","my brother's release","to find out",
-    "a normal week","the scan","to stop waiting","",""
-  ];
-  var notes = [
-    "Since March. It is not a big thing, it just sits there.",
-    "Everyone says it will come. Nobody says when.",
-    "I check twice a day. I have stopped telling people that.",
-    "Two years of this now. You get used to the shape of it.",
-    "It is fine. I would just like to know either way.",
-    "My mother asks every Sunday and I say soon.",
-    "I did the maths and it should have happened by now.",
-    "Honestly I only came here to read the others.",
-    "I am not sure I want it anymore. I am still waiting though.",
-    "Third time applying. This one feels different, which is what I said last time.",
-    "It has been long enough that waiting is just what I do now.",
-    "Nothing dramatic. Just a small thing that has not arrived."
-  ];
-  var nickA = ["quiet","late","small","half","north","paper","winter","slow","open","tired",
-               "blue","empty","first","last","soft","grey","far","new","old","bright"];
-  var nickB = ["door","letter","hour","room","train","light","field","stone","name","hand",
-               "window","river","coat","street","bell","gate","match","cup","road","key"];
-
-  var $ = function(id){ return document.getElementById(id); };
-  function fmt(n){ return n.toLocaleString("en-US"); }
-  function esc(s){
-    return String(s).replace(/[&<>"]/g, function(c){
-      return { "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c];
-    });
-  }
-  function seeded(seed){
-    var s = seed * 2654435761 % 2147483647;
-    return function(){ s = s * 16807 % 2147483647; return (s - 1) / 2147483646; };
-  }
-  /* Point track() at your analytics provider; keep the event names stable. */
-  function track(event, data){
-    if(window.plausible) window.plausible(event, { props:data });
-    else if(DEMO && window.console) console.log("[track]", event, data || {});
-  }
-  function entryURL(n){ return PRETTY_URLS ? ORIGIN + "/" + n : ORIGIN + "/#/" + n; }
-
-  /* =================================================================
-     DATA. In production every read below is a server call; the browser
-     must never hold the whole line, and sorting or searching 100k rows
-     on a phone will freeze it. Endpoints to build:
-       GET  /api/line?sort=&cursor=    one page
-       GET  /api/entry/:n              one entry, with who is also waiting
-       GET  /api/search?q=             matches
-       POST /api/join                  free entries (rate limited, captcha)
-       POST /api/like/:n               one per session, checked server-side
-       POST /api/also/:n               "I am waiting for this too", one per session
-  ================================================================== */
-  var mine = {};   /* entries created in this demo session */
-
-  function lineFor(n){ return mine[n] ? mine[n].w : lines[Math.floor(seeded(n)() * lines.length)]; }
-  function noteFor(n){
-    if(mine[n]) return mine[n].note;
-    var r = seeded(n + 1213);
-    return r() < 0.42 ? notes[Math.floor(r() * notes.length)] : "";
-  }
-  function nickFor(n){
-    if(mine[n]) return mine[n].nick;
-    var r = seeded(n + 3301);
-    if(r() < 0.28) return "";
-    return nickA[Math.floor(r() * nickA.length)] + nickB[Math.floor(r() * nickB.length)];
-  }
-  function supFor(n){ return mine[n] ? mine[n].sup : seeded(n + 8807)() < 0.06; }
-
-  var myLikes = {}, likeDelta = {};
-  function baseLikes(n){
-    if(mine[n]) return 0;
-    if(!lineFor(n)) return Math.floor(Math.pow(seeded(n + 44)(), 6) * 40);
-    return Math.floor(Math.pow(seeded(n + 6607)(), 5) * 2600);
-  }
-  function likesFor(n){ return baseLikes(n) + (likeDelta[n] || 0); }
-
-  /* "I am waiting for this too": people who say they are waiting for the same
-     thing as this entry. Named people are listed by their chosen name. */
-  var myAlso = {}, alsoDelta = {};
-  function alsoBase(n){
-    if(mine[n] || !lineFor(n)) return 0;
-    return Math.floor(Math.pow(seeded(n + 9901)(), 3.5) * 48);
-  }
-  function alsoTotal(n){ return alsoBase(n) + (alsoDelta[n] || 0); }
-  function alsoPeople(n){
-    var named = [], anon = 0, k, r, base = alsoBase(n);
-    for(k = 0; k < base; k++){
-      r = seeded(n * 131 + k + 7);
-      if(r() < 0.3){ anon++; continue; }
-      named.push(nickA[Math.floor(r() * nickA.length)] + nickB[Math.floor(r() * nickB.length)]);
-    }
-    return { named:named, anon:anon };
-  }
-
-  /* other entries that say the same words */
-  var sameIdx = null;
-  function sameKey(w){ return String(w).toLowerCase().replace(/[^\p{L}\p{N} ]/gu, "").replace(/\s+/g, " ").trim(); }
-  function buildSame(){
-    sameIdx = {};
-    var n, k, w;
-    for(n = 1; n <= COUNT; n++){
-      w = lineFor(n); if(!w) continue;
-      k = sameKey(w);
-      (sameIdx[k] = sameIdx[k] || []).push(n);
-    }
-  }
-  function sameFor(n){
-    var w = lineFor(n);
-    if(!w) return [];
-    if(!sameIdx) buildSame();
-    var arr = sameIdx[sameKey(w)] || [], out = [], i;
-    for(i = arr.length - 1; i >= 0; i--) if(arr[i] !== n) out.push(arr[i]);   /* back of the line first */
-    return out;
-  }
-
-  function pace(left){
-    var h = left / 20;                       /* a real queue moves about 20 m an hour */
-    if(h < 48) return Math.round(h) + " hours";
-    var d = h / 24;
-    return d < 60 ? Math.round(d) + " days" : Math.round(d / 30) + " months";
-  }
-
-  var pool = [];
-  for(var i = COUNT; i >= 1; i--) pool.push(i);   /* back of the line first */
-
-  var S = { sort:"order", list:pool, shown:0, nav:pool, cur:null, layer:null, results:[], hinted:false, alsoOpen:false };
-  var randomCache = null;
-  var deck = $("deck"), scroller = $("scroller");
-
-  function shuffled(src){
-    var a = src.slice(), j, t, k;
-    for(k = a.length - 1; k > 0; k--){ j = Math.floor(Math.random() * (k + 1)); t = a[k]; a[k] = a[j]; a[j] = t; }
-    return a;
-  }
-  function listFor(sort){
-    if(sort === "order") return pool;
-    if(sort === "random"){
-      if(!randomCache || randomCache.length !== pool.length) randomCache = shuffled(pool);
-      return randomCache;
-    }
-    return pool.slice().sort(function(a, b){ return (likesFor(b) - likesFor(a)) || (b - a); });
-  }
-
-  /* ---------- the line ---------- */
-  var hasIO = "IntersectionObserver" in window;
-
-  function dotHTML(sup, inline){
-    return '<span class="dot' + (sup ? " is-sup" : "") + (inline ? " inline" : "") + '" aria-hidden="true">' +
-           '<svg class="feet"><use href="#feet"></use></svg></span>';
-  }
-  function rowHTML(n){
-    var w = lineFor(n), nk = nickFor(n);
-    var by = esc(nk || "anonymous") + (S.sort === "liked" ? ", " + fmt(likesFor(n)) + " felt it" : "");
-    return '<li><button class="row" data-n="' + n + '" aria-label="' + esc((w || "said nothing") + ", number " + fmt(n)) + '">' +
-      dotHTML(supFor(n), false) +
-      '<span class="row__no">No. ' + fmt(n) + '</span>' +
-      '<span class="row__w voice' + (w ? "" : " is-silent") + '">' + (w ? esc(w) : "said nothing") + '</span>' +
-      '<span class="row__by">' + by + '</span></button></li>';
-  }
-  function mileHTML(meters, ahead){
-    return '<li class="mile"><b>' + fmt(meters) + ' m</b>' +
-      '<span>That is how far down the line you have walked. ' + fmt(ahead) + ' people are still ahead of you.</span>' +
-      '<small>At the pace a real queue moves, the door is ' + pace(ahead) + ' away. It does not open.</small></li>';
-  }
-  function loadMore(){
-    var end = Math.min(S.shown + 40, S.list.length), html = "", i;
-    for(i = S.shown; i < end; i++){
-      html += rowHTML(S.list[i]);
-      if(S.sort === "order" && (i + 1) % 100 === 0) html += mileHTML(i + 1, S.list[i] - 1);
-    }
-    $("line").insertAdjacentHTML("beforeend", html);
-    S.shown = end;
-    $("more").hidden = hasIO || end >= S.list.length;
-  }
-  function resetFeed(){
-    S.list = listFor(S.sort);
-    S.nav = S.list;
-    S.shown = 0;
-    $("line").innerHTML = "";
-    scroller.scrollTop = 0;
-    loadMore();
-  }
-
-  /* the observer watches the inner scroller, not the page */
-  if(hasIO){
-    new IntersectionObserver(function(es){
-      if(es[0].isIntersecting && S.shown < S.list.length) loadMore();
-    }, { root:scroller, rootMargin:"1200px" }).observe($("sentinel"));
-  }
-  $("more").addEventListener("click", loadMore);
-
-  document.querySelectorAll(".seg button").forEach(function(b){
-    b.addEventListener("click", function(){
-      document.querySelectorAll(".seg button").forEach(function(x){ x.setAttribute("aria-pressed", "false"); });
-      b.setAttribute("aria-pressed", "true");
-      S.sort = b.dataset.sort;
-      track("sort", { mode:S.sort });
-      resetFeed();
-    });
-  });
-
-  /* ---------- layers & the back button ----------
-     On a phone the back button must close whatever is on top instead of
-     leaving the site. Each layer takes one history entry. */
-  var pushed = false, lastFocus = null;
-  var LAYERS = ["sheet", "join", "search", "about"];
-
-  function showLayer(name){
-    LAYERS.forEach(function(k){ $(k).classList.toggle("is-on", k === name); });
-    document.documentElement.classList.toggle("lock", !!name);
-  }
-  function openLayer(name, hash){
-    var url = hash || (location.pathname + location.search);
-    try{
-      if(S.layer === null){ history.pushState({ l:name }, "", url); pushed = true; }
-      else history.replaceState({ l:name }, "", url);
-    }catch(e){ pushed = false; }
-    if(S.layer === null) lastFocus = document.activeElement;
-    S.layer = name;
-    showLayer(name);
-  }
-  function hideNow(){
-    S.layer = null; pushed = false;
-    showLayer(null);
-    if(lastFocus && lastFocus.focus){ try{ lastFocus.focus({ preventScroll:true }); }catch(e){} }
-  }
-  function closeLayer(){
-    if(S.layer === null) return;
-    if(pushed){ try{ history.back(); return; }catch(e){} }
-    hideNow();
-  }
-  window.addEventListener("popstate", function(){ if(S.layer !== null) hideNow(); });
-  document.addEventListener("keydown", function(e){
-    if(S.layer === null) return;
-    if(e.key === "Escape") return closeLayer();
-    if(S.layer !== "sheet") return;
-    if(e.key === "ArrowLeft")  step(-1);
-    if(e.key === "ArrowRight") step(1);
-  });
-
-  /* ---------- entry box ---------- */
-  function navIndex(n){ return S.nav.indexOf(n); }
-
-  function renderAlso(n){
-    var total = alsoTotal(n), you = !!myAlso[n], p = alsoPeople(n);
-    var names = (you ? ["You"] : []).concat(p.named);
-    var shown = names.slice(0, 3), rest = total - shown.length, txt;
-
-    $("c-also").setAttribute("aria-pressed", String(you));
-    $("c-also").textContent = you ? "You are waiting for this too" : "I am waiting for this too";
-
-    if(total === 0) txt = mine[n] ? "Nobody else has said so yet." : "Nobody has said so yet. You could be the first.";
-    else if(!shown.length) txt = "<b>" + fmt(total) + "</b> " + (total === 1 ? "person is" : "people are") + " waiting for this too, all anonymous.";
-    else txt = "Also waiting: <b>" + esc(shown.join(", ")) + "</b>" + (rest > 0 ? " and " + fmt(rest) + " more." : ".");
-    $("c-who").innerHTML = txt;
-
-    var canAll = names.length > shown.length || p.anon > 0;
-    $("c-all").hidden = !canAll;
-    $("c-all").textContent = S.alsoOpen ? "Hide the list" : "See everyone";
-    $("c-list").hidden = !(canAll && S.alsoOpen);
-    if(canAll && S.alsoOpen){
-      $("c-list").innerHTML = names.slice(0, 60).map(function(nm){ return "<li>" + esc(nm) + "</li>"; }).join("") +
-        (p.anon ? "<li>" + fmt(p.anon) + " anonymous</li>" : "");
-    }
-
-    var same = sameFor(n);
-    $("c-same").hidden = !same.length;
-    if(same.length) $("c-same").textContent = fmt(same.length) + (same.length === 1 ? " other wrote" : " others wrote") + " the same words. See them.";
-  }
-
-  function openSheet(n, list, fresh){
-    if(list) S.nav = list;
-    S.cur = n; S.alsoOpen = false;
-
-    var w = lineFor(n), nk = nickFor(n), nt = noteFor(n), sup = supFor(n);
-    $("c-n").textContent = "No. " + fmt(n) + " of " + fmt(COUNT);
-    $("c-w").textContent = w ? "\u201C" + w + "\u201D" : "Said nothing.";
-    $("c-by").innerHTML = (sup ? dotHTML(true, true) : "") +
-      "<span>" + esc(nk || "anonymous") + (sup ? ", left something" : "") + "</span>";
-    $("c-c").textContent = nt;
-    $("c-m").innerHTML = fmt(n - 1) + " people ahead<br>Estimated wait: never";
-    $("c-banner").hidden = !fresh;
-    $("acts").classList.toggle("is-fresh", !!fresh);
-    $("c-likes").textContent = fmt(likesFor(n));
-    syncLike();
-
-    /* nobody is "also" waiting for their own sentence, and a silent entry has
-       nothing to share */
-    $("c-also").hidden = !!mine[n] || !w;
-    renderAlso(n);
-
-    var i = navIndex(n), atStart = i <= 0, atEnd = i < 0 || i >= S.nav.length - 1;
-    var inLine = (S.nav === pool && S.sort === "order");
-    $("c-prev").disabled = atStart; $("c-next").disabled = atEnd;
-    $("c-prev").setAttribute("aria-label", inLine ? "Behind you in the line" : "Previous");
-    $("c-next").setAttribute("aria-label", inLine ? "Ahead in the line" : "Next");
-
-    say("");
-    $("panel").scrollTop = 0;
-    openLayer("sheet", "#/" + n);
-    $("c-close").focus({ preventScroll:true });
-    if(!fresh) track("entry_open", { n:n });
-    prepImage(n);
-
-    if(!S.hinted){
-      S.hinted = true;
-      var h = $("hint");
-      h.hidden = false;
-      setTimeout(function(){ h.style.opacity = "0"; }, 4200);
-      setTimeout(function(){ h.hidden = true; h.style.opacity = ""; }, 4800);
-    }
-  }
-  function step(dir){
-    var i = navIndex(S.cur);
-    if(i < 0) return;
-    var j = i + dir;
-    if(j < 0 || j >= S.nav.length) return;
-    openSheet(S.nav[j]);
-  }
-  $("c-prev").addEventListener("click", function(){ step(-1); });
-  $("c-next").addEventListener("click", function(){ step(1); });
-  $("c-close").addEventListener("click", closeLayer);
-  $("scrim").addEventListener("click", closeLayer);
-
-  /* sideways moves along the line, downward closes, which is what people
-     already expect from a panel laid over a page */
-  (function(){
-    var p = $("panel"), x0 = 0, y0 = 0, drag = false, active = false;
-    p.addEventListener("touchstart", function(e){
-      var t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; drag = false; active = true;
-    }, { passive:true });
-    p.addEventListener("touchmove", function(e){
-      if(!active) return;
-      var t = e.touches[0], dx = t.clientX - x0, dy = t.clientY - y0;
-      if(dy > 8 && Math.abs(dy) > Math.abs(dx) && p.scrollTop <= 0){
-        drag = true; p.style.transition = "none"; p.style.transform = "translateY(" + dy + "px)";
-      }
-    }, { passive:true });
-    p.addEventListener("touchend", function(e){
-      if(!active) return;
-      active = false;
-      var t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0;
-      p.style.transition = "";
-      if(drag){ p.style.transform = ""; if(dy > 110) closeLayer(); }
-      else if(Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1);
-      drag = false;
-    }, { passive:true });
-  })();
-
-  function syncLike(){
-    var on = !!myLikes[S.cur];
-    $("c-like").classList.toggle("is-on", on);
-    $("c-like").setAttribute("aria-pressed", String(on));
-    $("c-like").firstChild.textContent = on ? "\u2665" : "\u2661";
-  }
-  $("c-like").addEventListener("click", function(){
-    var n = S.cur;
-    /* -> server: POST /api/like/:n, one per session, rate limited. A like
-       button with no server check is a button that gets scripted. */
-    if(myLikes[n]){ myLikes[n] = false; likeDelta[n] = (likeDelta[n] || 0) - 1; }
-    else { myLikes[n] = true; likeDelta[n] = (likeDelta[n] || 0) + 1; track("like", { n:n }); }
-    $("c-likes").textContent = fmt(likesFor(n));
-    syncLike();
-  });
-
-  $("c-also").addEventListener("click", function(){
-    var n = S.cur;
-    /* -> server: POST /api/also/:n, one per session, rate limited. */
-    if(myAlso[n]){ myAlso[n] = false; alsoDelta[n] = (alsoDelta[n] || 0) - 1; say(""); }
-    else {
-      myAlso[n] = true; alsoDelta[n] = (alsoDelta[n] || 0) + 1; track("also", { n:n });
-      say("Noted. If you would rather say it in your own words, add yours.");
-    }
-    renderAlso(n);
-  });
-  $("c-all").addEventListener("click", function(){ S.alsoOpen = !S.alsoOpen; renderAlso(S.cur); });
-  $("c-same").addEventListener("click", function(){
-    var list = sameFor(S.cur), w = lineFor(S.cur);
-    track("same_words", { n:S.cur, count:list.length });
-    $("q").value = "";
-    renderResults(list.slice(0, 60), fmt(list.length) + (list.length === 1 ? " other in this line wrote" : " others in this line wrote") + " \u201C" + w + "\u201D");
-    openLayer("search");
-  });
-
-  /* one tap on any row, result or the hero line opens its entry */
-  document.addEventListener("click", function(e){
-    var el = e.target.closest(".row, .res, .peek");
-    if(!el || !el.dataset.n) return;
-    var n = Number(el.dataset.n);
-    openSheet(n, el.classList.contains("res") ? S.results : S.list);
-  });
-
-  /* ---------- search ---------- */
-  var st = null;
-  function renderResults(found, label){
-    S.results = found;
-    $("res-k").textContent = label;
-    $("res").innerHTML = found.map(function(m){
-      var w2 = lineFor(m), nk2 = nickFor(m);
-      return '<button class="res" data-n="' + m + '"><span class="res__no">No. ' + fmt(m) + '</span>' +
-        '<span class="res__w voice">' + (w2 ? esc(w2) : "said nothing") + '</span>' +
-        '<span class="res__by">' + esc(nk2 || "anonymous") + '</span></button>';
-    }).join("");
-  }
-  function runSearch(){
-    var raw = $("q").value.trim().toLowerCase(), found = [], n, w, nk;
-    if(!raw) return renderResults([], "Search by number, by name, or by something someone said.");
-    /* -> server: GET /api/search?q= . Scanning the whole line in the browser
-       is fine for a demo and will lock up a phone at real scale. */
-    if(/^#?\d+$/.test(raw)){
-      n = parseInt(raw.replace("#", ""), 10);
-      if(n >= 1 && n <= COUNT) found.push(n);
-    } else if(raw.length >= 2){
-      for(n = COUNT; n >= 1 && found.length < 60; n--){
-        nk = nickFor(n); w = lineFor(n);
-        if((nk && nk.toLowerCase().indexOf(raw) > -1) || (w && w.toLowerCase().indexOf(raw) > -1)) found.push(n);
-      }
-    }
-    renderResults(found, found.length
-      ? found.length + (found.length === 1 ? " person" : " people") + " found"
-      : (raw.length < 2 && !/^\d+$/.test(raw) ? "Keep typing." : "Nobody in this line matches that."));
-    track("search", { hits:found.length });
-  }
-  function openSearch(){
-    $("q").value = "";
-    runSearch();
-    openLayer("search");
-    setTimeout(function(){ $("q").focus(); }, 80);
-  }
-  $("open-search").addEventListener("click", openSearch);
-  $("q-x").addEventListener("click", closeLayer);
-  $("q").addEventListener("input", function(){ clearTimeout(st); st = setTimeout(runSearch, 140); });
-
-  /* ---------- who we are ---------- */
-  $("open-about").addEventListener("click", function(){ track("about"); openLayer("about"); });
-  $("ab-close").addEventListener("click", closeLayer);
-
-  /* =================================================================
-     SHARE CARD. One 1080 x 1920 frame (9:16), the native shape of Reels,
-     Stories and TikTok. Everything sits in one group around the middle of
-     the frame: clear of the top 250px that the apps cover with their own
-     header, and well clear of the bottom 470px that captions and buttons
-     cover. The quote is never cut: its type size steps down until the
-     whole sentence fits in three lines. Colours are read from the CSS
-     tokens at the top of the file, so the images always match the site.
-  ================================================================== */
-  var SERIF = "'Newsreader', Georgia, serif", SANS = "'Hanken Grotesk', Arial, sans-serif";
-  var P = null;
-  function pal(){
-    if(P) return P;
-    var cs = null;
-    try{ cs = window.getComputedStyle(document.documentElement); }catch(e){}
-    function v(name, fb){ var s = cs ? String(cs.getPropertyValue(name) || "").trim() : ""; return s || fb; }
-    P = { BG:v("--ground", "#3A0A12"), BRASS:v("--brass", "#C9AB62"), TEXT:v("--text", "#F4F0E6"),
-          READ:v("--read", "#E6DDD2"), DIM:v("--dim", "#CBB1A8"), FAINT:v("--faint", "#A98A84"), RULE:v("--line-2", "#74303D") };
-    return P;
-  }
-
-  function wrapT(ctx, t, maxW){
-    var out = [], line = "";
-    String(t).split(" ").forEach(function(word){
-      var test = line ? line + " " + word : word;
-      if(ctx.measureText(test).width > maxW && line){ out.push(line); line = word; }
-      else line = test;
-    });
-    if(line) out.push(line);
-    return out;
-  }
-  function clamp01(v){ return Math.max(0, Math.min(1, v)); }
-
-  function paint(x, W, H, n, reveal){
-    var C = pal();
-    var w = lineFor(n), nk = nickFor(n), nt = noteFor(n);
-    var padX = W * 0.09, maxW = W - padX * 2, animated = typeof reveal === "number";
-    x.globalAlpha = 1;
-    x.fillStyle = C.BG; x.fillRect(0, 0, W, H);
-    x.textAlign = "left"; x.textBaseline = "alphabetic";
-
-    /* the biggest size at which the whole sentence fits in three lines */
-    var qText = w ? "\u201C" + w + "\u201D" : "Said nothing.";
-    var sizes = [0.098, 0.088, 0.078, 0.069, 0.061, 0.054], qSize = W * sizes[sizes.length - 1], q = [], s, rows;
-    for(s = 0; s < sizes.length; s++){
-      x.font = "400 " + (W * sizes[s]) + "px " + SERIF;
-      rows = wrapT(x, qText, maxW);
-      qSize = W * sizes[s]; q = rows;
-      if(rows.length <= 3) break;
-    }
-    var qLead = qSize * 1.17;
-
-    var nSize = W * 0.041, nLead = nSize * 1.5;
-    x.font = "400 " + nSize + "px " + SANS;
-    var c = nt ? wrapT(x, nt, maxW) : [];
-
-    var kSize = W * 0.033, byeSize = W * 0.04, fSize = W * 0.033, dSize = W * 0.046;
-    var gapK = W * 0.05, gapQ = W * 0.034, gapBy = W * 0.034, gapRule = W * 0.052, gapFoot = W * 0.042;
-
-    /* total height of the group, so it can be centred as one piece */
-    var total = kSize + gapK + q.length * qLead + gapQ + byeSize +
-                (c.length ? gapBy + c.length * nLead : 0) +
-                gapRule + 2 + gapFoot + fSize * 1.55 * 2 + dSize;
-    var y = Math.max(H * 0.135, H * 0.45 - total / 2);
-
-    var tail = animated ? clamp01((reveal - 0.55) / 0.4) : 1;   /* fades in after the quote */
-
-    x.fillStyle = C.BRASS; x.font = "500 " + kSize + "px " + SANS;
-    x.fillText("What are you waiting for?", padX, y + kSize * 0.8);
-    y += kSize + gapK;
-
-    var shown = animated ? Math.max(1, Math.ceil(q.length * clamp01(reveal))) : q.length, i;
-    x.fillStyle = C.TEXT; x.font = "400 " + qSize + "px " + SERIF;
-    for(i = 0; i < q.length; i++){
-      if(i < shown) x.fillText(q[i], padX, y + i * qLead + (qLead - qSize) / 2 + qSize * 0.8);
-    }
-    y += q.length * qLead + gapQ;
-
-    x.globalAlpha = tail;
-    x.fillStyle = C.DIM; x.font = "400 " + byeSize + "px " + SANS;
-    x.fillText(nk || "anonymous", padX, y + byeSize * 0.8);
-    y += byeSize;
-
-    if(c.length){
-      y += gapBy;
-      x.fillStyle = C.READ; x.font = "400 " + nSize + "px " + SANS;
-      for(i = 0; i < c.length; i++){
-        x.fillText(c[i], padX, y + (nLead - nSize) / 2 + nSize * 0.8);
-        y += nLead;
-      }
-    }
-
-    y += gapRule;
-    x.strokeStyle = C.RULE; x.lineWidth = 2;
-    x.beginPath(); x.moveTo(padX, y); x.lineTo(W - padX, y); x.stroke();
-    y += 2 + gapFoot;
-
-    x.fillStyle = C.FAINT; x.font = "400 " + fSize + "px " + SANS;
-    x.fillText("No. " + fmt(n) + " of " + fmt(COUNT), padX, y + fSize * 0.8);
-    y += fSize * 1.55;
-    x.fillText("Estimated wait: never", padX, y + fSize * 0.8);
-    y += fSize * 1.55;
-    x.fillStyle = C.BRASS; x.font = "500 " + dSize + "px " + SANS;
-    x.fillText(SITE, padX, y + dSize * 0.8);
-    x.globalAlpha = 1;
-  }
-  function paintOutro(x, W, H){
-    var C = pal();
-    x.globalAlpha = 1;
-    x.fillStyle = C.BG; x.fillRect(0, 0, W, H);
-    x.textAlign = "center";
-    x.fillStyle = C.BRASS; x.font = "400 " + (W * 0.082) + "px " + SERIF;
-    x.fillText(SITE, W / 2, H * 0.45);
-    x.fillStyle = C.DIM; x.font = "400 " + (W * 0.038) + "px " + SANS;
-    x.fillText("There is nothing at the end.", W / 2, H * 0.49);
-    x.textAlign = "left";
-  }
-
-  var fontsP = null;
-  function ensureFonts(){
-    if(!fontsP){
-      fontsP = (document.fonts && document.fonts.load)
-        ? Promise.all(['400 40px "Newsreader"', '400 24px "Hanken Grotesk"', '500 24px "Hanken Grotesk"']
-            .map(function(f){ return document.fonts.load(f).catch(function(){ return 0; }); }))
-        : Promise.resolve();
-    }
-    return fontsP;
-  }
-  function say(m){ $("c-busy").textContent = m; }
-
-  /* The image is rendered ahead of the tap. Phones only open the share sheet
-     from a fresh tap, so doing the work first is what makes one tap enough. */
-  var imgCache = {}, prepTimer = null;
-  function renderImage(n, cb){
-    ensureFonts().then(function(){
-      try{
-        var cv = document.createElement("canvas");
-        cv.width = 1080; cv.height = 1920;
-        var x = cv.getContext("2d");
-        if(!x) return cb(null);
-        paint(x, 1080, 1920, n);
-        cv.toBlob(function(b){ cb(b ? new File([b], "queue-" + n + ".png", { type:"image/png" }) : null); });
-      }catch(e){ cb(null); }
-    });
-  }
-  function prepImage(n){
-    clearTimeout(prepTimer);
-    if(imgCache[n]) return;
-    prepTimer = setTimeout(function(){ renderImage(n, function(f){ if(f) imgCache[n] = f; }); }, 140);
-  }
-  function download(f){
-    var u = URL.createObjectURL(f), a = document.createElement("a");
-    a.href = u; a.download = f.name; a.click();
-    setTimeout(function(){ URL.revokeObjectURL(u); }, 2000);
-  }
-  function canShareFile(f){ return !!(navigator.canShare && navigator.share && navigator.canShare({ files:[f] })); }
-
-  /* The caption that travels with every image and video. Instagram and TikTok
-     drop the text a web page hands them, so it is also put on the clipboard
-     at the moment of the tap, ready to paste into the post. */
-  function caption(n){
-    var w = lineFor(n);
-    return (w ? "\u201C" + w + "\u201D" : "Said nothing.") +
-           "\nNo. " + fmt(n) + " in a queue with nothing at the end.\n\n" +
-           "What are you waiting for? Get in line:\n" + entryURL(n);
-  }
-  function copyCaption(n){
-    try{
-      if(navigator.clipboard && navigator.clipboard.writeText)
-        return navigator.clipboard.writeText(caption(n)).then(function(){ return true; }, function(){ return false; });
-    }catch(e){}
-    return Promise.resolve(false);
-  }
-  function savedMsg(what, copied){
-    return what + " saved." + (copied ? " The caption with your link is copied; paste it into the post." : "");
-  }
-
-  $("c-share").addEventListener("click", function(){
-    var n = S.cur, f = imgCache[n], cp = copyCaption(n);
-    track("share", { n:n });
-    if(!f){
-      say("One moment.");
-      return renderImage(n, function(file){
-        if(!file) return say("This device could not make the image.");
-        imgCache[n] = file; say(""); $("c-share").click();
-      });
-    }
-    if(canShareFile(f)){
-      navigator.share({ files:[f], text:caption(n) }).then(function(){
-        cp.then(function(c){ say(c ? "Shared. The caption with your link is also copied, in case the app skipped it." : ""); });
-      }).catch(function(err){
-        if(err && err.name === "AbortError") return;
-        download(f);
-        cp.then(function(c){ say(savedMsg("Sharing was blocked here, so the image was", c)); });
-      });
-    } else {
-      download(f);
-      cp.then(function(c){ say(savedMsg("Image", c) + (c ? "" : " Instagram and TikTok have no web upload; post it from your gallery.")); });
-    }
-  });
-
-  $("s-link").addEventListener("click", function(){
-    var url = entryURL(S.cur);
-    track("copy_link", { n:S.cur });
-    if(navigator.clipboard && navigator.clipboard.writeText)
-      navigator.clipboard.writeText(url).then(function(){ say("Link copied."); }, function(){ say(url); });
-    else say(url);
-  });
-
-  $("s-img").addEventListener("click", function(){
-    var n = S.cur, f = imgCache[n], cp = copyCaption(n);
-    track("save_image", { n:n });
-    function done(file){ download(file); cp.then(function(c){ say(savedMsg("Image", c)); }); }
-    if(f) return done(f);
-    say("One moment.");
-    renderImage(n, function(file){
-      if(!file) return say("This device could not make the image.");
-      imgCache[n] = file; done(file);
-    });
-  });
-
-  /* Video is recorded from the canvas. Safari records MP4, which Instagram
-     accepts; Chrome records WebM, which may need converting server-side. */
-  $("s-vid").addEventListener("click", function(){
-    var n = S.cur, cp = copyCaption(n);
-    track("save_video", { n:n });
-    if(typeof MediaRecorder === "undefined"){
-      var f0 = imgCache[n];
-      if(f0) download(f0);
-      return cp.then(function(c){ say("Video is not supported on this device, so the image was saved instead." + (c ? " The caption with your link is copied." : "")); });
-    }
-    ensureFonts().then(function(){
-      var W = 1080, H = 1920, DUR = 7000, cv = document.createElement("canvas");
-      cv.width = W; cv.height = H;
-      var x = cv.getContext("2d");
-      if(!x) return say("This device could not make the video.");
-      var types = ["video/mp4;codecs=avc1", "video/webm;codecs=vp9", "video/webm"], mime = "", k;
-      for(k = 0; k < types.length; k++){ if(MediaRecorder.isTypeSupported(types[k])){ mime = types[k]; break; } }
-      var ext = mime.indexOf("mp4") > -1 ? "mp4" : "webm";
-      var rec = new MediaRecorder(cv.captureStream(30), mime ? { mimeType:mime, videoBitsPerSecond:6000000 } : undefined);
-      var chunks = [];
-      rec.ondataavailable = function(e){ if(e.data.size) chunks.push(e.data); };
-      rec.onstop = function(){
-        var file = new File([new Blob(chunks, { type:ext === "mp4" ? "video/mp4" : "video/webm" })], "queue-" + n + "." + ext);
-        download(file);
-        cp.then(function(c){ say(savedMsg("Video", c)); });
-      };
-      paint(x, W, H, n, 0);
-      say("Making a seven second clip.");
-      rec.start();
-      var t0 = performance.now();
-      (function frame(now){
-        var p = Math.min((now - t0) / DUR, 1);
-        if(p < 0.82) paint(x, W, H, n, Math.min(1, p / 0.5)); else paintOutro(x, W, H);
-        if(p < 1) requestAnimationFrame(frame); else rec.stop();
-      })(t0);
-    });
-  });
-
-  /* =================================================================
-     MODERATION. Joining is free, so nothing but this stands between the
-     public line and a flood of spam. This is only a first pass and a
-     honeypot. The real defences belong on the server: a captcha such as
-     Cloudflare Turnstile, per-IP and per-session rate limits, and a review
-     queue for the first weeks. Do not launch without them.
-  ================================================================== */
-  var BANNED = /(https?:\/\/|www\.|\.com\b|\.net\b|\.ru\b|@[a-z0-9_]{3,})/i;
-  function checkText(s, field){
-    if(BANNED.test(s)) return "No links, handles or addresses. This is not a place to advertise.";
-    /* judge the letters alone, so spaces and punctuation cannot hide shouting;
-       scripts without capitals (Chinese, Arabic) are never flagged */
-    var letters = s.replace(/[^\p{L}]/gu, "");
-    if(letters.length >= 8 && letters === letters.toUpperCase() && letters !== letters.toLowerCase()) return "Please don't shout.";
-    if(/(.)\1{6,}/.test(s)) return "That looks like keyboard mashing.";
-    if(field === "said" && s.trim().length < 2) return "Say something, even if it is \u201Cnothing\u201D.";
-    return "";
-  }
-  function showErr(id, msg){
-    var el = $(id);
-    el.textContent = msg;
-    el.classList.toggle("is-on", !!msg);
-    return !msg;
-  }
-
-  /* ---------- join ---------- */
-  function currentSupport(){
-    var sel = document.querySelector(".amt[aria-checked='true']").dataset.amt;
-    if(sel === "other") return Math.floor(Number($("amt").value) || 0);
-    return Number(sel);
-  }
-  function syncJoin(){
-    var support = currentSupport();
-    $("j-go").textContent = support > 0 ? "Take my place, leaving $" + fmt(support) : "Take my place";
-  }
-  document.querySelectorAll(".amt").forEach(function(b){
-    b.addEventListener("click", function(){
-      document.querySelectorAll(".amt").forEach(function(x){ x.setAttribute("aria-checked", "false"); });
-      b.setAttribute("aria-checked", "true");
-      $("other").hidden = b.dataset.amt !== "other";
-      if(b.dataset.amt === "other") $("amt").focus();
-      showErr("amt-err", "");
-      syncJoin();
-    });
-  });
-  $("amt").addEventListener("input", syncJoin);
-  $("said").addEventListener("input", function(){ $("said-c").textContent = $("said").value.length; });
-  $("note").addEventListener("input", function(){ $("note-c").textContent = $("note").value.length; });
-  /* one sentence, one line: Enter moves on instead of adding a line break */
-  $("said").addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); $("note").focus(); } });
-  $("jform").addEventListener("submit", function(e){ e.preventDefault(); });
-
-  function openJoin(at){
-    track("cta", { at:at });
-    openLayer("join");
-    setTimeout(function(){ $("said").focus(); }, 280);
-  }
-  $("hero-join").addEventListener("click", function(){ openJoin("hero"); });
-  $("cta-btn").addEventListener("click", function(){ openJoin("sticky"); });
-  $("c-join").addEventListener("click", function(){ openJoin("card"); });
-  $("ab-join").addEventListener("click", function(){ openJoin("about"); });
-  $("j-close").addEventListener("click", closeLayer);
-
-  $("j-go").addEventListener("click", function(){
-    var said = $("said").value.trim(), note = $("note").value.trim(), nick = $("nick").value.trim();
-    var ok = showErr("said-err", said ? checkText(said, "said") : "Say something, even if it is \u201Cnothing\u201D.");
-    ok = showErr("note-err", note ? checkText(note, "note") : "") && ok;
-    ok = showErr("nick-err", nick ? checkText(nick, "nick") : "") && ok;
-
-    var amt = currentSupport(), sel = document.querySelector(".amt[aria-checked='true']").dataset.amt;
-    if(sel === "other" && amt < MIN_SUPPORT){
-      showErr("amt-err", "The smallest amount is $" + MIN_SUPPORT + ". Choose Not now if you'd rather leave nothing.");
-      ok = false;
-    } else showErr("amt-err", "");
-
-    if(!ok){
-      var first = document.querySelector(".err.is-on");
-      if(first && first.scrollIntoView) first.scrollIntoView({ block:"center" });
-      return;
-    }
-    if($("hp").value){ return; }   /* a bot filled the honeypot; do nothing, say nothing */
-
-    track("join", { support:amt, has_note:!!note, named:!!nick });
-    /* -> real flow. Free entries: POST /api/join, which checks the captcha and
-       rate limits and then writes the row. With support: write the free entry
-       first, then open checkout for the amount; the payment webhook only marks
-       the feet as brass. Never make joining wait on a payment. */
-    COUNT += 1;
-    var n = COUNT;
-    mine[n] = { w:said, note:note, nick:nick, sup:amt > 0 };
-    pool.unshift(n);
-    randomCache = null;
-    if(sameIdx){ var key = sameKey(said); (sameIdx[key] = sameIdx[key] || []).push(n); }
-    $("hero-n").textContent = fmt(COUNT);
-
-    $("said").value = $("note").value = $("nick").value = "";
-    $("said-c").textContent = $("note-c").textContent = "0";
-    document.querySelectorAll(".amt").forEach(function(x){ x.setAttribute("aria-checked", x.dataset.amt === "0" ? "true" : "false"); });
-    $("other").hidden = true; $("amt").value = "";
-    syncJoin();
-
-    S.sort = "order";
-    document.querySelectorAll(".seg button").forEach(function(x){ x.setAttribute("aria-pressed", String(x.dataset.sort === "order")); });
-    resetFeed();
-    openSheet(n, pool, true);
-    if(amt > 0) say("Demo: this is where checkout for $" + fmt(amt) + " would open.");
-  });
-
-  /* ---------- hero ---------- */
-  var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  function pickPeek(){
-    var n, w, tries = 0;
-    do{ n = 1 + Math.floor(Math.random() * COUNT); w = lineFor(n); tries++; } while(!w && tries < 30);
-    $("peek-k").textContent = "No. " + fmt(n) + " is waiting for";
-    $("peek-v").textContent = w || "nothing";
-    $("peek").dataset.n = n;
-  }
-  pickPeek();
-  if(!reduced) setInterval(function(){
-    $("peek").classList.add("is-out");
-    setTimeout(function(){ pickPeek(); $("peek").classList.remove("is-out"); }, 460);
-  }, 4200);
-
-  $("hero-read").addEventListener("click", function(){ $("feed").scrollIntoView({ behavior:"smooth", block:"start" }); });
-  $("home").addEventListener("click", function(){ deck.scrollTo({ top:0, behavior:"smooth" }); });
-
-  var tick = false;
-  deck.addEventListener("scroll", function(){
-    if(tick) return;
-    tick = true;
-    requestAnimationFrame(function(){
-      $("cta").classList.toggle("is-on", deck.scrollTop > deck.clientHeight * 0.5);
-      tick = false;
-    });
-  }, { passive:true });
-
-  /* ---------- boot ---------- */
-  $("demo").hidden = !DEMO;
-  $("hero-n").textContent = fmt(COUNT);
-  resetFeed();
-  syncJoin();
-  ensureFonts();
-  try{ document.querySelector('meta[name="theme-color"]').setAttribute("content", pal().BG); }catch(e){}
-
-  /* a link that points at an entry opens that entry; the front page sits
-     underneath, so Back goes there instead of leaving the site */
-  (function(){
-    var m = location.hash.match(/^#\/(\d+)$/);
-    if(!m) return;
-    var n = parseInt(m[1], 10);
-    if(n < 1 || n > COUNT) return;
-    try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){}
-    openSheet(n, pool);
-    track("entry_open", { n:n, from:"link" });
-  })();
-
-  track("view");
+"use strict";
+/* ===== CONFIG & DEMO DATA ===== */
+const DEMO=true, BASE=12847, MIN_SUPPORT=3, SITE="thequeue.example";
+let COUNT=BASE;
+const ORIGIN=(location.origin&&location.origin!=="null")?location.origin:"https://"+SITE;
+const PRETTY_URLS=false; /* flip once /<number> pages exist on the server */
+const lines=["a phone call","my visa","nothing, I was curious","the results","him to notice","my mother to call first","spring","the last exam","a reply to one email","my sister to forgive me","the rent to be possible","someone to sit next to me","nothing in particular","the swelling to go down","my name called somewhere else","a job, any job","my flight","the dog to come back","to stop checking my phone","an apology I will not get","the kettle","my turn, generally","a sign","the divorce to finish","to feel like myself again","payday","the ceasefire","my hands to stop shaking","the bus","to be picked","him to text back","a house I can afford","the season to change","my father to wake up","nothing. I just liked the queue","the delivery","to be old enough","forgiveness","my citizenship","the second interview","a friend to move back","the noise to stop","someone to notice I left","the ferry","my brother's release","to find out","a normal week","the scan","to stop waiting","",""];
+const notes=["Since March. It is not a big thing, it just sits there.","Everyone says it will come. Nobody says when.","I check twice a day. I have stopped telling people that.","Two years of this now. You get used to the shape of it.","It is fine. I would just like to know either way.","My mother asks every Sunday and I say soon.","I did the maths and it should have happened by now.","Honestly I only came here to read the others.","I am not sure I want it anymore. I am still waiting though.","Third time applying. This one feels different, which is what I said last time.","It has been long enough that waiting is just what I do now.","Nothing dramatic. Just a small thing that has not arrived."];
+const nickA=["quiet","late","small","half","north","paper","winter","slow","open","tired","blue","empty","first","last","soft","grey","far","new","old","bright"];
+const nickB=["door","letter","hour","room","train","light","field","stone","name","hand","window","river","coat","street","bell","gate","match","cup","road","key"];
+/* Multilingual demo entries (newest, so they sit at the top). `en` is the stored
+   translation; in production it comes from POST /api/translate. */
+const FX=[
+ {lang:"tr",w:"bir telefon",note:"Mart'tan beri. Pazar günleri arardı, o günden beri pazarları sevmiyorum.",nick:"sessizkapı",en:"a phone call",enNote:"Since March. He used to call on Sundays, and I haven't liked Sundays since."},
+ {lang:"es",w:"que mi madre me perdone",note:"Llevo dos años esperando. Ya no sé si quiero que llegue.",nick:"luna_tarde",en:"for my mother to forgive me",enNote:"I've been waiting two years. I no longer know if I want it to arrive."},
+ {lang:"fr",w:"le résultat de l'examen",note:"Je rafraîchis la page toutes les heures, même la nuit.",nick:"",en:"the exam result",enNote:"I refresh the page every hour, even at night."},
+ {lang:"de",w:"mein Visum",note:"Der Termin wurde schon dreimal verschoben.",nick:"leisertag",en:"my visa",enNote:"The appointment has already been postponed three times."},
+ {lang:"ja",w:"春",note:"冬が長すぎて、もう色を忘れそうです。",nick:"しずか",en:"spring",enNote:"The winter has been so long I'm starting to forget what colors look like."},
+ {lang:"ar",w:"اتصال من أخي",note:"مرّت سنة منذ آخر مرة سمعت صوته.",nick:"",en:"a call from my brother",enNote:"It has been a year since I last heard his voice."},
+ {lang:"ru",w:"ответа на одно письмо",note:"Я написал его в сентябре и всё ещё проверяю почту.",nick:"тихийдом",en:"a reply to one email",enNote:"I wrote it in September and I'm still checking my inbox."},
+ {lang:"zh",w:"一个答复",note:"他说过会联系我,但已经三个月了。",nick:"小窗",en:"an answer",enNote:"He said he would get in touch, but it has been three months."},
+ {lang:"pt",w:"o meu voo",note:"",nick:"cafédemanhã",en:"my flight",enNote:""},
+ {lang:"ko",w:"합격 소식",note:"발표는 어제였는데 아직 아무 연락이 없어요.",nick:"",en:"news that I got in",enNote:"The announcement was yesterday, and I still haven't heard anything."},
+ {lang:"it",w:"che smetta di piovere",note:"",nick:"ombrello",en:"for the rain to stop",enNote:""},
+ {lang:"hi",w:"नौकरी का जवाब",note:"तीसरा इंटरव्यू था। अब हर सुबह फ़ोन देखता हूँ।",nick:"",en:"an answer about the job",enNote:"It was the third interview. Now I check my phone every morning."},
+ {lang:"tr",w:"babamın uyanmasını",note:"",nick:"",en:"for my father to wake up",enNote:""}
+];
+const fx={}; FX.forEach((e,i)=>{fx[BASE-i]=e;});
+
+/* ===== HELPERS ===== */
+const $=id=>document.getElementById(id);
+const NF=new Intl.NumberFormat(); const fmt=n=>NF.format(n);
+const USD=new Intl.NumberFormat(undefined,{style:"currency",currency:"USD",maximumFractionDigits:0});
+const ESC={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>ESC[c]);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function seeded(seed){let s=seed*2654435761%2147483647;return()=>{s=s*16807%2147483647;return(s-1)/2147483646;};}
+function track(ev,d){if(window.plausible)window.plausible(ev,{props:d});else if(DEMO&&window.console)console.log("[track]",ev,d||{});}
+const entryURL=n=>PRETTY_URLS?ORIGIN+"/"+n:ORIGIN+"/#/"+n;
+const store={
+ get(k,fb){try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch(e){return fb;}},
+ set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+};
+let langNames=null; try{langNames=new Intl.DisplayNames(["en"],{type:"language"});}catch(e){}
+function langName(c){try{return langNames?langNames.of(c):c;}catch(e){return c;}}
+const isEN=l=>!l||l.split("-")[0]==="en";
+const RTL=/[\u0590-\u08FF]/;
+function guessLang(t){
+ const R=[[/[\u3040-\u30ff]/,"ja"],[/[\uac00-\ud7af]/,"ko"],[/[\u4e00-\u9fff]/,"zh"],[/[\u0600-\u06ff]/,"ar"],[/[\u0590-\u05ff]/,"he"],[/[\u0400-\u04ff]/,"ru"],[/[\u0900-\u097f]/,"hi"],[/[\u0e00-\u0e7f]/,"th"],[/[\u0370-\u03ff]/,"el"],[/[ğışİĞŞ]/,"tr"],[/[ñ¿¡]/,"es"],[/ß/,"de"],[/[ãõ]/,"pt"],[/[àâçéèêëîïôûùœ]/,"fr"]];
+ for(const [r,l] of R) if(r.test(t)) return l; return "en";
+}
+async function detectLang(t){
+ try{ if("LanguageDetector" in self){const d=await LanguageDetector.create(); const r=await d.detect(t); if(r[0]&&r[0].confidence>.5) return r[0].detectedLanguage;} }catch(e){}
+ return guessLang(t);
+}
+
+/* ===== DATA (every read here becomes a server call in production) =====
+   GET /api/line?sort=&cursor=  GET /api/entry/:n  GET /api/search?q=
+   POST /api/join (returns a secret delete token)  DELETE /api/entry/:n (token)
+   POST /api/like/:n  POST /api/also/:n  POST /api/translate */
+const mine=store.get("queue.mine",{}), gone=store.get("queue.gone",{});
+Object.keys(mine).forEach(k=>{COUNT=Math.max(COUNT,+k);});
+const EC=new Map(), LC={};
+function entry(n){
+ let e=EC.get(n); if(e) return e;
+ if(mine[n]) e=mine[n]; else if(fx[n]) e=fx[n];
+ else{
+  const w=lines[Math.floor(seeded(n)()*lines.length)];
+  let r=seeded(n+1213); const note=r()<.42?notes[Math.floor(r()*notes.length)]:"";
+  r=seeded(n+3301); const nick=r()<.28?"":nickA[Math.floor(r()*nickA.length)]+nickB[Math.floor(r()*nickB.length)];
+  e={w:w,note:note,nick:nick,lang:"en"};
+ }
+ if(e.sup===undefined) e.sup=seeded(n+8807)()<.06;
+ EC.set(n,e); return e;
+}
+const myLikes={}, likeDelta={};
+function likesFor(n){
+ if(LC[n]===undefined){const e=entry(n); LC[n]=mine[n]?0:Math.floor(Math.pow(seeded(n+(e.w?6607:44))(),e.w?5:6)*(e.w?2600:40));}
+ return LC[n]+(likeDelta[n]||0);
+}
+const myAlso={}, alsoDelta={};
+function alsoBase(n){const e=entry(n); return (mine[n]||!e.w)?0:Math.floor(Math.pow(seeded(n+9901)(),3.5)*48);}
+const alsoTotal=n=>alsoBase(n)+(alsoDelta[n]||0);
+function alsoPeople(n){
+ const named=[]; let anon=0; const base=alsoBase(n);
+ for(let k=0;k<base;k++){const r=seeded(n*131+k+7); if(r()<.3){anon++;continue;} named.push(nickA[Math.floor(r()*nickA.length)]+nickB[Math.floor(r()*nickB.length)]);}
+ return {named:named,anon:anon};
+}
+let sameIdx=null;
+const sameKey=w=>String(w).toLowerCase().replace(/[^\p{L}\p{N} ]/gu,"").replace(/\s+/g," ").trim();
+function sameFor(n){
+ const w=entry(n).w; if(!w) return [];
+ if(!sameIdx){sameIdx={}; pool.forEach(m=>{const x=entry(m).w; if(x)(sameIdx[sameKey(x)]=sameIdx[sameKey(x)]||[]).push(m);});}
+ return (sameIdx[sameKey(w)]||[]).filter(m=>m!==n); /* pool is newest first */
+}
+function pace(left){const h=left/20; if(h<48) return Math.round(h)+" hours"; const d=h/24; return d<60?Math.round(d)+" days":Math.round(d/30)+" months";}
+
+let pool=[];
+function buildPool(){pool=[]; for(let n=COUNT;n>=1;n--){ if(n>BASE&&!mine[n]) continue; if(gone[n]) continue; pool.push(n);} sameIdx=null;}
+buildPool();
+const S={sort:"order",list:pool,shown:0,nav:pool,cur:null,results:[],hinted:false,alsoOpen:false,tr:false};
+let randomCache=null;
+const deck=$("deck"), scroller=$("scroller");
+function shuffled(src){const a=src.slice(); for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1)); [a[k],a[j]]=[a[j],a[k]];} return a;}
+function listFor(sort){
+ if(sort==="order") return pool;
+ if(sort==="random"){ if(!randomCache||randomCache.length!==pool.length) randomCache=shuffled(pool); return randomCache; }
+ return pool.slice().sort((a,b)=>(likesFor(b)-likesFor(a))||(b-a));
+}
+
+/* ===== THE LINE ===== */
+const hasIO="IntersectionObserver" in window;
+const dotHTML=(sup,inline)=>'<span class="dot'+(sup?" is-sup":"")+(inline?" inline":"")+'" aria-hidden="true"><svg class="feet"><use href="#feet"></use></svg></span>';
+const langAttr=e=>e.lang?' lang="'+esc(e.lang)+'"':"";
+function rowHTML(n){
+ const e=entry(n), w=e.w;
+ const by=esc(e.nick||"anonymous")+(isEN(e.lang)?"":", "+esc(langName(e.lang)))+(S.sort==="liked"?", "+fmt(likesFor(n))+" felt it":"");
+ return '<li><button class="row" data-n="'+n+'" aria-label="'+esc((w||"said nothing")+", number "+fmt(n))+'">'+dotHTML(e.sup,false)+
+  '<span class="row__no">No. '+fmt(n)+'</span><span class="row__w voice'+(w?"":" is-silent")+'"'+langAttr(e)+' dir="auto">'+(w?esc(w):"said nothing")+'</span><span class="row__by">'+by+'</span></button></li>';
+}
+function mileHTML(m,ahead){return '<li class="mile"><b>'+fmt(m)+' m</b><span>That is how far down the line you have walked. '+fmt(ahead)+' people are still ahead of you.</span><small>At the pace a real queue moves, the door is '+pace(ahead)+' away. It does not open.</small></li>';}
+function loadMore(){
+ const end=Math.min(S.shown+40,S.list.length); let html="";
+ for(let i=S.shown;i<end;i++){html+=rowHTML(S.list[i]); if(S.sort==="order"&&(i+1)%100===0) html+=mileHTML(i+1,S.list[i]-1);}
+ $("line").insertAdjacentHTML("beforeend",html); S.shown=end; $("more").hidden=hasIO||end>=S.list.length;
+}
+function resetFeed(){S.list=listFor(S.sort); S.nav=S.list; S.shown=0; $("line").innerHTML=""; scroller.scrollTop=0; loadMore();}
+if(hasIO) new IntersectionObserver(es=>{if(es[0].isIntersecting&&S.shown<S.list.length) loadMore();},{root:scroller,rootMargin:"1200px"}).observe($("sentinel"));
+$("more").addEventListener("click",loadMore);
+document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>{
+ document.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed","false"));
+ b.setAttribute("aria-pressed","true"); S.sort=b.dataset.sort; track("sort",{mode:S.sort}); resetFeed();
+}));
+
+/* ===== LAYERS & HISTORY (a stack: Back closes the top layer) ===== */
+const LAYERS=["sheet","join","search","about"]; const stack=[]; let lastFocus=null;
+const baseURL=()=>location.pathname+location.search;
+function render(){
+ const top=stack[stack.length-1]||null;
+ LAYERS.forEach(k=>$(k).classList.toggle("is-on",k===top));
+ document.documentElement.classList.toggle("lock",!!top);
+ $("shell").inert=!!top; $("cta").inert=!!top;
+}
+function openLayer(name,hash){
+ const url=hash||baseURL();
+ try{
+  if(stack[stack.length-1]===name) history.replaceState({d:stack.length},"",url);
+  else{ if(!stack.length) lastFocus=document.activeElement; stack.push(name); history.pushState({d:stack.length},"",url); }
+ }catch(e){ if(stack[stack.length-1]!==name) stack.push(name); }
+ render();
+}
+function swapLayer(name,hash){stack[stack.length-1]=name; try{history.replaceState({d:stack.length},"",hash||baseURL());}catch(e){} render();}
+function closeLayer(){if(!stack.length) return; try{history.back();}catch(e){stack.pop(); render();}}
+window.addEventListener("popstate",e=>{
+ const d=(e.state&&e.state.d)||0;
+ if(d>stack.length){history.go(stack.length-d); return;} /* a Forward press with nothing to show */
+ stack.length=d; render();
+ const top=stack[stack.length-1];
+ if(top==="sheet"){const m=location.hash.match(/^#\/(\d+)$/); if(m&&+m[1]!==S.cur) fillSheet(+m[1],false);}
+ if(!top&&lastFocus&&lastFocus.focus){try{lastFocus.focus({preventScroll:true});}catch(x){}}
+});
+document.addEventListener("keydown",e=>{
+ const top=stack[stack.length-1]; if(!top) return;
+ if(e.key==="Escape") return closeLayer();
+ if(e.key==="Tab"){ /* keep focus inside the open layer */
+  const f=[...$(top).querySelectorAll("button,input,textarea,a[href]")].filter(x=>!x.disabled&&!x.hidden&&x.offsetParent!==null&&x.tabIndex>=0);
+  if(!f.length) return; const a=f[0], z=f[f.length-1];
+  if(e.shiftKey&&document.activeElement===a){e.preventDefault(); z.focus();}
+  else if(!e.shiftKey&&document.activeElement===z){e.preventDefault(); a.focus();}
+  return;
+ }
+ if(top!=="sheet"||/INPUT|TEXTAREA/.test(document.activeElement.tagName)) return;
+ if(e.key==="ArrowLeft") step(-1); if(e.key==="ArrowRight") step(1);
+});
+if(window.visualViewport){
+ const kb=()=>{const v=visualViewport; document.documentElement.style.setProperty("--kb",Math.max(0,window.innerHeight-v.height-v.offsetTop)+"px");};
+ visualViewport.addEventListener("resize",kb); visualViewport.addEventListener("scroll",kb);
+}
+
+/* ===== ENTRY SHEET ===== */
+const quote=w=>w?"\u201C"+w+"\u201D":"Said nothing.";
+function paintText(){
+ const n=S.cur, e=entry(n), t=S.tr&&trCache[n];
+ $("c-w").textContent=quote(t?t.w:e.w); $("c-w").lang=t?"en":(e.lang||"");
+ $("c-c").textContent=t?t.note:e.note; $("c-c").lang=t?"en":(e.lang||"");
+}
+function renderAlso(n){
+ const total=alsoTotal(n), you=!!myAlso[n], p=alsoPeople(n), e=entry(n);
+ const names=(you?["You"]:[]).concat(p.named), shown=names.slice(0,3), rest=total-shown.length; let txt;
+ $("c-also").setAttribute("aria-pressed",String(you));
+ $("c-also").textContent=you?"You are waiting for this too":"I am waiting for this too";
+ if(total===0) txt=mine[n]?"Nobody else has said so yet.":"Nobody has said so yet. You could be the first.";
+ else if(!shown.length) txt="<b>"+fmt(total)+"</b> "+(total===1?"person is":"people are")+" waiting for this too, all anonymous.";
+ else txt="Also waiting: <b>"+esc(shown.join(", "))+"</b>"+(rest>0?" and "+fmt(rest)+" more.":".");
+ $("c-who").innerHTML=txt;
+ const canAll=names.length>shown.length||p.anon>0;
+ $("c-all").hidden=!canAll; $("c-all").textContent=S.alsoOpen?"Hide the list":"See everyone";
+ $("c-list").hidden=!(canAll&&S.alsoOpen);
+ if(canAll&&S.alsoOpen) $("c-list").innerHTML=names.slice(0,60).map(x=>"<li>"+esc(x)+"</li>").join("")+(p.anon?"<li>"+fmt(p.anon)+" anonymous</li>":"");
+ const same=sameFor(n); $("c-same").hidden=!same.length;
+ if(same.length) $("c-same").textContent=fmt(same.length)+(same.length===1?" other wrote":" others wrote")+" the same words. See them.";
+}
+function fillSheet(n,fresh,note){
+ const e=entry(n); S.cur=n; S.alsoOpen=false; S.tr=false;
+ $("c-n").textContent="No. "+fmt(n)+" of "+fmt(COUNT);
+ paintText();
+ $("c-by").innerHTML=(e.sup?dotHTML(true,true):"")+"<span>"+esc(e.nick||"anonymous")+(e.sup?", left something":"")+(isEN(e.lang)?"":" \u00B7 "+esc(langName(e.lang)))+"</span>";
+ $("c-m").innerHTML=fmt(n-1)+" people ahead<br>Estimated wait: never";
+ const b=$("c-banner"); b.hidden=!fresh;
+ if(fresh) b.innerHTML="You're in the line. This is yours. Share it if you like."+(note?"<br><br>"+note:"");
+ $("acts").classList.toggle("is-fresh",!!fresh);
+ $("c-likes").textContent=fmt(likesFor(n)); syncLike();
+ $("c-also").hidden=!!mine[n]||!e.w; renderAlso(n);
+ $("c-del").hidden=!mine[n];
+ const needTr=!!e.w&&!isEN(e.lang);
+ $("c-trwrap").hidden=!needTr; $("c-tr").textContent="Translate to English"; $("c-trnote").textContent=""; $("c-gt").hidden=true;
+ if(needTr) $("c-gt").href="https://translate.google.com/?sl="+encodeURIComponent(e.lang)+"&tl=en&op=translate&text="+encodeURIComponent(e.w+(e.note?"\n\n"+e.note:""));
+ const i=S.nav.indexOf(n), inLine=(S.nav===pool&&S.sort==="order");
+ $("c-prev").disabled=i<=0; $("c-next").disabled=i<0||i>=S.nav.length-1;
+ $("c-prev").setAttribute("aria-label",inLine?"Newer in the line":"Previous");
+ $("c-next").setAttribute("aria-label",inLine?"Older in the line":"Next");
+ say(""); $("panel").scrollTop=0; prepImage(n);
+}
+function openSheet(n,list,fresh,note){
+ if(list) S.nav=list;
+ fillSheet(n,fresh,note);
+ if(fresh) swapLayer("sheet","#/"+n); else openLayer("sheet","#/"+n);
+ $("c-close").focus({preventScroll:true});
+ if(!fresh) track("entry_open",{n:n});
+ if(!S.hinted){S.hinted=true; const h=$("hint"); h.hidden=false; setTimeout(()=>{h.style.opacity="0";},4200); setTimeout(()=>{h.hidden=true; h.style.opacity="";},4800);}
+}
+function step(dir){const i=S.nav.indexOf(S.cur); if(i<0) return; const j=i+dir; if(j<0||j>=S.nav.length) return; fillSheet(S.nav[j],false); try{history.replaceState({d:stack.length},"","#/"+S.cur);}catch(e){} track("entry_open",{n:S.cur,from:"step"});}
+$("c-prev").addEventListener("click",()=>step(-1));
+$("c-next").addEventListener("click",()=>step(1));
+$("c-close").addEventListener("click",closeLayer);
+$("scrim").addEventListener("click",closeLayer);
+(function(){
+ const p=$("panel"); let x0=0,y0=0,drag=false,active=false;
+ p.addEventListener("touchstart",e=>{const t=e.touches[0]; x0=t.clientX; y0=t.clientY; drag=false; active=true;},{passive:true});
+ p.addEventListener("touchmove",e=>{if(!active) return; const t=e.touches[0],dx=t.clientX-x0,dy=t.clientY-y0;
+  if(dy>8&&Math.abs(dy)>Math.abs(dx)&&p.scrollTop<=0){drag=true; p.style.transition="none"; p.style.transform="translateY("+dy+"px)";}},{passive:true});
+ p.addEventListener("touchend",e=>{if(!active) return; active=false; const t=e.changedTouches[0],dx=t.clientX-x0,dy=t.clientY-y0; p.style.transition="";
+  if(drag){p.style.transform=""; if(dy>110) closeLayer();}
+  else if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.5) step(dx<0?1:-1);
+  drag=false;},{passive:true});
+})();
+function syncLike(){const on=!!myLikes[S.cur]; $("c-like").classList.toggle("is-on",on); $("c-like").setAttribute("aria-pressed",String(on)); $("c-like").firstChild.textContent=on?"\u2665":"\u2661";}
+$("c-like").addEventListener("click",()=>{ /* -> POST /api/like/:n */
+ const n=S.cur;
+ if(myLikes[n]){myLikes[n]=false; likeDelta[n]=(likeDelta[n]||0)-1;} else{myLikes[n]=true; likeDelta[n]=(likeDelta[n]||0)+1; track("like",{n:n});}
+ $("c-likes").textContent=fmt(likesFor(n)); syncLike();
+});
+$("c-also").addEventListener("click",()=>{ /* -> POST /api/also/:n */
+ const n=S.cur;
+ if(myAlso[n]){myAlso[n]=false; alsoDelta[n]=(alsoDelta[n]||0)-1; say("");}
+ else{myAlso[n]=true; alsoDelta[n]=(alsoDelta[n]||0)+1; track("also",{n:n}); say("Noted. If you would rather say it in your own words, add yours.");}
+ renderAlso(n);
+});
+$("c-all").addEventListener("click",()=>{S.alsoOpen=!S.alsoOpen; renderAlso(S.cur);});
+$("c-same").addEventListener("click",()=>{
+ const list=sameFor(S.cur), w=entry(S.cur).w; track("same_words",{n:S.cur,count:list.length}); $("q").value="";
+ renderResults(list.slice(0,60),fmt(list.length)+(list.length===1?" other in this line wrote":" others in this line wrote")+" \u201C"+w+"\u201D"); openLayer("search");
+});
+document.addEventListener("click",e=>{
+ const el=e.target.closest(".row, .res, .peek"); if(!el||!el.dataset.n) return;
+ openSheet(Number(el.dataset.n),el.classList.contains("res")?S.results:S.list);
+});
+
+/* ===== TRANSLATE TO ENGLISH =====
+   1) stored translation (demo; a server field in production)
+   2) the browser's built-in Translator API (Chrome)
+   3) fallback link to Google Translate. At scale: POST /api/translate. */
+const trCache={};
+async function translate(n){
+ if(trCache[n]) return trCache[n];
+ const e=entry(n); let res=null;
+ if(e.en!==undefined){await sleep(350); res={w:e.en,note:e.enNote||""};}
+ else if("Translator" in self){
+  try{
+   const opt={sourceLanguage:e.lang,targetLanguage:"en"};
+   if((await Translator.availability(opt))==="unavailable") throw new Error("unavailable");
+   const t=await Translator.create(opt);
+   res={w:await t.translate(e.w),note:e.note?await t.translate(e.note):""};
+  }catch(err){res=null;}
+ }
+ if(res) trCache[n]=res; return res;
+}
+$("c-tr").addEventListener("click",async()=>{
+ const n=S.cur;
+ if(S.tr){S.tr=false; paintText(); $("c-tr").textContent="Translate to English"; $("c-trnote").textContent=""; return;}
+ say("Translating\u2026"); $("c-gt").hidden=true;
+ const r=await translate(n); if(n!==S.cur) return;
+ if(!r){say("This browser can't translate this here."); $("c-gt").hidden=false; return;}
+ S.tr=true; paintText(); say(""); track("translate",{n:n,lang:entry(n).lang});
+ $("c-tr").textContent="Show original";
+ $("c-trnote").textContent="Translated from "+langName(entry(n).lang)+". Machine translation can miss nuance.";
+});
+
+/* ===== SEARCH ===== */
+let st=null;
+function renderResults(found,label){
+ S.results=found; $("res-k").textContent=label;
+ $("res").innerHTML=found.map(m=>{const e=entry(m);
+  return '<button class="res" data-n="'+m+'"><span class="res__no">No. '+fmt(m)+'</span><span class="res__w voice"'+langAttr(e)+' dir="auto">'+(e.w?esc(e.w):"said nothing")+'</span><span class="res__by">'+esc(e.nick||"anonymous")+'</span></button>';}).join("");
+}
+function runSearch(){
+ const raw=$("q").value.trim().toLowerCase(), found=[];
+ if(!raw) return renderResults([],"Search by number, by name, or by something someone said.");
+ if(/^#?\d+$/.test(raw)){const n=parseInt(raw.replace("#",""),10); if(pool.indexOf(n)>-1) found.push(n);}
+ else if(raw.length>=2){
+  for(let i=0;i<pool.length&&found.length<60;i++){const n=pool[i], e=entry(n);
+   if([e.nick,e.w,e.en].some(s=>s&&s.toLowerCase().indexOf(raw)>-1)) found.push(n);}
+ }
+ renderResults(found,found.length?found.length+(found.length===1?" person":" people")+" found":(raw.length<2&&!/^\d+$/.test(raw)?"Keep typing.":"Nobody in this line matches that."));
+ track("search",{hits:found.length});
+}
+function openSearch(){$("q").value=""; runSearch(); openLayer("search"); setTimeout(()=>$("q").focus(),80);}
+$("open-search").addEventListener("click",openSearch);
+$("q-x").addEventListener("click",closeLayer);
+$("q").addEventListener("input",()=>{clearTimeout(st); st=setTimeout(runSearch,140);});
+function openAbout(){track("about"); openLayer("about");}
+$("open-about").addEventListener("click",openAbout);
+$("open-about2").addEventListener("click",openAbout);
+$("ab-close").addEventListener("click",closeLayer);
+
+/* ===== SHARE CARD (1080x1920) ===== */
+const SERIF="'Newsreader', Georgia, 'Noto Serif', serif", SANS="'Hanken Grotesk', Arial, sans-serif";
+let P=null;
+function pal(){
+ if(P) return P; let cs=null; try{cs=getComputedStyle(document.documentElement);}catch(e){}
+ const v=(k,fb)=>{const s=cs?String(cs.getPropertyValue(k)||"").trim():""; return s||fb;};
+ P={BG:v("--ground","#3A0A12"),BRASS:v("--brass","#C9AB62"),TEXT:v("--text","#F4F0E6"),READ:v("--read","#E6DDD2"),DIM:v("--dim","#CBB1A8"),FAINT:v("--faint","#A98A84"),RULE:v("--line-2","#74303D")};
+ return P;
+}
+const seg=(typeof Intl!=="undefined"&&Intl.Segmenter)?new Intl.Segmenter(undefined,{granularity:"word"}):null;
+function wrapT(ctx,t,maxW){ /* word-aware for every script, including ones without spaces */
+ const toks=seg?Array.from(seg.segment(String(t)),s=>s.segment):String(t).split(/(\s+)/);
+ const out=[]; let line="";
+ toks.forEach(tok=>{const test=line+tok;
+  if(ctx.measureText(test).width>maxW&&line.trim()){out.push(line.trim()); line=tok.replace(/^\s+/,"");} else line=test;});
+ if(line.trim()) out.push(line.trim()); return out;
+}
+const clamp01=v=>Math.max(0,Math.min(1,v));
+const LAY=new Map();
+function layout(x,n,W){ /* measured once per entry, not on every video frame */
+ const key=n+":"+W; if(LAY.has(key)) return LAY.get(key);
+ const e=entry(n), padX=W*.09, maxW=W-padX*2, qText=quote(e.w), sizes=[.098,.088,.078,.069,.061,.054];
+ let qSize=W*sizes[sizes.length-1], q=[];
+ for(let s=0;s<sizes.length;s++){x.font="400 "+(W*sizes[s])+"px "+SERIF; const rows=wrapT(x,qText,maxW); qSize=W*sizes[s]; q=rows; if(rows.length<=3) break;}
+ const nSize=W*.041; x.font="400 "+nSize+"px "+SANS;
+ const L={q:q,qSize:qSize,c:e.note?wrapT(x,e.note,maxW):[]}; LAY.set(key,L); return L;
+}
+function paint(x,W,H,n,reveal){
+ const C=pal(), e=entry(n), padX=W*.09, animated=typeof reveal==="number", L=layout(x,n,W), q=L.q, qSize=L.qSize, c=L.c;
+ x.globalAlpha=1; x.fillStyle=C.BG; x.fillRect(0,0,W,H); x.textBaseline="alphabetic";
+ function T(txt,py){const r=RTL.test(txt); x.direction=r?"rtl":"ltr"; x.textAlign=r?"right":"left"; x.fillText(txt,r?W-padX:padX,py);}
+ const qLead=qSize*1.17, nSize=W*.041, nLead=nSize*1.5;
+ const kSize=W*.033, byeSize=W*.04, fSize=W*.033, dSize=W*.046;
+ const gapK=W*.05, gapQ=W*.034, gapBy=W*.034, gapRule=W*.052, gapFoot=W*.042;
+ const total=kSize+gapK+q.length*qLead+gapQ+byeSize+(c.length?gapBy+c.length*nLead:0)+gapRule+2+gapFoot+fSize*1.55*2+dSize;
+ let y=Math.max(H*.135,H*.45-total/2);
+ const tail=animated?clamp01((reveal-.55)/.4):1;
+ x.fillStyle=C.BRASS; x.font="500 "+kSize+"px "+SANS; T("What are you waiting for?",y+kSize*.8); y+=kSize+gapK;
+ const shown=animated?Math.max(1,Math.ceil(q.length*clamp01(reveal))):q.length;
+ x.fillStyle=C.TEXT; x.font="400 "+qSize+"px "+SERIF;
+ for(let i=0;i<q.length;i++) if(i<shown) T(q[i],y+i*qLead+(qLead-qSize)/2+qSize*.8);
+ y+=q.length*qLead+gapQ;
+ x.globalAlpha=tail; x.fillStyle=C.DIM; x.font="400 "+byeSize+"px "+SANS; T(e.nick||"anonymous",y+byeSize*.8); y+=byeSize;
+ if(c.length){y+=gapBy; x.fillStyle=C.READ; x.font="400 "+nSize+"px "+SANS; for(let i=0;i<c.length;i++){T(c[i],y+(nLead-nSize)/2+nSize*.8); y+=nLead;}}
+ y+=gapRule; x.strokeStyle=C.RULE; x.lineWidth=2; x.beginPath(); x.moveTo(padX,y); x.lineTo(W-padX,y); x.stroke(); y+=2+gapFoot;
+ x.fillStyle=C.FAINT; x.font="400 "+fSize+"px "+SANS;
+ T("No. "+fmt(n)+" of "+fmt(COUNT),y+fSize*.8); y+=fSize*1.55; T("Estimated wait: never",y+fSize*.8); y+=fSize*1.55;
+ x.fillStyle=C.BRASS; x.font="500 "+dSize+"px "+SANS; T(SITE,y+dSize*.8);
+ x.globalAlpha=1; x.direction="ltr"; x.textAlign="left";
+}
+function paintOutro(x,W,H){
+ const C=pal(); x.globalAlpha=1; x.direction="ltr"; x.fillStyle=C.BG; x.fillRect(0,0,W,H); x.textAlign="center";
+ x.fillStyle=C.BRASS; x.font="400 "+(W*.082)+"px "+SERIF; x.fillText(SITE,W/2,H*.45);
+ x.fillStyle=C.DIM; x.font="400 "+(W*.038)+"px "+SANS; x.fillText("There is nothing at the end.",W/2,H*.49); x.textAlign="left";
+}
+function ensureFonts(text){ /* pass the real text so non-basic letters load the right glyph subset */
+ if(!(document.fonts&&document.fonts.load)) return Promise.resolve();
+ const t=text||"";
+ return Promise.all(['400 40px "Newsreader"','400 24px "Hanken Grotesk"','500 24px "Hanken Grotesk"'].map(f=>document.fonts.load(f,t).catch(()=>0)));
+}
+const say=m=>{$("c-busy").textContent=m;};
+const fontText=n=>{const e=entry(n); return (e.w||"")+(e.note||"")+(e.nick||"")+"\u201C\u201D";};
+
+const imgCache=new Map(); let prepTimer=null; /* small LRU */
+function cachePut(n,f){imgCache.delete(n); imgCache.set(n,f); while(imgCache.size>8) imgCache.delete(imgCache.keys().next().value);}
+function renderImage(n,cb){
+ ensureFonts(fontText(n)).then(()=>{
+  try{const cv=document.createElement("canvas"); cv.width=1080; cv.height=1920; const x=cv.getContext("2d"); if(!x) return cb(null);
+   paint(x,1080,1920,n); cv.toBlob(b=>cb(b?new File([b],"queue-"+n+".png",{type:"image/png"}):null));}catch(e){cb(null);}
+ });
+}
+function prepImage(n){clearTimeout(prepTimer); if(imgCache.has(n)) return; prepTimer=setTimeout(()=>renderImage(n,f=>{if(f) cachePut(n,f);}),140);}
+function download(f){const u=URL.createObjectURL(f), a=document.createElement("a"); a.href=u; a.download=f.name; a.click(); setTimeout(()=>URL.revokeObjectURL(u),2000);}
+const canShareFile=f=>!!(navigator.canShare&&navigator.share&&navigator.canShare({files:[f]}));
+function caption(n){return quote(entry(n).w)+"\nNo. "+fmt(n)+" in a queue with nothing at the end.\n\nWhat are you waiting for? Get in line:\n"+entryURL(n);}
+function copyCaption(n){try{if(navigator.clipboard&&navigator.clipboard.writeText) return navigator.clipboard.writeText(caption(n)).then(()=>true,()=>false);}catch(e){} return Promise.resolve(false);}
+const savedMsg=(what,c)=>what+" saved."+(c?" The caption with your link is copied; paste it into the post.":"");
+
+$("c-share").addEventListener("click",()=>{
+ const n=S.cur, f=imgCache.get(n), cp=copyCaption(n); track("share",{n:n});
+ if(!f){say("One moment."); return renderImage(n,file=>{if(!file) return say("This device could not make the image."); cachePut(n,file); say(""); $("c-share").click();});}
+ if(canShareFile(f)){
+  navigator.share({files:[f],text:caption(n)}).then(()=>cp.then(c=>say(c?"Shared. The caption with your link is also copied, in case the app skipped it.":""))).catch(err=>{
+   if(err&&err.name==="AbortError") return; download(f); cp.then(c=>say(savedMsg("Sharing was blocked here, so the image was",c)));});
+ } else{download(f); cp.then(c=>say(savedMsg("Image",c)+(c?"":" Instagram and TikTok have no web upload; post it from your gallery.")));}
+});
+$("s-link").addEventListener("click",()=>{
+ const url=entryURL(S.cur); track("copy_link",{n:S.cur});
+ if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(()=>say("Link copied."),()=>say(url)); else say(url);
+});
+$("s-img").addEventListener("click",()=>{
+ const n=S.cur, f=imgCache.get(n), cp=copyCaption(n); track("save_image",{n:n});
+ const done=file=>{download(file); cp.then(c=>say(savedMsg("Image",c)));};
+ if(f) return done(f); say("One moment.");
+ renderImage(n,file=>{if(!file) return say("This device could not make the image."); cachePut(n,file); done(file);});
+});
+let recording=false;
+$("s-vid").addEventListener("click",()=>{
+ if(recording) return;
+ const n=S.cur, cp=copyCaption(n); track("save_video",{n:n});
+ if(typeof MediaRecorder==="undefined"){
+  const f0=imgCache.get(n); if(f0) download(f0);
+  return cp.then(c=>say("Video is not supported on this device, so the image was saved instead."+(c?" The caption with your link is copied.":"")));
+ }
+ recording=true; $("s-vid").disabled=true;
+ ensureFonts(fontText(n)).then(()=>{
+  const W=1080,H=1920,DUR=7000, cv=document.createElement("canvas"); cv.width=W; cv.height=H; const x=cv.getContext("2d");
+  const fin=()=>{recording=false; $("s-vid").disabled=false;};
+  if(!x){fin(); return say("This device could not make the video.");}
+  const types=["video/mp4;codecs=avc1","video/webm;codecs=vp9","video/webm"]; let mime="";
+  for(const t of types){if(MediaRecorder.isTypeSupported(t)){mime=t; break;}}
+  const ext=mime.indexOf("mp4")>-1?"mp4":"webm"; let aborted=false;
+  const rec=new MediaRecorder(cv.captureStream(30),mime?{mimeType:mime,videoBitsPerSecond:6000000}:undefined), chunks=[];
+  rec.ondataavailable=e=>{if(e.data.size) chunks.push(e.data);};
+  rec.onstop=()=>{
+   document.removeEventListener("visibilitychange",vis); fin();
+   if(aborted) return say("Recording stopped because the tab went to the background. Keep this tab open and try again.");
+   const file=new File([new Blob(chunks,{type:ext==="mp4"?"video/mp4":"video/webm"})],"queue-"+n+"."+ext,{type:ext==="mp4"?"video/mp4":"video/webm"});
+   const fallback=()=>{download(file); cp.then(c=>say(savedMsg("Video",c)));};
+   if(canShareFile(file)) navigator.share({files:[file],text:caption(n)}).then(()=>say("")).catch(fallback); else fallback();
+  };
+  function vis(){if(document.hidden){aborted=true; if(rec.state!=="inactive") rec.stop();}}
+  document.addEventListener("visibilitychange",vis);
+  paint(x,W,H,n,0); say("Making a seven second clip. Keep this tab open."); rec.start();
+  const t0=performance.now();
+  (function frame(now){
+   if(aborted) return; const p=Math.min((now-t0)/DUR,1);
+   if(p<.82) paint(x,W,H,n,Math.min(1,p/.5)); else paintOutro(x,W,H);
+   if(p<1) requestAnimationFrame(frame); else rec.stop();
+  })(t0);
+ });
+});
+
+/* ===== MODERATION (first pass only; the server must repeat all of it) ===== */
+const BANNED=/(https?:\/\/|www\.|\.com\b|\.net\b|\.ru\b|@[a-z0-9_]{3,})/i;
+const CRISIS=/(kill myself|end it all|suicid|want to die|wish i (was|were) dead|hurt myself|self.?harm|not wake up|intihar|ölmek istiyorum|quiero morir|me quiero matar|je veux mourir|ich will sterben|死にたい|자살|хочу умереть|أريد أن أموت)/i;
+function checkText(s,field){
+ if(BANNED.test(s)) return "No links, handles or addresses. This is not a place to advertise.";
+ const letters=s.replace(/[^\p{L}]/gu,"");
+ if(letters.length>=12&&letters===letters.toUpperCase()&&letters!==letters.toLowerCase()) return "Please don't shout.";
+ if(/(.)\1{6,}/.test(s)) return "That looks like keyboard mashing.";
+ if(field==="said"&&s.trim().length<2) return "Say something, even if it is \u201Cnothing\u201D.";
+ return "";
+}
+function showErr(id,msg){const el=$(id); el.textContent=msg; el.classList.toggle("is-on",!!msg); return !msg;}
+
+/* ===== JOIN ===== */
+const amtSel=()=>document.querySelector("input[name=amt]:checked").value;
+function currentSupport(){const s=amtSel(); return s==="other"?Math.floor(Number($("amt").value)||0):Number(s);}
+function syncJoin(){const s=currentSupport(); $("j-go").textContent=s>0?"Take my place, leaving "+USD.format(s):"Take my place";}
+document.querySelectorAll("input[name=amt]").forEach(r=>r.addEventListener("change",()=>{
+ $("other").hidden=amtSel()!=="other"; if(amtSel()==="other") $("amt").focus(); showErr("amt-err",""); syncJoin();
+}));
+$("amt").addEventListener("input",syncJoin);
+$("said").addEventListener("input",()=>{$("said-c").textContent=$("said").value.length;});
+$("note").addEventListener("input",()=>{$("note-c").textContent=$("note").value.length;});
+$("said").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault(); $("note").focus();}});
+$("jform").addEventListener("submit",e=>e.preventDefault());
+function openJoin(at){track("cta",{at:at}); openLayer("join"); setTimeout(()=>$("said").focus(),280);}
+$("hero-join").addEventListener("click",()=>openJoin("hero"));
+$("cta-btn").addEventListener("click",()=>openJoin("sticky"));
+$("c-join").addEventListener("click",()=>openJoin("card"));
+$("ab-join").addEventListener("click",()=>openJoin("about"));
+$("j-close").addEventListener("click",closeLayer);
+
+let joining=false;
+$("j-go").addEventListener("click",async()=>{
+ if(joining) return;
+ const said=$("said").value.trim(), note=$("note").value.trim(), nick=$("nick").value.trim();
+ let ok=showErr("said-err",said?checkText(said,"said"):"Say something, even if it is \u201Cnothing\u201D.");
+ ok=showErr("note-err",note?checkText(note,"note"):"")&&ok;
+ ok=showErr("nick-err",nick?checkText(nick,"nick"):"")&&ok;
+ const amt=currentSupport();
+ if(amtSel()==="other"&&amt<MIN_SUPPORT){showErr("amt-err","The smallest amount is "+USD.format(MIN_SUPPORT)+". Choose Not now if you'd rather leave nothing."); ok=false;} else showErr("amt-err","");
+ if(!ok){const f=document.querySelector(".err.is-on"); if(f&&f.scrollIntoView) f.scrollIntoView({block:"center"}); return;}
+ if($("hp").value) return;
+ joining=true; $("j-go").disabled=true;
+ const lang=await detectLang(said+" "+note);
+ const heavy=CRISIS.test(said+" "+note);
+ track("join",{support:amt,has_note:!!note,named:!!nick,lang:lang,review:heavy});
+ /* -> POST /api/join (captcha, rate limits). Server returns a secret delete token;
+    here ownership is simply "this entry is in this browser's storage".
+    Entries with review:true go to the human review queue first. */
+ COUNT+=1; const n=COUNT;
+ mine[n]={w:said,note:note,nick:nick,sup:amt>0,lang:lang,review:heavy}; store.set("queue.mine",mine);
+ EC.delete(n); buildPool(); randomCache=null;
+ $("hero-n").textContent=fmt(COUNT); syncMine();
+ $("said").value=$("note").value=$("nick").value=""; $("said-c").textContent=$("note-c").textContent="0";
+ document.querySelector("input[name=amt][value='0']").checked=true; $("other").hidden=true; $("amt").value=""; syncJoin();
+ S.sort="order"; document.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.sort==="order")));
+ resetFeed();
+ openSheet(n,pool,true,heavy?"If things feel heavy right now, you don\u2019t have to wait alone. <a href=\"https://findahelpline.com\" target=\"_blank\" rel=\"noopener\">findahelpline.com</a> lists free, confidential lines by country.":"");
+ if(amt>0) say("Demo: this is where checkout for "+USD.format(amt)+" would open.");
+ joining=false; $("j-go").disabled=false;
+});
+
+/* ===== MY ENTRIES: find and delete ===== */
+const myNums=()=>Object.keys(mine).map(Number).sort((a,b)=>b-a);
+function syncMine(){$("my-place").hidden=!myNums().length;}
+$("my-place").addEventListener("click",()=>{const l=myNums(); if(l.length) openSheet(l[0],pool);});
+$("c-del").addEventListener("click",()=>{
+ const n=S.cur; if(!mine[n]) return;
+ if(!confirm("Delete this entry? It will be removed from the line for everyone.")) return;
+ /* -> DELETE /api/entry/:n with the secret token */
+ delete mine[n]; gone[n]=1; EC.delete(n); store.set("queue.mine",mine); store.set("queue.gone",gone);
+ track("delete",{n:n}); buildPool(); randomCache=null; syncMine(); resetFeed(); closeLayer();
+});
+
+/* ===== HERO ===== */
+const reduced=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+function pickPeek(){
+ let n,e,t=0; do{n=pool[Math.floor(Math.random()*pool.length)]; e=entry(n); t++;}while(!e.w&&t<30);
+ $("peek-k").textContent="No. "+fmt(n)+" is waiting for"; $("peek-v").textContent=e.w||"nothing"; $("peek-v").lang=e.lang||""; $("peek").dataset.n=n;
+}
+pickPeek();
+if(!reduced) setInterval(()=>{ if(stack.length) return; $("peek").classList.add("is-out"); setTimeout(()=>{pickPeek(); $("peek").classList.remove("is-out");},460);},4200);
+$("hero-read").addEventListener("click",()=>$("feed").scrollIntoView({behavior:reduced?"auto":"smooth",block:"start"}));
+$("home").addEventListener("click",()=>deck.scrollTo({top:0,behavior:reduced?"auto":"smooth"}));
+let tick=false;
+deck.addEventListener("scroll",()=>{if(tick) return; tick=true; requestAnimationFrame(()=>{$("cta").classList.toggle("is-on",deck.scrollTop>deck.clientHeight*.5); tick=false;});},{passive:true});
+
+/* ===== BOOT ===== */
+$("demo").hidden=!DEMO; $("hero-n").textContent=fmt(COUNT);
+resetFeed(); syncJoin(); syncMine(); ensureFonts();
+try{document.querySelector('meta[name="theme-color"]').setAttribute("content",pal().BG);}catch(e){}
+(function(){
+ const m=location.hash.match(/^#\/(\d+)$/); if(!m) return; const n=parseInt(m[1],10);
+ if(pool.indexOf(n)<0) return;
+ try{history.replaceState(null,"",baseURL());}catch(e){}
+ openSheet(n,pool); track("entry_open",{n:n,from:"link"});
+})();
+track("view");
 })();
 </script>
 </body>
